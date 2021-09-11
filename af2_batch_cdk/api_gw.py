@@ -15,45 +15,34 @@ import aws_cdk.aws_ec2 as ec2
 import aws_cdk.aws_s3 as s3
 import aws_cdk.aws_dynamodb as dynamodb
 import aws_cdk.aws_events as events
-import aws_cdk.aws_sns as sns
 import aws_cdk.aws_ecr as ecr
 import aws_cdk.aws_lambda as _lambda
 import aws_cdk.aws_sqs as sqs
 import aws_cdk.aws_fsx as fsx
-import aws_cdk.apigatewayv2 as apigatewayv2
-import aws_cdk.apigatewayv2_authorizers as apigatewayv2_authorizers
-import aws_cdk.apigatewayv2_integrations as apigatewayv2_integrations
+import aws_cdk.aws_apigatewayv2 as apigatewayv2
+import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
+import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
 import aws_cdk.aws_s3_notifications as s3n
-
-
-# Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
-auth_key = 'af2'
-
-# Set the mail address for SNS
-mail_address = 'wttat8600@gmail.com'
-
-# Set whether to upload the entire dataset to S3 for backup.
-dataset_upload_s3 = True
-
-# dataset arn
-dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
-
-# dataset region
-dataset_region='cn-north-1'
-
-# af2-batch image arn
-image_arn='s3://alphafold2-raw-data/af2-batch.tar'
-
-mountPath = "/fsx"
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
-class Af2BatchCdkStack(cdk.Stack):
+class APIGWCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
+        # auth_key = self.node.try_get_context("auth_key") # replace your own
+        auth_key = "af2" # replace your own
+
+        # create a s3 bucket
+        self.bucket = s3.Bucket(
+            self,"BUCKET",
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            auto_delete_objects=True
+        )
 
         # create dynamodb table
         ddb_table = dynamodb.Table(
@@ -64,91 +53,8 @@ class Af2BatchCdkStack(cdk.Stack):
             )
         )
 
-        # create ECR repo
-        repo = ecr.Repository(
-            self,'af2',
-        )
-
-        # create a s3 bucket
-        bucket = s3.Bucket(
-            self,"af2_bucket",
-        )
-
-        #  create a SNS topic   
-        sns_topic = sns.Topic(
-            self, "Topic",
-            display_name="Customer subscription topic"
-        )
-
-        sns.Subscription(
-            self,"Subscription",
-            topic=sns_topic,
-            endpoint=mail_address,
-            protocol=sns.SubscriptionProtocol.EMAIL
-        )
-
         #  create a SQS queue
         queue = sqs.Queue(self, "SQSQueue")
-
-        # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression
-
-        file_system = fsx.LustreFileSystem(
-            self,'fsx',
-            fsx.LustreConfiguration(fsx.LustreDeploymentType('PERSISTENT_1'),
-                                        per_unit_storage_throughput=200),
-            # vpc = 
-            # vpc_subnet = 
-            storage_capacity_gib = 2400,
-        )
-
-        dnsName = file_system.dns_name
-        mountName = file_system.mount_name
-
-        # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
-        ec2_tmp = ec2.Instance(self, "ec2_tmp",
-            instance_type=ec2.InstanceType("c5.9xlarge"),
-            machine_image=ec2.AmazonLinuxImage(
-                generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
-            ),
-        )
-
-        # connect to fsx
-        ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonFSxFullAccess"))
-        ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
-        ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
-        fsx.connections.allow_default_port_from(ec2_tmp)
-
-        # add ec2_tmp user data 
-        ec2_tmp.user_data.add_commands("set -eux",
-                                        "yum update -y",
-                                        "yum install pigz -y",
-                                        "amazon-linux-extras install -y lustre2.10", 
-                                        f"mkdir -p {mountPath}",
-                                        f"chmod 777 {mountPath}", 
-                                        f"chown ec2-user:ec2-user {mountPath}",
-                                        f"mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}",
-                                        f"cd {mountPath}",
-                                        f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
-                                        f"tar -I pigz -xvf dataset.tar.gz --directory={mountPath}",
-                                        "rm -rf dataset.tar.gz",
-                                        f"aws s3 cp {image_arn} ./ --request-payer",
-                                        f"aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {repo.repository_uri()}",
-                                        )
-
-        # create EC2 for GUI, AMI : NICE-DCV
-
-        ec2_gui = ec2.Instance(self, "ec2_gui"
-        )
-        ec2_gui.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3FullAccess"))
-
-        # sudo yum install awscli
-        # aws configure
-        # aws s3 cp s3://alphafold2-dataset-bjs/goofys ./ --request-payer
-        # chmod a+x goofys
-        # ./goofys --region cn-north-1 af2-batch:output /home/dcv-user/Desktop/s3
-        # wget https://pymol.org/installers/PyMOL-2.5.2_293-Linux-x86_64-py37.tar.bz2
-        # tar -jxf PyMOL-2.5.2_293-Linux-x86_64-py37.tar.bz2
-        # ./pymol
 
         # create IAM role 0
         role0 = iam.Role(
@@ -157,7 +63,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_0',
         )
 
-        role0.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role0.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
 
         # create IAM role 1
         role1 = iam.Role(
@@ -166,7 +72,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_1',
         )
 
-        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
         role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
         role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
         role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
@@ -178,7 +84,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_2',
         )
 
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsReadOnlyAccess'))
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
@@ -190,7 +96,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_3',
         )
 
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
         role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
         role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
@@ -203,7 +109,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_4',
         )
 
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
         role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSNSFullAccess'))
         role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
@@ -215,7 +121,7 @@ class Af2BatchCdkStack(cdk.Stack):
             description =' IAM role for lambda_5',
         )
 
-        role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSLambdaBasicExecutionRole'))
+        role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
         role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSNSFullAccess'))
         role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
 
@@ -238,7 +144,7 @@ class Af2BatchCdkStack(cdk.Stack):
                                               code=_lambda.Code.asset("./lambda/lambda_1"))
 
         lambda_1.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_1.add_environment("S3_BUCKET", bucket.bucket_name)
+        lambda_1.add_environment("S3_BUCKET", self.bucket.bucket_name)
         lambda_1.add_environment("SQS_QUEUE", queue.queue_url)
 
         # create Lambda 2
@@ -260,7 +166,7 @@ class Af2BatchCdkStack(cdk.Stack):
                                               code=_lambda.Code.asset("./lambda/lambda_3"))
 
         lambda_3.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_3.add_environment("S3_BUCKET", bucket.bucket_name)
+        lambda_3.add_environment("S3_BUCKET", self.bucket.bucket_name)
         lambda_3.add_environment("SQS_QUEUE", queue.queue_url)
 
         # create Lambda 4
@@ -275,7 +181,13 @@ class Af2BatchCdkStack(cdk.Stack):
         lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
 
         # create s3 notification
-        bucket.add_event_notification(s3.EventType.OBJECT_CREATED,s3n.LambdaDestination(lambda_4),s3.NotificationKeyFilter(prefix="output/",suffix="tar.gz"))
+        self.bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED,
+            s3n.LambdaDestination(lambda_4),
+            s3.NotificationKeyFilter(
+                prefix="output/",suffix="tar.gz"
+                )
+            )
 
         # create Lambda 5
         lambda_5 = _lambda.Function(self, "lambda_5",
@@ -339,19 +251,26 @@ class Af2BatchCdkStack(cdk.Stack):
             integration = lambda_2_intergation
         )
 
-        # create batch 
+        core.CfnOutput(
+            self,"af2-S3",
+            description="S3",
+            value=self.bucket.bucket_name,
+        )
 
+        core.CfnOutput(
+            self,"af2-APIGW",
+            description="APIGW",
+            value=apigw.api_endpoint,
+        )
 
-    
+        core.CfnOutput(
+            self,"af2-SQS",
+            description="SQS",
+            value=queue.queue_url,
+        )
 
-
-
-
-
-
-
-
-
-
-
-
+        core.CfnOutput(
+            self,"af2-DDB",
+            description="DDB",
+            value=ddb_table.table_name,
+        )

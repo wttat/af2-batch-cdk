@@ -9,26 +9,48 @@ from aws_cdk import core as cdk
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import core
 
-from af2_batch_cdk.af2_batch_cdk_stack import Af2BatchCdkStack
+from af2_batch_cdk.vpc_ec2 import EC2VPCCdkStack
+from af2_batch_cdk.api_gw import APIGWCdkStack
+from af2_batch_cdk.batch import BATCHCdkStack
+from af2_batch_cdk.nice_dcv import NICEDEVCdkStack
 
 
 app = core.App()
-Af2BatchCdkStack(app, "Af2BatchCdkStack",
-    # If you don't specify 'env', this stack will be environment-agnostic.
-    # Account/Region-dependent features and context lookups will not work,
-    # but a single synthesized template can be deployed anywhere.
 
-    # Uncomment the next line to specialize this stack for the AWS Account
-    # and Region that are implied by the current CLI configuration.
-
-    #env=core.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')),
-
-    # Uncomment the next line if you know exactly what Account and Region you
-    # want to deploy the stack to. */
-
-    #env=core.Environment(account='123456789012', region='us-east-1'),
-
-    # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
+vpc_stack = EC2VPCCdkStack(app, "EC2VPCCdkStack",
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
     )
+)
+
+api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
+    vpc = vpc_stack.vpc,
+    sns_topic = vpc_stack.sns_topic,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
+
+batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+    file_system = vpc_stack.file_system,
+    vpc=vpc_stack.vpc,
+    repo = vpc_stack.repo,
+    bucket = api_gw_stack.bucket,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
+
+# nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
+#     vpc=vpc_stack.vpc,
+#     # bucket = vpc_stack.bucket,
+#     # pub_subnet = vpc_stack.pub_subnet,
+#     env=core.Environment(
+#         region=os.environ["CDK_DEFAULT_REGION"]
+#     )
+# )
 
 app.synth()

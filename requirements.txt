@@ -7,3 +7,5 @@ aws-cdk.aws_apigatewayv2
 aws-cdk.aws_apigatewayv2_authorizers
 aws-cdk.aws_apigatewayv2_integrations
 aws_cdk.aws_s3_notifications
+aws_cdk.aws_batch
+aws_cdk.aws_ecs

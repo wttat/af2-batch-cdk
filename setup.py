@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
 
-    author="author",
+    author="wt",
 
     package_dir={"": "af2_batch_cdk"},
     packages=setuptools.find_packages(where="af2_batch_cdk"),

@@ -1,0 +1,21 @@
+#!/bin/bash
+sudo yum update -y
+sudo yum install pigz -y
+sudo amazon-linux-extras install docker -y
+sudo amazon-linux-extras install -y lustre2.10
+service docker start
+chmod 666 /var/run/docker.sock
+sudo mkdir -p {mountPath}
+sudo chmod 777 {mountPath} 
+sudo chown ec2-user:ec2-user {mountPath}
+sudo mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}
+cd {mountPath}
+aws s3 cp {image_arn} ./ --request-payer --region {region}
+docker load < {image_name}
+aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {ecr_endpoint}
+docker tag $(docker images -q) {repository_uri_for_tag}
+docker push {repository_uri_for_tag}
+aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}
+tar -I pigz -xvf {dataset_name} --directory={mountPath}
+rm -rf {dataset_name}
+if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi 

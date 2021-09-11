@@ -1,0 +1,16 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+--==MYBOUNDARY==
+Content-Type: text/cloud-config; charset="us-ascii"
+
+runcmd:
+
+- amazon-linux-extras install -y lustre2.10
+- mkdir -p {fsx_directory}
+- mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}
+- echo "{dnsName}@tcp:/{mountName} {mountPath} lustre defaults,noatime,flock,_netdev 0 0" >> /etc/fstab 
+
+- mkdir -p /tmp/alphafold
+
+--==MYBOUNDARY==--
