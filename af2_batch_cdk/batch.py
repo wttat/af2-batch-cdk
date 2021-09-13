@@ -81,9 +81,9 @@ class BATCHCdkStack(cdk.Stack):
                 "launch_template":{
                     # "launch_template_name":launch_template.launch_template_name,
                     "launch_template_name":"lustreLaunchTemplate",
-                    "version":"$Lastest"
+                    "version":"$Latest"
                 },
-                # "security_groups":vpc.vpc_default_security_group
+                "security_groups":[vpc.vpc_default_security_group]
             }
         )
 
@@ -97,9 +97,12 @@ class BATCHCdkStack(cdk.Stack):
                 "instance_types":[ec2.InstanceType("p3.8xlarge")],
                 "launch_template":{
                     "launch_template_name":"lustreLaunchTemplate",
-                    "version":"$Lastest"
+                    "version":"$Latest"
                 },
-                # "security_groups":vpc.vpc_default_security_group
+                "security_groups":ec2.SecurityGroup.from_security_group_id(
+                                self,"AF24GPUSG",
+                                security_group_id=vpc.vpc_default_security_group
+                            ),
             }
         )
 
@@ -113,10 +116,13 @@ class BATCHCdkStack(cdk.Stack):
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{
                     "launch_template_name":"lustreLaunchTemplate",
-                    "version":"$Lastest"
+                    "version":"$Latest"
                 },
-                # "security_groups":vpc.vpc_default_security_group()
-            }
+                "security_groups":ec2.SecurityGroup.from_security_group_id(
+                                self,"AF21GPUSG",
+                                security_group_id=vpc.vpc_default_security_group
+                            ),
+                }
         )
 
         # create job queue

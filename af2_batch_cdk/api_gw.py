@@ -254,7 +254,7 @@ class APIGWCdkStack(cdk.Stack):
         core.CfnOutput(
             self,"af2-S3",
             description="S3",
-            value=self.bucket.bucket_name,
+            value=self.bucket.bucket_arn,
         )
 
         core.CfnOutput(

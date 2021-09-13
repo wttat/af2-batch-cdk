@@ -107,7 +107,13 @@ class EC2VPCCdkStack(cdk.Stack):
             vpc = self.vpc,
             vpc_subnet=self.vpc.public_subnets[0],
             storage_capacity_gib = 4800,
-            # security_group = self.vpc.vpc_default_security_group,
+
+            ##### 
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            security_group = ec2.SecurityGroup.from_security_group_id(
+                                self,"FSXSG",
+                                security_group_id=self.vpc.vpc_default_security_group
+                            ),
         )
 
         amzn_linux = ec2.MachineImage.latest_amazon_linux(generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
@@ -146,9 +152,21 @@ class EC2VPCCdkStack(cdk.Stack):
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
             vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
-            # security_group = self.vpc.vpc_default_security_group,
+            security_group = ec2.SecurityGroup.from_security_group_id(
+                                self,"EC2TMPSG",
+                                security_group_id=self.vpc.vpc_default_security_group
+                            ),
             machine_image = amzn_linux,
             key_name = key_pair,
+            block_devices = [ec2.BlockDevice(
+                                        #    device_name="/dev/xvda",
+                                        # This is a nvme device
+                                           device_name="/dev/nvme0n1p1",
+                                           volume=ec2.BlockDeviceVolume.ebs(50,
+                                                                            encrypted=True
+                                                                            )
+                                       )
+                            ],
             # user_data = ec2.UserData.custom(user_data)
         )
         ec2_tmp.add_security_group(sg_ssh)
@@ -172,11 +190,12 @@ class EC2VPCCdkStack(cdk.Stack):
                                         f"mkdir -p {mountPath}",
                                         f"chmod 777 {mountPath}", 
                                         f"chown ec2-user:ec2-user {mountPath}",
-                                        # bug in fsx.dnsName, extra .cn in AWS china region. Current date:09/11/2021
+                                        # Maybe bugs in fsx.dnsName, 
+                                        # extra .cn hostname in AWS china region. Current date:09/11/2021
                                         # f"mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}",
                                         f"mount -t lustre -o noatime,flock {fileSystemId}.fsx.{region}.amazonaws.com@tcp:/{mountName} {mountPath}",
                                         f"cd {mountPath}",
-                                        f"aws s3 cp {image_arn} ./ --request-payer",
+                                        f"aws s3 cp {image_arn} ./ --request-payer --region {dataset_region}",
                                         f"docker load < {image_name}",
                                         f"aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {ecr_endpoint}",
                                         f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('lastest')}",

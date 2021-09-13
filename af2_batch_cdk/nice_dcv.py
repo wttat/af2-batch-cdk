@@ -18,7 +18,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class NICEDEVCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,**kwargs):
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,bucket,**kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # create EC2 for NICE-DCV
@@ -30,7 +30,7 @@ class NICEDEVCdkStack(cdk.Stack):
         ec2_gui = ec2.Instance(self, "ec2_gui",
             instance_type = ec2.InstanceType("g4dn.xlarge"),
             vpc = vpc,
-            vpc_subnets = pub_subnet,
+            # vpc_subnets = pub_subnet,
             # security_group = sg,
             machine_image = nice_dcv_ami,
         )
