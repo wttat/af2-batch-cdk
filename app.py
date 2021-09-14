@@ -9,6 +9,7 @@ from aws_cdk import core as cdk
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import core
 
+from af2_batch_cdk.test_stack import TESTCdkStack
 from af2_batch_cdk.vpc_ec2 import EC2VPCCdkStack
 from af2_batch_cdk.api_gw import APIGWCdkStack
 from af2_batch_cdk.batch import BATCHCdkStack
@@ -16,6 +17,11 @@ from af2_batch_cdk.nice_dcv import NICEDEVCdkStack
 
 
 app = core.App()
+
+# test_stack = TESTCdkStack(
+#     app,"TESTCdkStack",
+
+# )
 
 vpc_stack = EC2VPCCdkStack(app, "EC2VPCCdkStack",
     env=core.Environment(
@@ -33,16 +39,16 @@ api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     )
 )
 
-# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-#     file_system = vpc_stack.file_system,
-#     vpc=vpc_stack.vpc,
-#     repo = vpc_stack.repo,
-#     bucket = api_gw_stack.bucket,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+    file_system = vpc_stack.file_system,
+    vpc=vpc_stack.vpc,
+    repo = vpc_stack.repo,
+    bucket = api_gw_stack.bucket,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     vpc=vpc_stack.vpc,

@@ -125,7 +125,6 @@ class EC2VPCCdkStack(cdk.Stack):
         mountName = self.file_system.mount_name
         fileSystemId = self.file_system.file_system_id
 
-
         if region == "cn-north-1" or region == "cn-northwest-1":
             ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com.cn'
         else:
@@ -147,6 +146,12 @@ class EC2VPCCdkStack(cdk.Stack):
         # user_data_bytes = base64.b64encode(user_data_new.encode('utf-8'))
         # user_data = str(user_data_bytes,'utf-8')
 
+        # role_ec2 = iam.Role(
+        #     self,'ROLEEC2',
+        #     assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
+        #     description =' IAM role for tmp ec2',
+        # )
+
         # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
         ec2_tmp = ec2.Instance(self, "EC2TMP",
             instance_type = ec2.InstanceType("c5.9xlarge"),
@@ -159,9 +164,9 @@ class EC2VPCCdkStack(cdk.Stack):
             machine_image = amzn_linux,
             key_name = key_pair,
             block_devices = [ec2.BlockDevice(
-                                        #    device_name="/dev/xvda",
+                                           device_name="/dev/xvda",
                                         # This is a nvme device
-                                           device_name="/dev/nvme0n1p1",
+                                        #    device_name="/dev/nvme0n1p1",
                                            volume=ec2.BlockDeviceVolume.ebs(50,
                                                                             encrypted=True
                                                                             )

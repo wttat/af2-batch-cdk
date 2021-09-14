@@ -59,7 +59,9 @@ class BATCHCdkStack(cdk.Stack):
         launch_template = ec2.LaunchTemplate(
             self,"LaunchTemplate",
             launch_template_name="lustreLaunchTemplate",
-            user_data = ec2.UserData.custom(user_data)
+            # user_data = ec2.UserData.custom(user_data)
+            user_data = ec2.MultipartUserData.custom(user_data)
+
         )
 
         # lanuch_template.user_data.add_commands(
@@ -83,7 +85,12 @@ class BATCHCdkStack(cdk.Stack):
                     "launch_template_name":"lustreLaunchTemplate",
                     "version":"$Latest"
                 },
-                "security_groups":[vpc.vpc_default_security_group]
+                "security_groups":[
+                    ec2.SecurityGroup.from_security_group_id(
+                                self,"AF28GPUSG",
+                                security_group_id=vpc.vpc_default_security_group
+                            )
+                            ]
             }
         )
 
@@ -99,10 +106,12 @@ class BATCHCdkStack(cdk.Stack):
                     "launch_template_name":"lustreLaunchTemplate",
                     "version":"$Latest"
                 },
-                "security_groups":ec2.SecurityGroup.from_security_group_id(
+                "security_groups":[
+                    ec2.SecurityGroup.from_security_group_id(
                                 self,"AF24GPUSG",
                                 security_group_id=vpc.vpc_default_security_group
-                            ),
+                            )
+                            ]
             }
         )
 
@@ -118,10 +127,12 @@ class BATCHCdkStack(cdk.Stack):
                     "launch_template_name":"lustreLaunchTemplate",
                     "version":"$Latest"
                 },
-                "security_groups":ec2.SecurityGroup.from_security_group_id(
+                "security_groups":[
+                    ec2.SecurityGroup.from_security_group_id(
                                 self,"AF21GPUSG",
                                 security_group_id=vpc.vpc_default_security_group
-                            ),
+                            )
+                            ]
                 }
         )
 
@@ -211,38 +222,4 @@ class BATCHCdkStack(cdk.Stack):
             # },
             
         )
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-        
-
-
-
-        
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
+   
