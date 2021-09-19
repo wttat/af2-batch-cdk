@@ -55,7 +55,10 @@ def lambda_handler(event, context):
             data['que']
         except:
             return 'You need to at least specific the fasta and que parameters.\n'
-        
+
+        if data['que'] != 'high' and data['que'] != 'mid' and data['que'] != 'low':
+            return 'The job queue should be high or mid or low.\n'
+
         max_template_date = ''
         try:
             data['max_template_date']
@@ -63,7 +66,8 @@ def lambda_handler(event, context):
             print ('no max_template_date,using dafault max_template_date 2020-05-14')
             max_template_date = '2020-05-14'
         else:
-            max_template_date: data['max_template_date']
+            max_template_date = data['max_template_date']
+        print (data['max_template_date'])
         
         model_names = ''
         try:
@@ -72,7 +76,8 @@ def lambda_handler(event, context):
             print ('no model_names,using dafault model_names 1-5')
             model_names = 'model_1,model_2,model_3,model_4,model_5'
         else:
-            model_names: data['model_names']
+            model_names =  data['model_names']
+        print (data['model_names'])
         
         preset = ''
         try:
@@ -81,15 +86,17 @@ def lambda_handler(event, context):
             print ('no preset,using dafault preset full')
             preset = 'full'
         else:
-            preset: data['preset']
-        
+            preset =  data['preset']
+        print (data['preset'])
+
         comment = ''
         try:
             data['comment']
         except:
             print ('no comment')
         else:
-            preset: data['preset']
+            preset =  data['comment']
+        print (data['comment'])
             
         Item={
             'id' : id,
@@ -142,10 +149,10 @@ def lambda_handler(event, context):
                 status = (response_ddb)['Item']['job_status']
                 
                 if status == 'allset' and method == 'CANCEL':
-                    return "This job has completed, you could use delete method to delete all files"
+                    return "This job has completed, you could use delete method to delete all files.\n"
                 
                 if status == 'failed' and method == 'CANCEL':
-                    return "This job has failed, you could use delete method to delete all files"
+                    return "This job has failed, you could use delete method to delete all files.\n"
                     
                 if (status == 'starting' or status == 'running') and method == 'DELETE':
                     return ("You can't DELETE a "+status+" job, please use CANCEL method.\n")

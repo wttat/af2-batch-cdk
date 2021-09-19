@@ -10,10 +10,13 @@ from aws_cdk import core
 
 import aws_cdk.aws_iam as iam
 import aws_cdk.aws_s3 as s3
+import aws_cdk.aws_ecs as ecs
 import aws_cdk.aws_ec2 as ec2
 import aws_cdk.aws_ecr as ecr
 import aws_cdk.aws_fsx as fsx
 import aws_cdk.aws_sns as sns
+import aws_cdk.aws_batch as batch
+
 
 
 import base64
@@ -49,19 +52,67 @@ class TESTCdkStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # SSH key pair name, 
-        key_pair = 'cn-nw-01' # replace your own in the region
-        # key_pair = self.node.try_get_context("key_pair") # replace your own in the region
+        af2 = batch.JobDefinition(self,"JobDefinition",
+            job_definition_name = 'af2',
+            container = {
+                # "image": repo.repository_uri_for_tag("lastest"),
+                "image": ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample"),
+                # "job_role" : batch_job_role,
+                "command":["/bin/bash","/app/run.sh","-f","Ref::fasta_paths","-m","Ref::model_names","-d","Ref::max_template_date","-p","Ref::preset"],
+                "volumes": [
+                    {
+                        "host":{
+                            "sourcePath":"/fsx",
+                        },
+                        "name":"Lustre"
+                    }
+                ],
+                "environment":{
+                        "XLA_PYTHON_CLIENT_MEM_FRACTION":"4.0",
+                        "TF_FORCE_UNIFIED_MEMORY":"1",
+                        # "BATCH_BUCKET":bucket.bucket_name,
+                        "BATCH_DIR_PREFIX":"input",
+                        "REGION":region,
+                },
+                "mount_points":[
+                    {
+                        "containerPath": mountPath,
+                        "readOnly":False,
+                        "sourceVolume": "Lustre",
+                    }
+                ],
+                "user":"root",
+                "gpu_count":1,
+                "vcpus":8,
+                "memory_limit_mib":48000,
+                "log_configuration":{
+                    "log_driver":batch.LogDriver.AWSLOGS
+                }
+            },
 
-        # Set whether to upload the entire dataset to S3 for backup.
-        # dataset_upload_s3 = self.node.try_get_context("dataset_upload_s3") # replace your own
-        # dataset_upload_s3 = 'False'
+            parameters = {
+                # default parameters
+                "model_names": "mn",
+                "max_template_date": "mtd",
+                "preset": "p",
+                "fasta_paths": "fp"
+            },
+            
+        )
 
-        # Set the mail address for SNS
-        # mail_address = self.node.try_get_context("mail") # replace your own
-        mail_address = "wttat8600@gmail.com" # replace your own
+        # # SSH key pair name, 
+        # key_pair = 'cn-nw-01' # replace your own in the region
+        # # key_pair = self.node.try_get_context("key_pair") # replace your own in the region
 
-        #  create a SNS topic   
+        # # Set whether to upload the entire dataset to S3 for backup.
+        # # dataset_upload_s3 = self.node.try_get_context("dataset_upload_s3") # replace your own
+        # # dataset_upload_s3 = 'False'
+
+        # # Set the mail address for SNS
+        # # mail_address = self.node.try_get_context("mail") # replace your own
+        # mail_address = "wttat8600@gmail.com" # replace your own
+
+        # #  create a SNS topic   
         # self.sns_topic = sns.Topic(
         #     self, "TOPIC",
         #     display_name="Customer subscription topic",
@@ -74,170 +125,172 @@ class TESTCdkStack(cdk.Stack):
         #     protocol=sns.SubscriptionProtocol.EMAIL,
         # )
 
-        # create ECR repo
-        # self.repo = ecr.Repository(
-        #     self,'REPO',
-        #     removal_policy=cdk.RemovalPolicy.DESTROY
+        # # create ECR repo
+        # # self.repo = ecr.Repository(
+        # #     self,'REPO',
+        # #     removal_policy=cdk.RemovalPolicy.DESTROY
+        # # )
+
+        # # create vpc
+
+        # self.vpc = ec2.Vpc(self, "VPC",
+        # max_azs=1, # single AZ
+        # subnet_configuration=[
+        #     {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
+        #     {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
+        #     ]
         # )
 
-        # create vpc
+        # sg_ssh = ec2.SecurityGroup(self, "SGSSH",
+        #                         vpc=self.vpc,
+        #                         description="for ssh from anywhere",
+        #                         security_group_name="CDK SecurityGroup for ssh",
+        #                         allow_all_outbound=True,
+        #                     )
+        # sg_ssh.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
 
-        self.vpc = ec2.Vpc(self, "VPC",
-        max_azs=1, # single AZ
-        subnet_configuration=[
-            {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
-            {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
-            ]
-        )
+        # # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
 
-        sg_ssh = ec2.SecurityGroup(self, "SGSSH",
-                                vpc=self.vpc,
-                                description="for ssh from anywhere",
-                                security_group_name="CDK SecurityGroup for ssh",
-                                allow_all_outbound=True,
-                            )
-        sg_ssh.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
+        # # self.file_system = fsx.LustreFileSystem(
+        # #     self,'FSX',
+        # #     lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+        # #                             "per_unit_storage_throughput":100}, # 
+        # #     vpc = self.vpc,
+        # #     vpc_subnet=self.vpc.public_subnets[0],
+        # #     storage_capacity_gib = 4800,
 
-        # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
+        # #     ##### 
+        # #     removal_policy=cdk.RemovalPolicy.DESTROY,
+        # #     security_group = ec2.SecurityGroup.from_security_group_id(
+        # #                         self,"FSXSG",
+        # #                         security_group_id=self.vpc.vpc_default_security_group
+        # #                     ),
+        # # )
 
-        # self.file_system = fsx.LustreFileSystem(
-        #     self,'FSX',
-        #     lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-        #                             "per_unit_storage_throughput":100}, # 
+        # amzn_linux = ec2.MachineImage.latest_amazon_linux(generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+        #                                                       edition=ec2.AmazonLinuxEdition.STANDARD,
+        #                                                       virtualization=ec2.AmazonLinuxVirt.HVM,
+        #                                                       storage=ec2.AmazonLinuxStorage.GENERAL_PURPOSE)
+
+        # # dnsName = self.file_system.dns_name
+        # # mountName = self.file_system.mount_name
+        # # fileSystemId = self.file_system.file_system_id
+
+        # # if region == "cn-north-1" or region == "cn-northwest-1":
+        # #     ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com.cn'
+        # # else:
+        # #     ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com'
+
+        # # # build user data from fsx paramaters
+        # # # user_data_new = user_data_raw.replace('{fsx_directory}',mountPath)
+        # # # user_data_new = user_data_new.replace('{dnsName}',dnsName)
+        # # # user_data_new = user_data_new.replace('{mountName}',mountName)
+        # # # user_data_new = user_data_new.replace('{region}',region)
+        # # # user_data_new = user_data_new.replace('{image_arn}',image_arn)
+        # # # user_data_new = user_data_new.replace('{image_name}',image_name)
+        # # # user_data_new = user_data_new.replace('{ecr_endpoint}',ecr_endpoint)
+        # # # user_data_new = user_data_new.replace('{repository_uri_for_tag}',self.repo.repository_uri_for_tag('lastest'))
+        # # # user_data_new = user_data_new.replace('{dataset_arn}',dataset_arn)
+        # # # user_data_new = user_data_new.replace('{dataset_region}',dataset_region)
+        # # # user_data_new = user_data_new.replace('{dataset_upload_s3}',dataset_upload_s3)
+
+        # # # user_data_bytes = base64.b64encode(user_data_new.encode('utf-8'))
+        # # # user_data = str(user_data_bytes,'utf-8')
+
+        # # # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
+        # ec2_tmp = ec2.Instance(self, "EC2TMP",
+        #     instance_type = ec2.InstanceType("c5.9xlarge"),
         #     vpc = self.vpc,
-        #     vpc_subnet=self.vpc.public_subnets[0],
-        #     storage_capacity_gib = 4800,
-
-        #     ##### 
-        #     removal_policy=cdk.RemovalPolicy.DESTROY,
+        #     vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
         #     security_group = ec2.SecurityGroup.from_security_group_id(
-        #                         self,"FSXSG",
+        #                         self,"EC2TMPSG",
         #                         security_group_id=self.vpc.vpc_default_security_group
         #                     ),
+        #     machine_image = amzn_linux,
+        #     key_name = key_pair,
+        #     block_devices = [ec2.BlockDevice(
+        #                                    device_name="/dev/xvda",
+        #                                 # This is a nvme device
+        #                                 #    device_name="/dev/nvme0n1p1",
+        #                                    volume=ec2.BlockDeviceVolume.ebs(50,
+        #                                                                     encrypted=True
+        #                                                                     )
+        #                                )
+        #                     ],
+        #     # user_data = ec2.UserData.custom(user_data)
         # )
-
-        amzn_linux = ec2.MachineImage.latest_amazon_linux(generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                                                              edition=ec2.AmazonLinuxEdition.STANDARD,
-                                                              virtualization=ec2.AmazonLinuxVirt.HVM,
-                                                              storage=ec2.AmazonLinuxStorage.GENERAL_PURPOSE)
-
-        # dnsName = self.file_system.dns_name
-        # mountName = self.file_system.mount_name
-        # fileSystemId = self.file_system.file_system_id
-
-        # if region == "cn-north-1" or region == "cn-northwest-1":
-        #     ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com.cn'
-        # else:
-        #     ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com'
-
-        # # build user data from fsx paramaters
-        # # user_data_new = user_data_raw.replace('{fsx_directory}',mountPath)
-        # # user_data_new = user_data_new.replace('{dnsName}',dnsName)
-        # # user_data_new = user_data_new.replace('{mountName}',mountName)
-        # # user_data_new = user_data_new.replace('{region}',region)
-        # # user_data_new = user_data_new.replace('{image_arn}',image_arn)
-        # # user_data_new = user_data_new.replace('{image_name}',image_name)
-        # # user_data_new = user_data_new.replace('{ecr_endpoint}',ecr_endpoint)
-        # # user_data_new = user_data_new.replace('{repository_uri_for_tag}',self.repo.repository_uri_for_tag('lastest'))
-        # # user_data_new = user_data_new.replace('{dataset_arn}',dataset_arn)
-        # # user_data_new = user_data_new.replace('{dataset_region}',dataset_region)
-        # # user_data_new = user_data_new.replace('{dataset_upload_s3}',dataset_upload_s3)
-
-        # # user_data_bytes = base64.b64encode(user_data_new.encode('utf-8'))
-        # # user_data = str(user_data_bytes,'utf-8')
-
-        # # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
-        ec2_tmp = ec2.Instance(self, "EC2TMP",
-            instance_type = ec2.InstanceType("c5.9xlarge"),
-            vpc = self.vpc,
-            vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
-            security_group = ec2.SecurityGroup.from_security_group_id(
-                                self,"EC2TMPSG",
-                                security_group_id=self.vpc.vpc_default_security_group
-                            ),
-            machine_image = amzn_linux,
-            key_name = key_pair,
-            block_devices = [ec2.BlockDevice(
-                                           device_name="/dev/xvda",
-                                        # This is a nvme device
-                                        #    device_name="/dev/nvme0n1p1",
-                                           volume=ec2.BlockDeviceVolume.ebs(50,
-                                                                            encrypted=True
-                                                                            )
-                                       )
-                            ],
-            # user_data = ec2.UserData.custom(user_data)
-        )
         # ec2_tmp.add_security_group(sg_ssh)
 
-        # self.file_system.connections.allow_default_port_from(ec2_tmp)
+        # # self.file_system.connections.allow_default_port_from(ec2_tmp)
 
         # # connect to fsx
         # ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonFSxFullAccess"))
         # ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
         # ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
-        
+        # ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
+
 
         # # add ec2_tmp user data 
         # ec2_tmp.user_data.add_commands("set -eux",
         #                                 "yum update -y",
-        #                                 "yum install pigz -y",
-        #                                 "amazon-linux-extras install docker -y",
-        #                                 "amazon-linux-extras install -y lustre2.10",
-        #                                 "service docker start",
-        #                                 "chmod 666 /var/run/docker.sock",
-        #                                 f"mkdir -p {mountPath}",
-        #                                 f"chmod 777 {mountPath}", 
-        #                                 f"chown ec2-user:ec2-user {mountPath}",
-        #                                 # Maybe bugs in fsx.dnsName, 
-        #                                 # extra .cn hostname in AWS china region. Current date:09/11/2021
-        #                                 # f"mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}",
-        #                                 f"mount -t lustre -o noatime,flock {fileSystemId}.fsx.{region}.amazonaws.com@tcp:/{mountName} {mountPath}",
-        #                                 f"cd {mountPath}",
-        #                                 f"aws s3 cp {image_arn} ./ --request-payer --region {dataset_region}",
-        #                                 f"docker load < {image_name}",
-        #                                 f"aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {ecr_endpoint}",
-        #                                 f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('lastest')}",
-        #                                 f"docker push {self.repo.repository_uri_for_tag('lastest')}",
-        #                                 f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
-        #                                 f"tar -I pigz -xvf {dataset_name} --directory={mountPath}",
-        #                                 f"rm -rf {dataset_name}",
-        #                                 # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
+        # #                                 "yum install pigz -y",
+        # #                                 "amazon-linux-extras install docker -y",
+        # #                                 "amazon-linux-extras install -y lustre2.10",
+        # #                                 "service docker start",
+        # #                                 "chmod 666 /var/run/docker.sock",
+        # #                                 f"mkdir -p {mountPath}",
+        # #                                 f"chmod 777 {mountPath}", 
+        # #                                 f"chown ec2-user:ec2-user {mountPath}",
+        # #                                 # Maybe bugs in fsx.dnsName, 
+        # #                                 # extra .cn hostname in AWS china region. Current date:09/11/2021
+        # #                                 # f"mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}",
+        # #                                 f"mount -t lustre -o noatime,flock {fileSystemId}.fsx.{region}.amazonaws.com@tcp:/{mountName} {mountPath}",
+        # #                                 f"cd {mountPath}",
+        # #                                 f"aws s3 cp {image_arn} ./ --request-payer --region {dataset_region}",
+        # #                                 f"docker load < {image_name}",
+        # #                                 f"aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {ecr_endpoint}",
+        # #                                 f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('lastest')}",
+        # #                                 f"docker push {self.repo.repository_uri_for_tag('lastest')}",
+        # #                                 f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
+        # #                                 f"tar -I pigz -xvf {dataset_name} --directory={mountPath}",
+        # #                                 f"rm -rf {dataset_name}",
+        # #                                 # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
         #                                 )
 
-        # # ec2_tmp.user_data.add_on_exit_commands(
-
-        # # )
-
-        # core.CfnOutput(
-        #     self,"af2-VPC",
-        #     description="VPC",
-        #     value=self.vpc.vpc_id,
+        # ec2_tmp.user_data.add_on_exit_commands(
+        #     # f"aws sns --message {messgae} --topic-arn {self.sns_topic.topic_arn} --subject {subject}"
+        #     f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.'  --region {region}"
         # )
-    
+
         # # core.CfnOutput(
-        # #     self,"af2-S3",
-        # #     description="S3",
-        # #     value=self.bucket.bucket_name,
+        # #     self,"af2-VPC",
+        # #     description="VPC",
+        # #     value=self.vpc.vpc_id,
+        # # )
+    
+        # # # core.CfnOutput(
+        # # #     self,"af2-S3",
+        # # #     description="S3",
+        # # #     value=self.bucket.bucket_name,
+        # # # )
+
+        # # core.CfnOutput(
+        # #     self,"af2-REPO",
+        # #     description="af2-REPO",
+        # #     value=self.repo.repository_arn, 
         # # )
 
-        # core.CfnOutput(
-        #     self,"af2-REPO",
-        #     description="af2-REPO",
-        #     value=self.repo.repository_arn, 
-        # )
+        # # core.CfnOutput(
+        # #     self,"af2-FSX",
+        # #     description="FSX",
+        # #     value=self.file_system.dns_name, 
+        # # )
 
-        # core.CfnOutput(
-        #     self,"af2-FSX",
-        #     description="FSX",
-        #     value=self.file_system.dns_name, 
-        # )
-
-        # core.CfnOutput(
-        #     self,"af2-SNS",
-        #     description="SNS",
-        #     value=self.sns_topic.topic_arn, 
-        # )
+        # # core.CfnOutput(
+        # #     self,"af2-SNS",
+        # #     description="SNS",
+        # #     value=self.sns_topic.topic_arn, 
+        # # )
 
 
 

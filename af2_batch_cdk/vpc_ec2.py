@@ -20,6 +20,13 @@ import base64
 #
 # cdk deploy -c key_pair=cn-nw-01 dataset_upload_s3=True
 
+
+# key_pair = self.node.try_get_context("key_pair") # replace your own in the region
+
+# Set the mail address for SNS
+# mail_address = self.node.try_get_context("mail") # replace your own
+# mail_address = "wttat8600@gmail.com" # replace your own
+
 # dataset arn
 dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
 
@@ -46,20 +53,12 @@ with open("./user_data/tmpec2_user_data") as f:
 
 class EC2VPCCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,mail_address,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        # SSH key pair name, 
-        key_pair = 'cn-nw-01' # replace your own in the region
-        # key_pair = self.node.try_get_context("key_pair") # replace your own in the region
 
         # Set whether to upload the entire dataset to S3 for backup.
         # dataset_upload_s3 = self.node.try_get_context("dataset_upload_s3") # replace your own
         # dataset_upload_s3 = 'False'
-
-        # Set the mail address for SNS
-        # mail_address = self.node.try_get_context("mail") # replace your own
-        mail_address = "wttat8600@gmail.com" # replace your own
 
         #  create a SNS topic   
         self.sns_topic = sns.Topic(
@@ -182,6 +181,7 @@ class EC2VPCCdkStack(cdk.Stack):
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonFSxFullAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
+        ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
         
 
         # add ec2_tmp user data 
@@ -209,11 +209,14 @@ class EC2VPCCdkStack(cdk.Stack):
                                         f"tar -I pigz -xvf {dataset_name} --directory={mountPath}",
                                         f"rm -rf {dataset_name}",
                                         # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
+                                        # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
                                         )
 
-        # ec2_tmp.user_data.add_on_exit_commands(
-
-        # )
+        # after success, send sns to user.
+        ec2_tmp.user_data.add_on_exit_commands(
+            # f"aws sns --message {messgae} --topic-arn {self.sns_topic.topic_arn} --subject {subject}"
+            f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
+        )
 
         core.CfnOutput(
             self,"af2-VPC",

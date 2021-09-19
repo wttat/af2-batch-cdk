@@ -23,6 +23,7 @@ import aws_cdk.aws_apigatewayv2 as apigatewayv2
 import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
 import aws_cdk.aws_s3_notifications as s3n
+import aws_cdk.aws_lambda_event_sources as eventsources
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
@@ -30,12 +31,12 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class APIGWCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, auth_key,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
         # auth_key = self.node.try_get_context("auth_key") # replace your own
-        auth_key = "af2" # replace your own
+        # auth_key = "af2" # replace your own
 
         # create a s3 bucket
         self.bucket = s3.Bucket(
@@ -88,6 +89,8 @@ class APIGWCdkStack(cdk.Stack):
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsReadOnlyAccess'))
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
         role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
+        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
+
 
         # create IAM role 3
         role3 = iam.Role(
@@ -140,6 +143,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role1,
+                                              timeout = core.Duration.seconds(30),
                                               description = "For HTTP POST/DELETE/CANCEL method, send messages to SQS",
                                               code=_lambda.Code.asset("./lambda/lambda_1"))
 
@@ -152,6 +156,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role2,
+                                              timeout = core.Duration.seconds(30),
                                               description = "For all GET/GET+id method",
                                               code=_lambda.Code.asset("./lambda/lambda_2"))
 
@@ -162,6 +167,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role3,
+                                              timeout = core.Duration.seconds(30),
                                               description = "For HTTP POST/DELETE/CANCEL method, receive SQS messages, submit to Batch",
                                               code=_lambda.Code.asset("./lambda/lambda_3"))
 
@@ -169,11 +175,15 @@ class APIGWCdkStack(cdk.Stack):
         lambda_3.add_environment("S3_BUCKET", self.bucket.bucket_name)
         lambda_3.add_environment("SQS_QUEUE", queue.queue_url)
 
+        # create sqs invoker
+        lambda_3.add_event_source(eventsources.SqsEventSource(queue))
+
         # create Lambda 4
         lambda_4 = _lambda.Function(self, "lambda_4",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role4,
+                                              timeout = core.Duration.seconds(30),
                                               description = "When job succussed, send SNS to user. Triggered by S3",
                                               code=_lambda.Code.asset("./lambda/lambda_4"))
 
@@ -190,20 +200,23 @@ class APIGWCdkStack(cdk.Stack):
             )
 
         # create Lambda 5
-        lambda_5 = _lambda.Function(self, "lambda_5",
+        self.lambda_5 = _lambda.Function(self, "lambda_5",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role5,
+                                              timeout = core.Duration.seconds(30),
                                               description = "When job failed,send SNS to user.Triggered by EventBridge",
                                               code=_lambda.Code.asset("./lambda/lambda_5"))
 
-        lambda_5.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_5.add_environment("SNS_ARN", sns_topic.topic_arn)
+        self.lambda_5.add_environment("TABLE_NAME", ddb_table.table_name)
+        self.lambda_5.add_environment("SNS_ARN", sns_topic.topic_arn)
 
         # create api-gateway
 
         apigw_auth = apigatewayv2_authorizers.HttpLambdaAuthorizer(
             authorizer_name = 'apigw_auth',
+            response_types = [apigatewayv2_authorizers.HttpLambdaResponseType('SIMPLE')],
+            # payload_format_version = apigatewayv2.AuthorizerPayloadVersion('VERSION_2_0'),
             handler = lambda_0
         )
 

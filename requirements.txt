@@ -9,3 +9,6 @@ aws-cdk.aws_apigatewayv2_integrations
 aws_cdk.aws_s3_notifications
 aws_cdk.aws_batch
 aws_cdk.aws_ecs
+aws_cdk.aws_events
+aws_cdk.aws_events_targets
+aws_cdk.aws_lambda_event_sources
