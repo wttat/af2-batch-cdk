@@ -29,6 +29,8 @@ import aws_cdk.aws_lambda_event_sources as eventsources
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
+
+
 class APIGWCdkStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, auth_key,**kwargs) -> None:
@@ -37,6 +39,8 @@ class APIGWCdkStack(cdk.Stack):
         # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
         # auth_key = self.node.try_get_context("auth_key") # replace your own
         # auth_key = "af2" # replace your own
+
+        self.job_Definition_name = 'af2'
 
         # create a s3 bucket
         self.bucket = s3.Bucket(
@@ -173,7 +177,8 @@ class APIGWCdkStack(cdk.Stack):
 
         lambda_3.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_3.add_environment("S3_BUCKET", self.bucket.bucket_name)
-        lambda_3.add_environment("SQS_QUEUE", queue.queue_url)
+        lambda_3.add_environment("SQS_QUEUE", queue.queue_url)  
+        lambda_3.add_environment("JOB_DEFINITION_NAME", self.job_Definition_name)
 
         # create sqs invoker
         lambda_3.add_event_source(eventsources.SqsEventSource(queue))

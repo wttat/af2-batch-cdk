@@ -15,6 +15,7 @@ queue_url = os.environ['SQS_QUEUE']
 
 s3 = boto3.resource('s3')
 bucket = os.environ['S3_BUCKET']
+job_Definition_name = os.environ['JOB_DEFINITION_NAME']
 
 ## Handle POST & DELETE & CANCEL
 
@@ -50,7 +51,7 @@ def lambda_handler(event, context):
             response_batch = batch.submit_job(
                 jobName = fasta,
                 jobQueue = que,
-                jobDefinition='af2',
+                jobDefinition=job_Definition_name,
                 parameters={
                     'fasta_paths': file_name,
                     'preset': preset,

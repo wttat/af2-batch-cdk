@@ -42,7 +42,7 @@ image_arn='s3://alphafold2-raw-data/af2-batch.tar' # do not touch
 # af2-batch image file name
 image_name=image_arn.split("/")[-1]
 
-mountPath = "/fsx"
+mountPath = "/fsx" # do not touch
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]

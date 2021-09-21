@@ -42,7 +42,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,file_system,bucket,repo,key_pair,lambda_5, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,file_system,bucket,repo,key_pair,lambda_5,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         failed_rule = events.Rule(
@@ -224,7 +224,7 @@ class BATCHCdkStack(cdk.Stack):
 
         # create job definition
         af2 = batch.JobDefinition(self,"JobDefinition",
-            job_definition_name = 'af2',
+            job_definition_name = job_Definition_name,
             container = {
                 # "image": repo.repository_uri_for_tag("lastest"),
                 "image": image_id,
