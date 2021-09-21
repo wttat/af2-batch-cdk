@@ -18,9 +18,9 @@ from af2_batch_cdk.nice_dcv import NICEDEVCdkStack
 
 app = core.App()
 
-test_stack = TESTCdkStack(
-    app,"TESTCdkStack",
-)
+# test_stack = TESTCdkStack(
+#     app,"TESTCdkStack",
+# )
 
 
 # SSH key pair name, 
@@ -29,39 +29,39 @@ mail_address = "wttat8600@gmail.com" # replace your own
 
 # # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
 # # auth_key = self.node.try_get_context("auth_key") # replace your own
-# auth_key = "af2" # replace your own
+auth_key = "af2" # replace your own
 
-# vpc_stack = EC2VPCCdkStack(app, "EC2VPCCdkStack",
-#     key_pair = key_pair,
-#     mail_address = mail_address,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+vpc_stack = EC2VPCCdkStack(app, "EC2VPCCdkStack",
+    key_pair = key_pair,
+    mail_address = mail_address,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
-# api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
-#     vpc = vpc_stack.vpc,
-#     sns_topic = vpc_stack.sns_topic,
-#     auth_key = auth_key,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
+    vpc = vpc_stack.vpc,
+    sns_topic = vpc_stack.sns_topic,
+    auth_key = auth_key,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
-# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-#     file_system = vpc_stack.file_system,
-#     vpc=vpc_stack.vpc,
-#     repo = vpc_stack.repo,
-#     bucket = api_gw_stack.bucket,
-#     key_pair = key_pair,
-#     lambda_5 = api_gw_stack.lambda_5,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+    file_system = vpc_stack.file_system,
+    vpc=vpc_stack.vpc,
+    repo = vpc_stack.repo,
+    bucket = api_gw_stack.bucket,
+    key_pair = key_pair,
+    lambda_5 = api_gw_stack.lambda_5,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     vpc=vpc_stack.vpc,

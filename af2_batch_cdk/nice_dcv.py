@@ -36,7 +36,7 @@ class NICEDEVCdkStack(cdk.Stack):
         )
         ec2_gui.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3FullAccess"))
 
-        ec2_gui.user_data.add_commands("aws s3 cp s3://alphafold2-dataset-bjs/goofys ./ --request-payer",
+        ec2_gui.user_data.add_commands(f"aws s3 cp s3://alphafold2-dataset-bjs/goofys ./ --request-payer --region {region}",
                                         "chmod a+x goofys",
                                         f"./goofys --region {region} {bucket.bucket_name}:output /home/dcv-user/Desktop/s3",
                                         "wget https://pymol.org/installers/PyMOL-2.5.2_293-Linux-x86_64-py37.tar.bz2",

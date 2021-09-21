@@ -48,43 +48,42 @@ def lambda_handler(event, context):
             else:
                 status = (response_ddb)['Item']['job_status']
                 job_id = response_ddb['Item']['job_id']
-                response_batch = batch.describe_jobs(
-                    jobs=[
-                        job_id,
-                    ]
-                )
-                batch_status = response_batch['jobs'][0]['status']
+
                 if  status == "starting":
                     return str(response_ddb['Item'])+"\n\n###\n\nThis job is starting and waiting for send to Batch\n"
-                elif status == "running":
+                else:
+                    response_batch = batch.describe_jobs(
+                        jobs=[
+                            job_id,
+                        ]
+                    )
+                    batch_status = response_batch['jobs'][0]['status']
+                    if status == "running":
                     # return response_batch
-                    
-                    if batch_status == "SUBMITTED":
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
-                    elif batch_status == "PENDING":
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
-                    elif batch_status == "RUNNABLE":
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',if you stuck in this status for a long time, please check your GPU ec2 instances limit'+'\n\n'
-                    elif batch_status == "STARTING":
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',going to run'
-                    elif batch_status == "RUNNING":
+                        if batch_status == "SUBMITTED":
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
+                        elif batch_status == "PENDING":
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
+                        elif batch_status == "RUNNABLE":
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',if you stuck in this status for a long time, please check your GPU ec2 instances limit.'+'\n\n'
+                        elif batch_status == "STARTING":
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',going to run.'+'\n\n'
+                        elif batch_status == "RUNNING":
+                            logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
+                    elif status == "allset" :
+                        statusReason = response_batch['jobs'][0]['statusReason']
                         logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
                         messages = getLogs(logStreamName)
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
+                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                    elif status == "failed":
+                        statusReason = response_batch['jobs'][0]['statusReason']
+                        logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
+                        messages = getLogs(logStreamName)
+                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nMaybe Wrong!!! Please check full logs on cloudwatch logs\n'
                     else:
                         return "status error,please connact for support"
-                elif status == "allset" :
-                    statusReason = response_batch['jobs'][0]['statusReason']
-                    logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
-                    messages = getLogs(logStreamName)
-                    return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
-                elif status == "failed":
-                    statusReason = response_batch['jobs'][0]['statusReason']
-                    logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
-                    messages = getLogs(logStreamName)
-                    return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nMaybe Wrong!!! Please check full logs on cloudwatch logs\n'
-                else:
-                    return 'something wrong'
     else:
         return "please use GET/GET{id}/POST/DELETE{id}\n"
     
