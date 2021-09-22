@@ -67,7 +67,7 @@ def lambda_handler(event, context):
             max_template_date = '2020-05-14'
         else:
             max_template_date = data['max_template_date']
-        print (data['max_template_date'])
+        print (max_template_date)
         
         model_names = ''
         try:
@@ -77,7 +77,7 @@ def lambda_handler(event, context):
             model_names = 'model_1,model_2,model_3,model_4,model_5'
         else:
             model_names =  data['model_names']
-        print (data['model_names'])
+        print (model_names)
         
         preset = ''
         try:
@@ -87,7 +87,7 @@ def lambda_handler(event, context):
             preset = 'full'
         else:
             preset =  data['preset']
-        print (data['preset'])
+        print (preset)
 
         comment = ''
         try:
@@ -96,7 +96,7 @@ def lambda_handler(event, context):
             print ('no comment')
         else:
             preset =  data['comment']
-        print (data['comment'])
+        print (comment)
             
         Item={
             'id' : id,

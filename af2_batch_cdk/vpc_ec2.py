@@ -27,14 +27,17 @@ import base64
 # mail_address = self.node.try_get_context("mail") # replace your own
 # mail_address = "wttat8600@gmail.com" # replace your own
 
-# dataset arn
+# s3 china region dataset arn
+dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
+
+# s3 china region dataset region
+dataset_region='cn-northwest-1' # do not touch
+
+# s3 global dataset arn
 dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
 
 # dataset name
 dataset_name=dataset_arn.split("/")[-1]
-
-# dataset region
-dataset_region='cn-north-1' # do not touch
 
 # af2-batch image arn
 image_arn='s3://alphafold2-raw-data/af2-batch.tar' # do not touch
