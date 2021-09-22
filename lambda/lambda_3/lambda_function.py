@@ -14,7 +14,8 @@ sqs = boto3.client('sqs')
 queue_url = os.environ['SQS_QUEUE']
 
 s3 = boto3.resource('s3')
-bucket = os.environ['S3_BUCKET']
+bucket_name = os.environ['S3_BUCKET']
+bucket = s3.Bucket(bucket_name)
 job_Definition_name = os.environ['JOB_DEFINITION_NAME']
 
 ## Handle POST & DELETE & CANCEL
@@ -136,6 +137,4 @@ def lambda_handler(event, context):
             # only DELETE method delete ddb
 
                 
-            print ("response_ddb from delete_item:"+str(response_ddb))
-            return response_batch
-            
+            print ("response_ddb from delete_item:"+str(response_ddb))            

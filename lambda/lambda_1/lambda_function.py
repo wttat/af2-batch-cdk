@@ -19,7 +19,7 @@ sqs = boto3.client('sqs')
 queue_url = os.environ['SQS_QUEUE']
 
 def lambda_handler(event, context):
-    # return event
+    print (event)
     method = eval(json.dumps(event['requestContext']['http']['method']))
 
     if method == 'POST':

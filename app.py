@@ -25,7 +25,8 @@ app = core.App()
 
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace your own in the region
-mail_address = "wttat8600@gmail.com" # replace your own
+
+mail_address = "twuam@amazon.com" # replace your own
 
 # # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
 # # auth_key = self.node.try_get_context("auth_key") # replace your own
