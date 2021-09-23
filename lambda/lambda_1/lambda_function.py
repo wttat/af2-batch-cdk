@@ -19,12 +19,18 @@ sqs = boto3.client('sqs')
 queue_url = os.environ['SQS_QUEUE']
 
 def lambda_handler(event, context):
+    # return event
     print (event)
     method = eval(json.dumps(event['requestContext']['http']['method']))
 
     if method == 'POST':
-        data = json.loads(event['body'])
-        
+        # check for body 
+        try:
+            data = json.loads(event['body'])
+        except:
+            return 'You need to post parameters.\n'
+        else:
+            data = json.loads(event['body'])
         # check for file 
         try:
             data['file_name']
@@ -95,7 +101,7 @@ def lambda_handler(event, context):
         except:
             print ('no comment')
         else:
-            preset =  data['comment']
+            comment =  data['comment']
         print (comment)
             
         Item={
