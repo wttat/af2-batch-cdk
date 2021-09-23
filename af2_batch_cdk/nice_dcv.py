@@ -22,38 +22,29 @@ class NICEDEVCdkStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # create EC2 for NICE-DCV
-        nice_dcv_ami = ec2.MachineImage.lookup(
-            name="Remote Desktop based on NVIDIA GRID and NICE DCV",
-            owners=["amazon"]
-        )
+        # nice_dcv_ami = ec2.MachineImage.lookup(
+        #     name="DCV-AmazonLinux2*NVIDIA*",
+        #     # name="Remote Desktop based on NVIDIA GRID and NICE DCV",
+        #     # owners=["amazon"]
+        # )
 
         ec2_gui = ec2.Instance(self, "ec2_gui",
             instance_type = ec2.InstanceType("g4dn.xlarge"),
             vpc = vpc,
             # vpc_subnets = pub_subnet,
             # security_group = sg,
-            machine_image = nice_dcv_ami,
+            machine_image = ec2.GenericLinuxImage({
+                'cn-north-1':'ami-03e41aa4baa635f04',
+                'cn-northwest-1':'ami-09cf9c90783446a1e'
+            }
+            )
         )
         ec2_gui.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3FullAccess"))
 
-        ec2_gui.user_data.add_commands(f"aws s3 cp s3://alphafold2-dataset-bjs/goofys ./ --request-payer --region {region}",
+        ec2_gui.user_data.add_commands(f"wget https://github.com/kahing/goofys/releases/latest/download/goofys",
                                         "chmod a+x goofys",
+                                        "mkdir /home/dcv-user/Desktop/s3",
                                         f"./goofys --region {region} {bucket.bucket_name}:output /home/dcv-user/Desktop/s3",
                                         "wget https://pymol.org/installers/PyMOL-2.5.2_293-Linux-x86_64-py37.tar.bz2",
                                         "tar -jxf PyMOL-2.5.2_293-Linux-x86_64-py37.tar.bz2",
                                         )
-
-        # ./pymol
-
-
-
-
-
-
-
-
-
-
-
-
-

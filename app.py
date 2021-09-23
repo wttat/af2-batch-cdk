@@ -65,14 +65,14 @@ batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
     )
 )
 
-# nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
-#     vpc=vpc_stack.vpc,
-#     bucket = api_gw_stack.bucket,
-#     # pub_subnet = vpc_stack.pub_subnet,
-#     env=core.Environment(
-#         account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#         region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
+    vpc=vpc_stack.vpc,
+    bucket = api_gw_stack.bucket,
+    # pub_subnet = vpc_stack.pub_subnet,
+    env=core.Environment(
+        account=os.environ["CDK_DEFAULT_ACCOUNT"],
+        region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
 app.synth()
