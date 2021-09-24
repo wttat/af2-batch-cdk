@@ -18,7 +18,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class NICEDEVCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,bucket,**kwargs):
+    def __init__(self, scope: cdk.Construct, construct_id: str,key_pair,vpc,bucket,**kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # create EC2 for NICE-DCV
@@ -27,12 +27,21 @@ class NICEDEVCdkStack(cdk.Stack):
         #     # name="Remote Desktop based on NVIDIA GRID and NICE DCV",
         #     # owners=["amazon"]
         # )
+        sg_dcv = ec2.SecurityGroup(self, "nicedcvSG",
+                                vpc=vpc,
+                                description="for nice dcv and ssh from anywhere",
+                                security_group_name="CDK SecurityGroup for nice dcv ssh",
+                                allow_all_outbound=True,
+                            )
+        sg_dcv.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
+        sg_dcv.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(8443), "allow nice dcv access from the world")
 
         ec2_gui = ec2.Instance(self, "ec2_gui",
             instance_type = ec2.InstanceType("g4dn.xlarge"),
             vpc = vpc,
-            # vpc_subnets = pub_subnet,
-            # security_group = sg,
+            key_name = key_pair,
+            vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
+            security_group = sg_dcv,
             machine_image = ec2.GenericLinuxImage({
                 'cn-north-1':'ami-03e41aa4baa635f04',
                 'cn-northwest-1':'ami-09cf9c90783446a1e'

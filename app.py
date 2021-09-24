@@ -26,7 +26,7 @@ app = core.App()
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace your own in the region
 
-mail_address = "twuam@amazon.com" # replace your own
+mail_address = "" # replace your own
 
 # # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
 # # auth_key = self.node.try_get_context("auth_key") # replace your own
@@ -51,21 +51,22 @@ api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     )
 )
 
-batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-    file_system = vpc_stack.file_system,
-    vpc=vpc_stack.vpc,
-    repo = vpc_stack.repo,
-    bucket = api_gw_stack.bucket,
-    key_pair = key_pair,
-    lambda_5 = api_gw_stack.lambda_5,
-    job_Definition_name = api_gw_stack.job_Definition_name,
-    env=core.Environment(
-    account=os.environ["CDK_DEFAULT_ACCOUNT"],
-    region=os.environ["CDK_DEFAULT_REGION"]
-    )
-)
+# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+#     file_system = vpc_stack.file_system,
+#     vpc=vpc_stack.vpc,
+#     repo = vpc_stack.repo,
+#     bucket = api_gw_stack.bucket,
+#     key_pair = key_pair,
+#     lambda_5 = api_gw_stack.lambda_5,
+#     job_Definition_name = api_gw_stack.job_Definition_name,
+#     env=core.Environment(
+#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
+#     region=os.environ["CDK_DEFAULT_REGION"]
+#     )
+# )
 
 nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
+    key_pair = key_pair,
     vpc=vpc_stack.vpc,
     bucket = api_gw_stack.bucket,
     # pub_subnet = vpc_stack.pub_subnet,
