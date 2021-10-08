@@ -51,19 +51,19 @@ api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     )
 )
 
-# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-#     file_system = vpc_stack.file_system,
-#     vpc=vpc_stack.vpc,
-#     repo = vpc_stack.repo,
-#     bucket = api_gw_stack.bucket,
-#     key_pair = key_pair,
-#     lambda_5 = api_gw_stack.lambda_5,
-#     job_Definition_name = api_gw_stack.job_Definition_name,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+    file_system = vpc_stack.file_system,
+    vpc=vpc_stack.vpc,
+    repo = vpc_stack.repo,
+    bucket = api_gw_stack.bucket,
+    key_pair = key_pair,
+    lambda_5 = api_gw_stack.lambda_5,
+    job_Definition_name = api_gw_stack.job_Definition_name,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
 nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
     key_pair = key_pair,

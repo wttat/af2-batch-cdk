@@ -27,29 +27,35 @@ import base64
 # mail_address = self.node.try_get_context("mail") # replace your own
 # mail_address = "wttat8600@gmail.com" # replace your own
 
-# s3 china region dataset arn
-dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
+# # s3 china region dataset arn
+# dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
 
-# s3 china region dataset region
-dataset_region='cn-northwest-1' # do not touch
+# # s3 china region dataset region
+# dataset_region='cn-northwest-1' # do not touch
 
-# s3 global dataset arn
-dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
-
-# dataset name
-dataset_name=dataset_arn.split("/")[-1]
-
-# af2-batch image arn
-image_arn='s3://alphafold2-raw-data/af2-batch.tar' # do not touch
-
-# af2-batch image file name
-image_name=image_arn.split("/")[-1]
+# # af2-batch image arn
+# image_arn='s3://alphafold2-raw-data/af2-batch.tar' # do not touch
 
 mountPath = "/fsx" # do not touch
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
+
+if region == 'cn-north-1' or region == 'cn-northwest-1':
+    image_arn='s3://alphafold2-raw-data/af2-batch.tar'
+    dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
+    dataset_region='cn-northwest-1'
+else:
+    image_arn='s3://alphafold2/af2-batch.tar'
+    dataset_arn='s3://alphafold2/dataset.tar.gz'
+    dataset_region='us-east-1'
+
+# af2-batch image file name
+image_name=image_arn.split("/")[-1]
+
+# dataset name
+dataset_name=dataset_arn.split("/")[-1]
 
 with open("./user_data/tmpec2_user_data") as f:
 	    user_data_raw = f.read()
