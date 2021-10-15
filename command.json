@@ -1,8 +1,8 @@
 {
 	"fasta":"6LU7",
-	"file_name":"rcsb_pdb_6LU7.fasta",
-	"model_names":"model_1,model_2,model_3,model_4,model_5",
-	"preset":"reduced",
+	"file_name":"rcsb_pdb_6L7U.fasta",
+	"model_names":"model_1",
+	"preset":"full",
 	"max_template_date":"2020-05-14",
 	"que":"high",
 	"comment":"噜噜噜噜"

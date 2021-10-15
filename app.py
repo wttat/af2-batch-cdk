@@ -22,17 +22,20 @@ app = core.App()
 #     app,"TESTCdkStack",
 # )
 
+use_default_vpc = 0 # set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
+vpc_id = "vpc-654bcd0c" # if you wanna to set your own VPC
 
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace your own in the region
-
-mail_address = "" # replace your own
+mail_address = "wttat8600@gmail.com" # replace your own
 
 # # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
 # # auth_key = self.node.try_get_context("auth_key") # replace your own
 auth_key = "af2" # replace your own
 
 vpc_stack = EC2VPCCdkStack(app, "EC2VPCCdkStack",
+    use_default_vpc = use_default_vpc,
+    vpc_id = vpc_id,
     key_pair = key_pair,
     mail_address = mail_address,
     env=core.Environment(
@@ -51,29 +54,29 @@ api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     )
 )
 
-batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-    file_system = vpc_stack.file_system,
-    vpc=vpc_stack.vpc,
-    repo = vpc_stack.repo,
-    bucket = api_gw_stack.bucket,
-    key_pair = key_pair,
-    lambda_5 = api_gw_stack.lambda_5,
-    job_Definition_name = api_gw_stack.job_Definition_name,
-    env=core.Environment(
-    account=os.environ["CDK_DEFAULT_ACCOUNT"],
-    region=os.environ["CDK_DEFAULT_REGION"]
-    )
-)
+# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+#     file_system = vpc_stack.file_system,
+#     vpc=vpc_stack.vpc,
+#     repo = vpc_stack.repo,
+#     bucket = api_gw_stack.bucket,
+#     key_pair = key_pair,
+#     lambda_5 = api_gw_stack.lambda_5,
+#     job_Definition_name = api_gw_stack.job_Definition_name,
+#     env=core.Environment(
+#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
+#     region=os.environ["CDK_DEFAULT_REGION"]
+#     )
+# )
 
-nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
-    key_pair = key_pair,
-    vpc=vpc_stack.vpc,
-    bucket = api_gw_stack.bucket,
-    # pub_subnet = vpc_stack.pub_subnet,
-    env=core.Environment(
-        account=os.environ["CDK_DEFAULT_ACCOUNT"],
-        region=os.environ["CDK_DEFAULT_REGION"]
-    )
-)
+# nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
+#     key_pair = key_pair,
+#     vpc=vpc_stack.vpc,
+#     bucket = api_gw_stack.bucket,
+#     # pub_subnet = vpc_stack.pub_subnet,
+#     env=core.Environment(
+#         account=os.environ["CDK_DEFAULT_ACCOUNT"],
+#         region=os.environ["CDK_DEFAULT_REGION"]
+#     )
+# )
 
 app.synth()

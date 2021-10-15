@@ -62,7 +62,7 @@ with open("./user_data/tmpec2_user_data") as f:
 
 class EC2VPCCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,mail_address,**kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,mail_address,vpc_id,use_default_vpc,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set whether to upload the entire dataset to S3 for backup.
@@ -88,15 +88,20 @@ class EC2VPCCdkStack(cdk.Stack):
             removal_policy=cdk.RemovalPolicy.DESTROY
         )
 
-        # create vpc
+        # choose or create a vpc
+        if use_default_vpc == 1:
+            self.vpc = ec2.Vpc.from_lookup(self, 'VPC', is_default = True) 
+        elif vpc_id != "":
+            self.vpc = ec2.Vpc.from_lookup(self, 'VPC', is_default = False,vpc_id = vpc_id) 
+        else:
+            self.vpc = ec2.Vpc(self, "VPC",
+            max_azs=1, # single AZ
+            subnet_configuration=[
+                {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
+                {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
+                ]
+            )
 
-        self.vpc = ec2.Vpc(self, "VPC",
-        max_azs=1, # single AZ
-        subnet_configuration=[
-            {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
-            {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
-            ]
-        )
 
         sg_ssh = ec2.SecurityGroup(self, "SGSSH",
                                 vpc=self.vpc,

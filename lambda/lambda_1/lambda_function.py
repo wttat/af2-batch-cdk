@@ -44,7 +44,7 @@ def lambda_handler(event, context):
         try:
             s3.head_object(Bucket=bucket, Key=key)
         except ClientError as e:
-            return ('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix+'\n')
+            return ('The fatsa file path is not correct, please put it under s3://'+bucket+'/'+prefix+'\n')
         print ('fasta found')
         
         # get fasta seq

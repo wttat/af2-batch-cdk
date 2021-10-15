@@ -71,17 +71,22 @@ def lambda_handler(event, context):
                         elif batch_status == "RUNNING":
                             logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
                             messages = getLogs(logStreamName)
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
                     elif status == "allset" :
                         statusReason = response_batch['jobs'][0]['statusReason']
                         logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
                         messages = getLogs(logStreamName)
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
                     elif status == "failed":
                         statusReason = response_batch['jobs'][0]['statusReason']
-                        logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
-                        messages = getLogs(logStreamName)
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nLast 20 logs :'+messages+'\n\n####\n\nMaybe Wrong!!! Please check full logs on cloudwatch logs\n'
+                        logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                        try:
+                            getLogs(logStreamName)
+                        except:
+                            messages = 'No Cloudwatch logs for now'
+                        else:
+                            messages = getLogs(logStreamName)   
+                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nMaybe Wrong!!! Please check full logs on cloudwatch logs\n'
                     else:
                         return "status error,please connact for support"
     else:
