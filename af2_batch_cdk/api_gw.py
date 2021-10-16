@@ -225,7 +225,7 @@ class APIGWCdkStack(cdk.Stack):
             handler = lambda_0
         )
 
-        if apigw_auth:
+        if len(apigw_auth)!=0:
             apigw = apigatewayv2.HttpApi(
                 self,'apigw',
                 api_name = 'af2-apigw',
@@ -250,8 +250,23 @@ class APIGWCdkStack(cdk.Stack):
             integration = lambda_2_intergation
         )
         apigw.add_routes(
+            path = '/{id}',
+            methods = [apigatewayv2.HttpMethod.GET],
+            integration = lambda_2_intergation
+        )
+        apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.POST],
+            integration = lambda_1_intergation
+        )
+        apigw.add_routes(
+            path = '/',
+            methods = [apigatewayv2.HttpMethod.DELETE],
+            integration = lambda_1_intergation
+        )
+        apigw.add_routes(
+            path = '/',
+            methods = [apigatewayv2.HttpMethod.ANY],# for CANCEL method
             integration = lambda_1_intergation
         )
         apigw.add_routes(
@@ -263,11 +278,6 @@ class APIGWCdkStack(cdk.Stack):
             path = '/{id}',
             methods = [apigatewayv2.HttpMethod.ANY],# for CANCEL method
             integration = lambda_1_intergation
-        )
-        apigw.add_routes(
-            path = '/{id}',
-            methods = [apigatewayv2.HttpMethod.GET],
-            integration = lambda_2_intergation
         )
 
         core.CfnOutput(
