@@ -225,11 +225,17 @@ class APIGWCdkStack(cdk.Stack):
             handler = lambda_0
         )
 
-        if len(apigw_auth)!=0:
+        if len(auth_key)!=0:
             apigw = apigatewayv2.HttpApi(
                 self,'apigw',
                 api_name = 'af2-apigw',
                 default_authorizer = apigw_auth
+            )
+        else:
+            apigw = apigatewayv2.HttpApi(
+                self,'apigw',
+                api_name = 'af2-apigw',
+                # default_authorizer = apigw_auth
             )
 
         # 不需要显性授权？
