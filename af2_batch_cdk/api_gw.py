@@ -225,7 +225,7 @@ class APIGWCdkStack(cdk.Stack):
             handler = lambda_0
         )
 
-        if apigw_auth != "":
+        if apigw_auth:
             apigw = apigatewayv2.HttpApi(
                 self,'apigw',
                 api_name = 'af2-apigw',
