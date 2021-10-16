@@ -24,122 +24,134 @@ def lambda_handler(event, context):
     method = eval(json.dumps(event['requestContext']['http']['method']))
 
     if method == 'POST':
-        # check for body 
+        # check for body
+        
+        messages = ""
+        Items = []
+        
         try:
-            data = json.loads(event['body'])
+            datas = json.loads(event['body'])
         except:
             return 'You need to post parameters.\n'
         else:
-            data = json.loads(event['body'])
-        # check for file 
-        try:
-            data['file_name']
-        except:
-            return 'You need to specific the fasta file name.\n'
+            datas = json.loads(event['body'])
         
-        file_name = data['file_name']
-        key = prefix+file_name
-        
-        # check file path
-        try:
-            s3.head_object(Bucket=bucket, Key=key)
-        except ClientError as e:
-            return ('The fatsa file path is not correct, please put it under s3://'+bucket+'/'+prefix+'\n')
-        print ('fasta found')
-        
-        # get fasta seq
-        s3.download_file(bucket,key, '/tmp/'+file_name)
-        fasta_seq = linecache.getline('/tmp/'+file_name, line_number).strip()
-    
-        id = str(uuid.uuid4())
-        now = time.asctime()
-        
-        # decouple Item for both SQS and dynamoDB usage
-        
-        try:
-            data['fasta']
-            data['que']
-        except:
-            return 'You need to at least specific the fasta and que parameters.\n'
-
-        if data['que'] != 'high' and data['que'] != 'mid' and data['que'] != 'low':
-            return 'The job queue should be high or mid or low.\n'
-
-        max_template_date = ''
-        try:
-            data['max_template_date']
-        except:
-            print ('no max_template_date,using dafault max_template_date 2020-05-14')
-            max_template_date = '2020-05-14'
-        else:
-            max_template_date = data['max_template_date']
-        print (max_template_date)
-        
-        model_names = ''
-        try:
-            data['model_names']
-        except:
-            print ('no model_names,using dafault model_names 1-5')
-            model_names = 'model_1,model_2,model_3,model_4,model_5'
-        else:
-            model_names =  data['model_names']
-        print (model_names)
-        
-        preset = ''
-        try:
-            data['preset']
-        except:
-            print ('no preset,using dafault preset full')
-            preset = 'full'
-        else:
-            preset =  data['preset']
-        print (preset)
-
-        comment = ''
-        try:
-            data['comment']
-        except:
-            print ('no comment')
-        else:
-            comment =  data['comment']
-        print (comment)
+        for data in datas:
             
-        Item={
-            'id' : id,
-            'fasta' : data['fasta'],
-            'fasta_seq':fasta_seq,
-            'file_name': file_name,
-            'job_id':'none',
-            'job_status': 'starting',
-            'model_names' : model_names,
-            'preset': preset,
-            'max_template_date': max_template_date,
-            'que': data['que'],
-            'time': now,
-            'comment': comment
-        }
+            # check for file 
+            try:
+                data['file_name']
+            except:
+                return 'You need to specific the fasta file name.\n'
+            
+            file_name = data['file_name']
+            key = prefix+file_name
+            
+            # return key
+            
+            # check file path
+            try:
+                s3.head_object(Bucket=bucket, Key=key)
+            except ClientError as e:
+                return ('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix+'\n')
+            print ('fasta found')
+            
+            # get fasta seq
+            s3.download_file(bucket,key, '/tmp/'+file_name)
+            fasta_seq = linecache.getline('/tmp/'+file_name, line_number).strip()
         
-        # return Item
+            id = str(uuid.uuid4())
+            now = time.asctime()
+            
+            # decouple Item for both SQS and dynamoDB usage
+            
+            try:
+                data['fasta']
+                data['que']
+            except:
+                return 'You need to at least specific the fasta and que parameters.\n'
+    
+            if data['que'] != 'high' and data['que'] != 'mid' and data['que'] != 'low':
+                return 'The job queue should be high or mid or low.\n'
+    
+            max_template_date = ''
+            try:
+                data['max_template_date']
+            except:
+                print ('no max_template_date,using dafault max_template_date 2020-05-14')
+                max_template_date = '2020-05-14'
+            else:
+                max_template_date = data['max_template_date']
+            print (max_template_date)
+            
+            model_names = ''
+            try:
+                data['model_names']
+            except:
+                print ('no model_names,using dafault model_names 1-5')
+                model_names = 'model_1,model_2,model_3,model_4,model_5'
+            else:
+                model_names =  data['model_names']
+            print (model_names)
+            
+            preset = ''
+            try:
+                data['preset']
+            except:
+                print ('no preset,using dafault preset full')
+                preset = 'full'
+            else:
+                preset =  data['preset']
+            print (preset)
+    
+            comment = ''
+            try:
+                data['comment']
+            except:
+                print ('no comment')
+            else:
+                comment =  data['comment']
+            print (comment)
+                
+            Item={
+                'id' : id,
+                'fasta' : data['fasta'],
+                'fasta_seq':fasta_seq,
+                'file_name': file_name,
+                'job_id':'none',
+                'job_status': 'starting',
+                'model_names' : model_names,
+                'preset': preset,
+                'max_template_date': max_template_date,
+                'que': data['que'],
+                'time': now,
+                'comment': comment
+            }
+            
+            # Items.append(Item)
+            # return str(type(Item))
 
-        response_ddb= table.put_item(Item=Item)
-        print (response_ddb)
+            response_ddb= table.put_item(Item=Item)
+            print (response_ddb)
+            
+            response_sqs = sqs.send_message(
+                QueueUrl=queue_url,
+                MessageBody=str(Item),
+                DelaySeconds=10,
+                MessageAttributes={
+                    'Atcion': {
+                        'StringValue': 'POST',
+                        'DataType': 'String'
+                    }
+                },
+            )
         
-        response_sqs = sqs.send_message(
-            QueueUrl=queue_url,
-            MessageBody=str(Item),
-            DelaySeconds=10,
-            MessageAttributes={
-                'Atcion': {
-                    'StringValue': 'POST',
-                    'DataType': 'String'
-                }
-            },
-        )
+            print (response_sqs)
+            if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
+                messages = messages + '\nSuccessful submit Batch job for fasta:' + data['fasta']+ ', id:'+ id+'\n\n'+'Please use $(curl $auth-info $api-gateway-url/'+id+') to query this job'+'\n\n'
         
-        print (response_sqs)
-        if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
-            return('\nSuccessful submit Batch job for fasta:' + data['fasta']+ ', id:'+ id+'\n\n'+'Please use $(curl $auth-info $api-gateway-url/'+id+') to query this job'+'\n')
-        
+        return messages
+
     elif method == 'DELETE' or method == 'CANCEL':
         
         id =  json.dumps(event['requestContext']['http']['path']).strip('"/')
