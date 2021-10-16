@@ -1,4 +1,4 @@
-from typing import Protocol
+# from typing import Protocol
 import os
 from aws_cdk import core as cdk
 
@@ -42,7 +42,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,file_system,bucket,repo,key_pair,lambda_5,job_Definition_name, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,lambda_5,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         failed_rule = events.Rule(
@@ -114,6 +114,7 @@ class BATCHCdkStack(cdk.Stack):
                     #             self,"AF28GPUSG",
                     #             security_group_id=vpc.vpc_default_security_group
                     #         )
+                    sg,
                 ]
             }
         )
@@ -135,6 +136,7 @@ class BATCHCdkStack(cdk.Stack):
                     #             self,"AF24GPUSG",
                     #             security_group_id=vpc.vpc_default_security_group
                     #         )
+                    sg,
                             ]
             }
         )
@@ -156,6 +158,7 @@ class BATCHCdkStack(cdk.Stack):
                     #             self,"AF21GPUSG",
                     #             security_group_id=vpc.vpc_default_security_group
                     #         )
+                    sg,
                             ]
                 }
         )

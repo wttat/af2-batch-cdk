@@ -1,4 +1,4 @@
-from typing import Protocol
+# from typing import Protocol
 import os
 from aws_cdk import core as cdk
 
@@ -225,11 +225,12 @@ class APIGWCdkStack(cdk.Stack):
             handler = lambda_0
         )
 
-        apigw = apigatewayv2.HttpApi(
-            self,'apigw',
-            api_name = 'af2-apigw',
-            default_authorizer = apigw_auth
-        )
+        if apigw_auth != "":
+            apigw = apigatewayv2.HttpApi(
+                self,'apigw',
+                api_name = 'af2-apigw',
+                default_authorizer = apigw_auth
+            )
 
         # 不需要显性授权？
 
@@ -281,14 +282,14 @@ class APIGWCdkStack(cdk.Stack):
             value=apigw.api_endpoint,
         )
 
-        core.CfnOutput(
-            self,"af2-SQS",
-            description="SQS",
-            value=queue.queue_url,
-        )
+        # core.CfnOutput(
+        #     self,"af2-SQS",
+        #     description="SQS",
+        #     value=queue.queue_url,
+        # )
 
-        core.CfnOutput(
-            self,"af2-DDB",
-            description="DDB",
-            value=ddb_table.table_name,
-        )
+        # core.CfnOutput(
+        #     self,"af2-DDB",
+        #     description="DDB",
+        #     value=ddb_table.table_name,
+        # )

@@ -1,4 +1,4 @@
-from typing import Protocol
+# from typing import Protocol
 import os
 from aws_cdk import core as cdk
 

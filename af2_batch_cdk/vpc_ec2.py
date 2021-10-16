@@ -1,4 +1,4 @@
-from typing import Protocol
+# from typing import Protocol
 import os
 from aws_cdk import core as cdk
 
@@ -87,14 +87,14 @@ class EC2VPCCdkStack(cdk.Stack):
                 ]
             )
 
-
-        sg_ssh = ec2.SecurityGroup(self, "SGSSH",
+        self.sg = ec2.SecurityGroup(self, "SGSSH",
                                 vpc=self.vpc,
                                 description="for ssh from anywhere",
                                 security_group_name="CDK SecurityGroup for ssh",
                                 allow_all_outbound=True,
                             )
-        sg_ssh.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
+        self.sg.add_ingress_rule(ec2.Peer.ipv4(self.vpc.vpc_cidr_block),ec2.Port.all_traffic())
+        self.sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
 
         # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
 
@@ -108,6 +108,7 @@ class EC2VPCCdkStack(cdk.Stack):
             storage_capacity_gib = 4800,
 
             removal_policy=cdk.RemovalPolicy.DESTROY,
+            security_group = self.sg,
             # security_group = ec2.SecurityGroup.from_security_group_id(
             #                     self,"FSXSG",
             #                     security_group_id=self.vpc.vpc_default_security_group
@@ -151,7 +152,7 @@ class EC2VPCCdkStack(cdk.Stack):
                             ],
             # user_data = ec2.UserData.custom(user_data)
         )
-        ec2_tmp.add_security_group(sg_ssh)
+        ec2_tmp.add_security_group(self.sg)
 
         self.file_system.connections.allow_default_port_from(ec2_tmp)
 
