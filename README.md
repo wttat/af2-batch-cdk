@@ -37,6 +37,12 @@ Once the virtualenv is activated, you can install the required dependencies.
 $ pip install -r requirements.txt
 ```
 
+This stack uses assets, so the toolkit stack must be deployed to the environment
+
+```
+$ cdk bootstrap aws://**account**/**region**
+```
+
 At this point you can now synthesize the CloudFormation template for this code.
 
 ```

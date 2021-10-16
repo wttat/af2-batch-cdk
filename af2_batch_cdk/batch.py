@@ -210,7 +210,7 @@ class BATCHCdkStack(cdk.Stack):
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEC2ContainerRegistryReadOnly'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
-        batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonFSxReadOnlyAccess'))
+        # batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonFSxReadOnlyAccess'))
 
         # create job definition
         af2 = batch.JobDefinition(self,"JobDefinition",
