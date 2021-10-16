@@ -155,8 +155,36 @@ def lambda_handler(event, context):
     elif method == 'DELETE' or method == 'CANCEL':
         
         id =  json.dumps(event['requestContext']['http']['path']).strip('"/')
+        
         if id == '': 
-            return("please specific id for delete or cancel\n")
+            if method == 'DELETE':
+                messages = "Deleting all finished and failed jobs.\n\n"
+            elif method == 'CANCEL':
+                messages = "Canceling all running jobs.\n\n"
+                
+            response_ddb = table.scan()
+            
+            for Item in response_ddb['Items']:
+                status = Item['job_status']
+                id = Item['id']
+                # if status == 'allset' or status == 'failed':
+                response_sqs = sqs.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=id,
+                    DelaySeconds=10,
+                    MessageAttributes={
+                        'Atcion': {
+                            'StringValue': method,
+                            'DataType': 'String'
+                        }
+                    },
+                )
+                print (response_sqs)
+                messages = messages + 'Successfully send '+method+' command to Batch job ,id :' + id+' \n\n'
+            messages = messages + '####\nPlease wait 2min and try again.\n\n'
+            return messages
+            
+            # return("please specific id for delete or cancel\n")
         else:
             response_ddb = table.get_item(Key={'id':id})
             if 'Item' not in response_ddb:
