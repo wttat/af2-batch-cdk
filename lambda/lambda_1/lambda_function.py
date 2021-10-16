@@ -112,6 +112,26 @@ def lambda_handler(event, context):
             else:
                 comment =  data['comment']
             print (comment)
+
+            gpu = ''
+            try:
+                data['gpu']
+            except:
+                print ('no gpu')
+                gpu = 1
+            else:
+                gpu =  data['gpu']
+                
+            print (gpu)
+
+            if gpu > 1:
+                if data['que']=='low':
+                    return "this que only support 1 GPU"
+                if gpu > 4:
+                    if data['que']!='high':
+                        return "only p3.8xlarge support more than 4 GPU"
+                    if gpu > 8:
+                        return "max GPU = 8"
                 
             Item={
                 'id' : id,
@@ -125,6 +145,7 @@ def lambda_handler(event, context):
                 'max_template_date': max_template_date,
                 'que': data['que'],
                 'time': now,
+                'gpu': gpu,
                 'comment': comment
             }
             

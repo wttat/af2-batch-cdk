@@ -47,6 +47,7 @@ def lambda_handler(event, context):
             preset = payload_dict['preset']
             max_template_date = payload_dict['max_template_date']
             que = payload_dict['que']
+            gpu = payload_dict['gpu']
             
             # submit batch job
             response_batch = batch.submit_job(
@@ -61,6 +62,14 @@ def lambda_handler(event, context):
                 },
                 propagateTags=False,
                 containerOverrides={
+                    'vcpus' :8*gpu,
+                    'memory': 48000*gpu,
+                    'resourceRequirements': [
+                        {
+                            'value': str(gpu),
+                            'type': 'GPU'
+                        },
+                    ],
                     'environment': [
                         {
                             'name': 'id',
