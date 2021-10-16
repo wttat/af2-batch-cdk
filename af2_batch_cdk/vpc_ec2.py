@@ -15,26 +15,11 @@ import aws_cdk.aws_ecr as ecr
 import aws_cdk.aws_fsx as fsx
 import aws_cdk.aws_sns as sns
 
-
 import base64
-#
+
 # cdk deploy -c key_pair=cn-nw-01 dataset_upload_s3=True
 
-
 # key_pair = self.node.try_get_context("key_pair") # replace your own in the region
-
-# Set the mail address for SNS
-# mail_address = self.node.try_get_context("mail") # replace your own
-# mail_address = "wttat8600@gmail.com" # replace your own
-
-# # s3 china region dataset arn
-# dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz' # do not touch
-
-# # s3 china region dataset region
-# dataset_region='cn-northwest-1' # do not touch
-
-# # af2-batch image arn
-# image_arn='s3://alphafold2-raw-data/af2-batch.tar' # do not touch
 
 mountPath = "/fsx" # do not touch
 
@@ -119,14 +104,14 @@ class EC2VPCCdkStack(cdk.Stack):
                                     "per_unit_storage_throughput":100}, # 
             vpc = self.vpc,
             vpc_subnet=self.vpc.public_subnets[0],
+            # vpc_subnet=self.vpc.private_subnets[0],
             storage_capacity_gib = 4800,
 
-            ##### 
             removal_policy=cdk.RemovalPolicy.DESTROY,
-            security_group = ec2.SecurityGroup.from_security_group_id(
-                                self,"FSXSG",
-                                security_group_id=self.vpc.vpc_default_security_group
-                            ),
+            # security_group = ec2.SecurityGroup.from_security_group_id(
+            #                     self,"FSXSG",
+            #                     security_group_id=self.vpc.vpc_default_security_group
+            #                 ),
         )
 
         amzn_linux = ec2.MachineImage.latest_amazon_linux(generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
@@ -143,37 +128,16 @@ class EC2VPCCdkStack(cdk.Stack):
         else:
             ecr_endpoint = account+'.dkr.ecr.'+region+'.amazonaws.com'
 
-        # build user data from fsx paramaters
-        # user_data_new = user_data_raw.replace('{fsx_directory}',mountPath)
-        # user_data_new = user_data_new.replace('{dnsName}',dnsName)
-        # user_data_new = user_data_new.replace('{mountName}',mountName)
-        # user_data_new = user_data_new.replace('{region}',region)
-        # user_data_new = user_data_new.replace('{image_arn}',image_arn)
-        # user_data_new = user_data_new.replace('{image_name}',image_name)
-        # user_data_new = user_data_new.replace('{ecr_endpoint}',ecr_endpoint)
-        # user_data_new = user_data_new.replace('{repository_uri_for_tag}',self.repo.repository_uri_for_tag('lastest'))
-        # user_data_new = user_data_new.replace('{dataset_arn}',dataset_arn)
-        # user_data_new = user_data_new.replace('{dataset_region}',dataset_region)
-        # user_data_new = user_data_new.replace('{dataset_upload_s3}',dataset_upload_s3)
-
-        # user_data_bytes = base64.b64encode(user_data_new.encode('utf-8'))
-        # user_data = str(user_data_bytes,'utf-8')
-
-        # role_ec2 = iam.Role(
-        #     self,'ROLEEC2',
-        #     assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-        #     description =' IAM role for tmp ec2',
-        # )
 
         # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
         ec2_tmp = ec2.Instance(self, "EC2TMP",
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
             vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
-            security_group = ec2.SecurityGroup.from_security_group_id(
-                                self,"EC2TMPSG",
-                                security_group_id=self.vpc.vpc_default_security_group
-                            ),
+            # security_group = ec2.SecurityGroup.from_security_group_id(
+            #                     self,"EC2TMPSG",
+            #                     security_group_id=self.vpc.vpc_default_security_group
+            #                 ),
             machine_image = amzn_linux,
             key_name = key_pair,
             block_devices = [ec2.BlockDevice(
@@ -196,7 +160,6 @@ class EC2VPCCdkStack(cdk.Stack):
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
-        
 
         # add ec2_tmp user data 
         ec2_tmp.user_data.add_commands("set -eux",

@@ -71,13 +71,6 @@ class BATCHCdkStack(cdk.Stack):
         mountName = file_system.mount_name
         fileSystemId = file_system.file_system_id
 
-        # build user data from fsx paramaters
-        # user_data_new = user_data_raw.replace('{fsx_directory}',mountPath)
-        # user_data_new = user_data_new.replace('{dnsName}',dnsName)
-        # user_data_new = user_data_new.replace('{mountName}',mountName)
-
-        # user_data_bytes = base64.b64encode(user_data_new.encode('utf-8'))
-        # user_data = str(user_data_bytes,'utf-8')
         user_data = ec2.MultipartUserData()
         user_data.add_part(
             ec2.MultipartBody.from_user_data(
@@ -93,13 +86,7 @@ class BATCHCdkStack(cdk.Stack):
                     )
                 ),
             )
-        # user_data.add_commands("amazon-linux-extras install -y lustre2.10",
-        #                         f"mkdir -p {mountPath}",
-        #                         f"mount -t lustre -o noatime,flock {dnsName}@tcp:/{mountName} {mountPath}",
-        #                         f"echo '{dnsName}@tcp:/{mountName} {mountPath} lustre defaults,noatime,flock,_netdev 0 0' >> /etc/fstab ",
-        #                         "mkdir -p /tmp/alphafold"
-        #                         )
-        # create launch template for compute env
+
         launch_template = ec2.LaunchTemplate(
             self,"AF2Instances",
             launch_template_name="lustreLaunchTemplate",
@@ -123,10 +110,10 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    ec2.SecurityGroup.from_security_group_id(
-                                self,"AF28GPUSG",
-                                security_group_id=vpc.vpc_default_security_group
-                            )
+                    # ec2.SecurityGroup.from_security_group_id(
+                    #             self,"AF28GPUSG",
+                    #             security_group_id=vpc.vpc_default_security_group
+                    #         )
                 ]
             }
         )
@@ -144,10 +131,10 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    ec2.SecurityGroup.from_security_group_id(
-                                self,"AF24GPUSG",
-                                security_group_id=vpc.vpc_default_security_group
-                            )
+                    # ec2.SecurityGroup.from_security_group_id(
+                    #             self,"AF24GPUSG",
+                    #             security_group_id=vpc.vpc_default_security_group
+                    #         )
                             ]
             }
         )
@@ -165,10 +152,10 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    ec2.SecurityGroup.from_security_group_id(
-                                self,"AF21GPUSG",
-                                security_group_id=vpc.vpc_default_security_group
-                            )
+                    # ec2.SecurityGroup.from_security_group_id(
+                    #             self,"AF21GPUSG",
+                    #             security_group_id=vpc.vpc_default_security_group
+                    #         )
                             ]
                 }
         )
@@ -220,7 +207,7 @@ class BATCHCdkStack(cdk.Stack):
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEC2ContainerRegistryReadOnly'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
-
+        batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonFSxReadOnlyAccess'))
 
         # create job definition
         af2 = batch.JobDefinition(self,"JobDefinition",

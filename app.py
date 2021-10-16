@@ -23,7 +23,7 @@ app = core.App()
 # )
 
 use_default_vpc = 0 # set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
-vpc_id = "vpc-654bcd0c" # if you wanna to set your own VPC
+vpc_id = "vpc-0b59760e7cf7ce50f" # if you wanna to set your own VPC
 
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace your own in the region
@@ -54,19 +54,19 @@ api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     )
 )
 
-# batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
-#     file_system = vpc_stack.file_system,
-#     vpc=vpc_stack.vpc,
-#     repo = vpc_stack.repo,
-#     bucket = api_gw_stack.bucket,
-#     key_pair = key_pair,
-#     lambda_5 = api_gw_stack.lambda_5,
-#     job_Definition_name = api_gw_stack.job_Definition_name,
-#     env=core.Environment(
-#     account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#     region=os.environ["CDK_DEFAULT_REGION"]
-#     )
-# )
+batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
+    file_system = vpc_stack.file_system,
+    vpc=vpc_stack.vpc,
+    repo = vpc_stack.repo,
+    bucket = api_gw_stack.bucket,
+    key_pair = key_pair,
+    lambda_5 = api_gw_stack.lambda_5,
+    job_Definition_name = api_gw_stack.job_Definition_name,
+    env=core.Environment(
+    account=os.environ["CDK_DEFAULT_ACCOUNT"],
+    region=os.environ["CDK_DEFAULT_REGION"]
+    )
+)
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     key_pair = key_pair,

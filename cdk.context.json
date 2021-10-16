@@ -3,5 +3,30 @@
     "cn-northwest-1a",
     "cn-northwest-1b",
     "cn-northwest-1c"
-  ]
+  ],
+  "vpc-provider:account=405621504724:filter.isDefault=false:filter.vpc-id=vpc-0b59760e7cf7ce50f:region=cn-northwest-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-0b59760e7cf7ce50f",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-08a600cf27ce56dce",
+            "cidr": "10.0.0.0/24",
+            "availabilityZone": "cn-northwest-1a",
+            "routeTableId": "rtb-0cf4630d702718f9e"
+          },
+          {
+            "subnetId": "subnet-0d0255a0cf16d120e",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "cn-northwest-1b",
+            "routeTableId": "rtb-0cf4630d702718f9e"
+          }
+        ]
+      }
+    ]
+  }
 }
