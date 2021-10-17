@@ -15,6 +15,7 @@ s3Client = boto3.client('s3')
 
 snsClient = boto3.client('sns')
 sns_arn = os.environ['SNS_ARN']
+batch = boto3.client('batch')
 
 dynamodb = boto3.resource('dynamodb')
 ddb = dynamodb.Table(os.environ['TABLE_NAME'])
@@ -106,7 +107,7 @@ def lambda_handler(event, context):
     for record in event['Records']:
         fileBucket = record['s3']['bucket']['name']
         dirPrefix = (record['s3']['object']['key']).split('.')[0]
-        # fileName = record['s3']['object']['key'].split('/')[1]
+        fileName = record['s3']['object']['key'].split('/')[1]
 
         print('Bucket: ', fileBucket)
         print('Dir: ', dirPrefix)
@@ -168,15 +169,28 @@ def lambda_handler(event, context):
         # get id
         id = s3Client.head_object(Bucket=fileBucket, Key=record['s3']['object']['key'])['Metadata']['id']
         
+        response_ddb = ddb.get_item(Key={'id':id})
+        job_id = response_ddb['Item']['job_id']
+        response_batch = batch.describe_jobs(
+            jobs=[
+                job_id,
+            ]
+        )
+        startedAt = response_batch['jobs'][0]['startedAt']
+        stoppedAt = response_batch['jobs'][0]['stoppedAt']
+        cost = round((stoppedAt-startedAt)/1000)
+        # return usage
+        
         # update dynamodb
         response_ddb = ddb.update_item(
             Key={
                 'id': id
             },
-            UpdateExpression='SET s3_url = :s3_url,job_status = :job_status',
+            UpdateExpression='SET s3_url = :s3_url,job_status = :job_status,cost = :cost',
             ExpressionAttributeValues={
                 ':s3_url': htmlPresignUrl,
-                ':job_status': 'allset'
+                ':job_status': 'allset',
+                ':cost': cost
             }
             # ReturnValues: "UPDATED_NEW"
         )
