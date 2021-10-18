@@ -32,7 +32,7 @@ def lambda_handler(event, context):
         try:
             datas = json.loads(event['body'])
         except:
-            return 'You need to post parameters.\n'
+            return 'Please check HTTP body.It should in json.\n'
         else:
             datas = json.loads(event['body'])
         
