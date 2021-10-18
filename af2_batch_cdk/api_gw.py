@@ -24,6 +24,7 @@ import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
 import aws_cdk.aws_s3_notifications as s3n
 import aws_cdk.aws_lambda_event_sources as eventsources
+import aws_cdk.aws_s3_deployment as s3deploy
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
@@ -47,6 +48,12 @@ class APIGWCdkStack(cdk.Stack):
             self,"BUCKET",
             removal_policy=cdk.RemovalPolicy.DESTROY,
             auto_delete_objects=True
+        )
+
+        s3deploy.BucketDeployment(self, "DeployFastaSample",
+            sources=[s3deploy.Source.asset("./input/")],
+            destination_bucket= self.bucket ,
+            destination_key_prefix="input/"
         )
 
         # create dynamodb table

@@ -52,53 +52,55 @@ class TESTCdkStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        af2 = batch.JobDefinition(self,"JobDefinition",
-            job_definition_name = 'af2',
-            container = {
-                # "image": repo.repository_uri_for_tag("lastest"),
-                "image": ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample"),
-                # "job_role" : batch_job_role,
-                "command":["/bin/bash","/app/run.sh","-f","Ref::fasta_paths","-m","Ref::model_names","-d","Ref::max_template_date","-p","Ref::preset"],
-                "volumes": [
-                    {
-                        "host":{
-                            "sourcePath":"/fsx",
-                        },
-                        "name":"Lustre"
-                    }
-                ],
-                "environment":{
-                        "XLA_PYTHON_CLIENT_MEM_FRACTION":"4.0",
-                        "TF_FORCE_UNIFIED_MEMORY":"1",
-                        # "BATCH_BUCKET":bucket.bucket_name,
-                        "BATCH_DIR_PREFIX":"input",
-                        "REGION":region,
-                },
-                "mount_points":[
-                    {
-                        "containerPath": mountPath,
-                        "readOnly":False,
-                        "sourceVolume": "Lustre",
-                    }
-                ],
-                "user":"root",
-                "gpu_count":1,
-                "vcpus":8,
-                "memory_limit_mib":48000,
-                "log_configuration":{
-                    "log_driver":batch.LogDriver.AWSLOGS
-                }
-            },
+        
 
-            parameters = {
-                # default parameters
-                "model_names": "mn",
-                "max_template_date": "mtd",
-                "preset": "p",
-                "fasta_paths": "fp"
-            },
+        # af2 = batch.JobDefinition(self,"JobDefinition",
+        #     job_definition_name = 'af2',
+        #     container = {
+        #         # "image": repo.repository_uri_for_tag("lastest"),
+        #         "image": ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample"),
+        #         # "job_role" : batch_job_role,
+        #         "command":["/bin/bash","/app/run.sh","-f","Ref::fasta_paths","-m","Ref::model_names","-d","Ref::max_template_date","-p","Ref::preset"],
+        #         "volumes": [
+        #             {
+        #                 "host":{
+        #                     "sourcePath":"/fsx",
+        #                 },
+        #                 "name":"Lustre"
+        #             }
+        #         ],
+        #         "environment":{
+        #                 "XLA_PYTHON_CLIENT_MEM_FRACTION":"4.0",
+        #                 "TF_FORCE_UNIFIED_MEMORY":"1",
+        #                 # "BATCH_BUCKET":bucket.bucket_name,
+        #                 "BATCH_DIR_PREFIX":"input",
+        #                 "REGION":region,
+        #         },
+        #         "mount_points":[
+        #             {
+        #                 "containerPath": mountPath,
+        #                 "readOnly":False,
+        #                 "sourceVolume": "Lustre",
+        #             }
+        #         ],
+        #         "user":"root",
+        #         "gpu_count":1,
+        #         "vcpus":8,
+        #         "memory_limit_mib":48000,
+        #         "log_configuration":{
+        #             "log_driver":batch.LogDriver.AWSLOGS
+        #         }
+        #     },
+
+        #     parameters = {
+        #         # default parameters
+        #         "model_names": "mn",
+        #         "max_template_date": "mtd",
+        #         "preset": "p",
+        #         "fasta_paths": "fp"
+        #     },
             
-        )
+        # )
 
         # # SSH key pair name, 
         # key_pair = 'cn-nw-01' # replace your own in the region
