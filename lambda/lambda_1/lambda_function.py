@@ -201,7 +201,7 @@ def lambda_handler(event, context):
                     },
                 )
                 print (response_sqs)
-                messages = messages + 'Successfully send '+method+' command to Batch job ,id :' + id+' \n\n'
+                messages = messages + 'Successfully send '+method+' command to all Batch job.\n\n'
             messages = messages + '####\nPlease wait 2min and try again.\n\n'
             return messages
             
