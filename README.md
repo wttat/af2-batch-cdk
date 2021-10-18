@@ -64,3 +64,10 @@ command.
 Enjoy!
 
 
+问题：
+1.如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂在，此时可登陆tmp ec2手动执行挂载命令测试原因，参考：
+https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败
+
+解决相关问题后执行cdk destroy --all清除环境，再重新部署。
+或者不选择vpc，重新创建即可。
+
