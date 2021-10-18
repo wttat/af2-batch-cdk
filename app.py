@@ -22,8 +22,8 @@ app = core.App()
 #     app,"TESTCdkStack",
 # )
 
-use_default_vpc = 1 # set to 0 to do not use the default vpc,set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
-vpc_id = "vpc-0b59760e7cf7ce50f" # if you wanna to set your own VPC,do not set if you want to create a new one
+use_default_vpc = 0 # set to 0 to do not use the default vpc,set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
+vpc_id = "vpc-654bcd0c" # if you wanna to set your own VPC,do not set if you want to create a new one
 
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace to your own key-pair in the region

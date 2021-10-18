@@ -77,7 +77,7 @@ class EC2VPCCdkStack(cdk.Stack):
         if use_default_vpc:
             self.vpc = ec2.Vpc.from_lookup(self, 'VPC', is_default = True) 
         elif len(vpc_id)!=0:
-            self.vpc = ec2.Vpc.from_lookup(self, 'VPC', is_default = False,vpc_id = vpc_id) 
+            self.vpc = ec2.Vpc.from_lookup(self, 'VPC',vpc_id = vpc_id) 
         else:
             self.vpc = ec2.Vpc(self, "VPC",
             max_azs=1, # single AZ
