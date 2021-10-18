@@ -18,7 +18,7 @@ bucket_name = os.environ['S3_BUCKET']
 bucket = s3.Bucket(bucket_name)
 job_Definition_name = os.environ['JOB_DEFINITION_NAME']
 
-## Handle POST & DELETE & CANCEL
+## Handle POST & DELETE & CANCEL from SQS
 
 def lambda_handler(event, context):
     print (event)
@@ -107,13 +107,14 @@ def lambda_handler(event, context):
             if method == 'DELETE':
                 if job_status == "failed":
                     print ("failed jobs just delete dynamodb")
+                    response_ddb = table.delete_item(Key={'id': id})
                 elif job_status == "allset":
                     ## finished job just delete s3 folder
                     s3_foleder_name = (response_ddb['Item']['file_name'].split('.'))[0]
                     Prefix = "output/"+s3_foleder_name+"/"
                     response_s3 = bucket.objects.filter(Prefix=Prefix).delete()
                     print ("response_s3:"+str(response_s3))
-                response_ddb = table.delete_item(Key={'id': id})
+                    response_ddb = table.delete_item(Key={'id': id})
                 
             elif method =='CANCEL': # job_status == "running/starting":
                 job_id = response_ddb['Item']['job_id']
