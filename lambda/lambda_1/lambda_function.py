@@ -149,9 +149,10 @@ def lambda_handler(event, context):
                 'comment': comment
             }
             
-            # Items.append(Item)
+            Items.append(Item)
             # return str(type(Item))
-
+        
+        for Item in Items:
             response_ddb= table.put_item(Item=Item)
             print (response_ddb)
             
@@ -170,7 +171,6 @@ def lambda_handler(event, context):
             print (response_sqs)
             if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
                 messages = messages + '\nSuccessful submit Batch job for fasta:' + data['fasta']+ ', id:'+ id+'\n\n'+'Please use $(curl $auth-info $api-gateway-url/'+id+') to query this job'+'\n\n'
-        
         return messages
 
     elif method == 'DELETE' or method == 'CANCEL':
