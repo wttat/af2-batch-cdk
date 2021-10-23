@@ -71,8 +71,9 @@ def lambda_handler(event, context):
             except:
                 return 'You need to at least specific the fasta and que parameters.\n'
     
-            if data['que'] != 'high' and data['que'] != 'mid' and data['que'] != 'low':
-                return 'The job queue should be high or mid or low.\n'
+            ## TODO check p4 auto
+            if data['que'] != 'high' and data['que'] != 'mid' and data['que'] != 'low' and data['que'] != 'p4':
+                return 'The job queue should be high or mid or low or p4(depends on region) .\n'
     
             max_template_date = ''
             try:
@@ -128,8 +129,8 @@ def lambda_handler(event, context):
                 if data['que']=='low':
                     return "this que only support 1 GPU"
                 if gpu > 4:
-                    if data['que']!='high':
-                        return "only p3.8xlarge support more than 4 GPU"
+                    if data['que']=='mid':
+                        return "only p3.8xlarge or p4 support more than 4 GPU"
                     if gpu > 8:
                         return "max GPU = 8"
                 

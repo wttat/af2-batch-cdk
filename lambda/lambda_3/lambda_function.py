@@ -50,6 +50,14 @@ def lambda_handler(event, context):
             gpu = payload_dict['gpu']
             
             # submit batch job
+
+            if que == 'p4':
+                vcpu = 12
+                memory = 140000
+            else:
+                vcpu = 8
+                memory = 48000
+
             response_batch = batch.submit_job(
                 jobName = fasta,
                 jobQueue = que,
@@ -62,8 +70,8 @@ def lambda_handler(event, context):
                 },
                 propagateTags=False,
                 containerOverrides={
-                    'vcpus' :8*gpu,
-                    'memory': 48000*gpu,
+                    'vcpus' :vcpu*gpu,
+                    'memory': memory*gpu,
                     'resourceRequirements': [
                         {
                             'value': str(gpu),

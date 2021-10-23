@@ -168,6 +168,31 @@ class BATCHCdkStack(cdk.Stack):
                 }
         )
 
+        ## TODO check p4 auto
+
+        # af2_p4 = batch.ComputeEnvironment(
+        #     self,"ComputeEnvironment_1GPU",
+        #     compute_resources = {
+        #         "vpc":vpc,
+        #         "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
+        #         "minv_cpus":0,
+        #         "desiredv_cpus":8,
+        #         "maxv_cpus":256,
+        #         "instance_types":[ec2.InstanceType("p4.24xlarge")],
+        #         "launch_template":{
+        #             "launch_template_name":"lustreLaunchTemplate",
+        #             "version":"$Latest"
+        #         },
+        #         "security_groups":[
+        #             # ec2.SecurityGroup.from_security_group_id(
+        #             #             self,"AF21GPUSG",
+        #             #             security_group_id=vpc.vpc_default_security_group
+        #             #         )
+        #             sg,
+        #                     ]
+        #         }
+        # )
+
         # create job queue
         af_high = batch.JobQueue(self, "JobQueue_High",
             compute_environments=[{
@@ -201,6 +226,19 @@ class BATCHCdkStack(cdk.Stack):
             ],
             job_queue_name = 'low',
         )
+
+        # af_p4 = batch.JobQueue(self, "JobQueue_P4",
+        #     compute_environments=[{
+        #         # Defines a collection of compute resources to handle assigned batch jobs
+        #         "computeEnvironment": af2_p4,
+        #         # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
+        #         "order": 1
+        #     }
+        #     ],
+        #     job_queue_name = 'p4',
+        # )
+
+
 
         image_id = ecs.ContainerImage.from_ecr_repository(
             repository=ecr.Repository.from_repository_name(self, "GetCompRegRepoName",repo.repository_name),
