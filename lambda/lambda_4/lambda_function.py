@@ -20,6 +20,8 @@ batch = boto3.client('batch')
 dynamodb = boto3.resource('dynamodb')
 ddb = dynamodb.Table(os.environ['TABLE_NAME'])
 
+expiretime = 86400
+
 def getSharedFileList(fileBucket, dirPrefix):
     fileList = []
     # 原文件名为*则查文件列表，否则就查单个文件
@@ -153,7 +155,10 @@ def lambda_handler(event, context):
                             Params = {
                                 'Bucket': fileBucket,
                                 'Key': htmlKey
-                            })
+                            },
+                            ExpiresIn = expiretime
+                            
+                            )
         print('htmlPresignUrl: ', htmlPresignUrl)
 
         # get id
