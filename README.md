@@ -68,6 +68,7 @@ Enjoy!
 ### 10/24/2021
 * 支持p4实例/队列，开启需解除batch.py相关注释。
 * 完善sns通知信息，现在可以从邮件直接看到任务名称和所需时间。
+* S3 presigned URL expire in 1day
 
 
 ## TODO
