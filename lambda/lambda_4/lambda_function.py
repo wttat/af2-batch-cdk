@@ -155,17 +155,7 @@ def lambda_handler(event, context):
                                 'Key': htmlKey
                             })
         print('htmlPresignUrl: ', htmlPresignUrl)
-        if record['awsRegion'] == 'cn-north-1' or record['awsRegion'] == 'cn-northwest-1':
-            messageStr = 'Warning : You are in AWS China region, Presigned URLs work only if the resource owner has an ICP license, otherwise, please use aws cli $aws s3 sync s3://'+fileBucket+'/'+dirPrefix+' ./ to download entire foleder'+'\n\nDownload files from the html: ' + htmlPresignUrl
-        else:
-            messageStr = 'You can download files from the html: ' + htmlPresignUrl
-        response_sns = snsClient.publish(
-            TopicArn = sns_arn,
-            Message = messageStr,
-            Subject = 'The result data is now available for download'
-        )
-        print('Sns publish response: ', response_sns)
-        
+
         # get id
         id = s3Client.head_object(Bucket=fileBucket, Key=record['s3']['object']['key'])['Metadata']['id']
         
@@ -176,9 +166,26 @@ def lambda_handler(event, context):
                 job_id,
             ]
         )
+        
+        jobName = response_batch['jobs'][0]['jobName']
+
+        # get cost
         startedAt = response_batch['jobs'][0]['startedAt']
         stoppedAt = response_batch['jobs'][0]['stoppedAt']
         cost = round((stoppedAt-startedAt)/1000)
+
+        if record['awsRegion'] == 'cn-north-1' or record['awsRegion'] == 'cn-northwest-1':
+            messageStr = 'Total runtime is '+str(cost)+'s.\n\nIn AWS China,Presigned URLs work only if the resource owner has an ICP license , otherwise, please use aws cli $aws s3 sync s3://'+fileBucket+'/'+dirPrefix+' ./ to download entire foleder'+'\n\nDownload files from the html: ' + htmlPresignUrl
+        else:
+            messageStr = 'Total runtime is '+str(cost)+'s.\n\nYou can download files from the html: ' + htmlPresignUrl+'.\n\nYou can alsp use aws cli $aws s3 sync s3://'+fileBucket+'/'+dirPrefix+' ./ to download entire foleder'
+        response_sns = snsClient.publish(
+            TopicArn = sns_arn,
+            Message = messageStr,
+            Subject = jobName +"'s result data is now available for download"
+        )
+        print('Sns publish response: ', response_sns)
+        
+
         # return usage
         
         # update dynamodb
