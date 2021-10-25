@@ -20,7 +20,7 @@ batch = boto3.client('batch')
 dynamodb = boto3.resource('dynamodb')
 ddb = dynamodb.Table(os.environ['TABLE_NAME'])
 
-expiretime = 86400
+expiretime = 86400 # 24h*60min*60s = 1day
 
 def getSharedFileList(fileBucket, dirPrefix):
     fileList = []

@@ -288,7 +288,7 @@ class BATCHCdkStack(cdk.Stack):
                 "user":"root",
                 "gpu_count":1,
                 "vcpus":8,
-                "memory_limit_mib":48000,
+                "memory_limit_mib":60000,
                 "log_configuration":{
                     "log_driver":batch.LogDriver.AWSLOGS
                 }

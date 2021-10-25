@@ -22,8 +22,11 @@ app = core.App()
 #     app,"TESTCdkStack",
 # )
 
+### As af2 input/output both in S3, there is no need to put it in a exist VPC.
+### Thus, follow setting is recommanded.
+
 use_default_vpc = 0 # set to 0 to do not use the default vpc,set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
-vpc_id = "vpc-654bcd0c" # if you wanna to set your own VPC,do not set if you want to create a new one
+vpc_id = "" # if you wanna to set your own VPC,change this to your vpc'id.
 
 # SSH key pair name, 
 key_pair = 'cn-nw-01' # replace to your own key-pair in the region

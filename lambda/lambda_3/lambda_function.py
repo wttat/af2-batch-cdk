@@ -53,10 +53,10 @@ def lambda_handler(event, context):
 
             if que == 'p4':
                 vcpu = 12
-                memory = 140000
+                memory = 1100000
             else:
                 vcpu = 8
-                memory = 48000
+                memory = 60000
 
             response_batch = batch.submit_job(
                 jobName = fasta,

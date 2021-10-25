@@ -70,16 +70,12 @@ Enjoy!
 * 完善sns通知信息，现在可以从邮件直接看到任务名称和所需时间。
 * S3 presigned URL expire in 1day
 
-
 ## TODO
 
 * 引入更完善身份验证机制，但国内没有user pool。
 * 自动化鉴别该区域没有p4实例。
 
-## 常见问题：
-1.如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，参考：
-https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败
-
-解决相关问题后执行cdk destroy --all清除环境，再重新部署。
-或者不选择vpc，重新创建即可。
-
+## Known Issue
+* 有可能默认AZ没有p3实例，导致初始化失败。
+* 如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，参考：
+https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败。
