@@ -171,14 +171,14 @@ class BATCHCdkStack(cdk.Stack):
         ## TODO check p4 auto
 
         # af2_p4 = batch.ComputeEnvironment(
-        #     self,"ComputeEnvironment_1GPU",
+        #     self,"ComputeEnvironment_P4",
         #     compute_resources = {
         #         "vpc":vpc,
         #         "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
         #         "minv_cpus":0,
         #         "desiredv_cpus":8,
         #         "maxv_cpus":256,
-        #         "instance_types":[ec2.InstanceType("p4.24xlarge")],
+        #         "instance_types":[ec2.InstanceType("p4d.24xlarge")],
         #         "launch_template":{
         #             "launch_template_name":"lustreLaunchTemplate",
         #             "version":"$Latest"
