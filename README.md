@@ -1,65 +1,30 @@
 
-# Welcome to your CDK Python project!
+# Alphafold2-cdk部署手册
 
-This is a blank project for Python development with CDK.
+## 部署流程
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
-
-To manually create a virtualenv on MacOS and Linux:
-
-```
-$ python3 -m venv .venv
-```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-This stack uses assets, so the toolkit stack must be deployed to the environment
-
-```
-$ cdk bootstrap aws://**account**/**region**
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+ * `wget https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz`  
+ * `tar xvf node-v14.18.1-linux-x64.tar.xz`
+ * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/node /usr/local/bin` 
+ * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin`
+ * `export PATH=$PATH:$(npm get prefix)/bin`
+ * `sudo yum install -y git`
+ * `git clone https://github.com/wttat/af2-batch-cdk`
+ * `cd af2-batch-cdk`
+ * `pip3 install -r requirements.txt`
+ * `npm install -g aws-cdk`
+ * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
+ * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行。
+ * `cdk bootstrap aws://ACCOUNT/REGION`
+ * `cdk synth`
+ * `cdk deploy --all`
+ * 确认SNS通知邮件
+ * 系统会自动开启一台c5.9xlarge下载数据并存放到FSx for Lustre.和一台P3.2xlarge(可以修改计算环境Min VCPU为0关闭)
+ * 3个小时左右数据准备完毕会有邮件通知，此时可以删除临时下载机器准备模型训练
+ * 修改目录下的command.json文件
+ * 任务提交 curl -X "POST" -H "Authorization: af2" -H "Content-Type: application/json" APIGW——URL -d @command.json
+ * 查看任务状态 curl -H "Authorization: af2" APIGW——URL/{id}
+ * 任务分析完毕会有邮件通知，用户可以到指定的S3桶下载pdb文件进行在云端或者本地查看。
 
 Enjoy!
 
