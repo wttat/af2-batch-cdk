@@ -185,7 +185,7 @@ class EC2VPCCdkStack(cdk.Stack):
                                         f"docker push {self.repo.repository_uri_for_tag('lastest')}",
                                         f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
                                         f"tar -I pigz -xvf {dataset_name} --directory={mountPath}",
-                                        f"rm -rf {dataset_name}",
+                                        # f"rm -rf {dataset_name}",
                                         # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
                                         # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
                                         )
