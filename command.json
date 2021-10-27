@@ -6,7 +6,7 @@
 		"preset":"full",
 		"max_template_date":"2020-05-14",
 		"que":"high",
-		"comment":"啦啦啦啦",
+		"comment":"水痘带状疱疹病毒衣壳",
 		"gpu":4
     },
     {
@@ -16,14 +16,14 @@
 		"preset":"reduced",
 		"max_template_date":"2020-05-14",
 		"que":"mid",
-		"comment":"嘻嘻嘻嘻",
+		"comment":"氨基甲酰磷酸合成酶",
 		"gpu":2
     },
 	{
-		"fasta":"7K59",
-		"file_name":"rcsb_pdb_7K59.fasta",
+		"fasta":"6TBT",
+		"file_name":"rcsb_pdb_6TBT.fasta",
 		"que":"low",
-		"comment":"噜噜噜噜",
+		"comment":"BCL6 BTB 结构域与 Apt48 肽复合物的晶体结构",
 		"gpu":1
 	}
 ]
