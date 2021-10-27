@@ -227,16 +227,16 @@ class BATCHCdkStack(cdk.Stack):
             job_queue_name = 'low',
         )
 
-        af_p4 = batch.JobQueue(self, "JobQueue_P4",
-            compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
-                "computeEnvironment": af2_p4,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
-                "order": 1
-            }
-            ],
-            job_queue_name = 'p4',
-        )
+        # af_p4 = batch.JobQueue(self, "JobQueue_P4",
+        #     compute_environments=[{
+        #         # Defines a collection of compute resources to handle assigned batch jobs
+        #         "computeEnvironment": af2_p4,
+        #         # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
+        #         "order": 1
+        #     }
+        #     ],
+        #     job_queue_name = 'p4',
+        # )
 
 
 
