@@ -20,8 +20,8 @@ https://github.com/wttat/alphafold
  * `pip3 install -r requirements.txt`
  * `npm install -g aws-cdk`
  * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
- * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行。
- * `cdk bootstrap aws://ACCOUNT/REGION`
+ * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行注释。
+ * `cdk bootstrap aws://{ACCOUNT}/{REGION}`
  * `cdk synth`
  * `cdk deploy --all`
  * 确认SNS通知邮件
