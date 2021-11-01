@@ -14,7 +14,6 @@ logs = boto3.client('logs')
 logGroupName = '/aws/batch/job'
 
 def getLogs(logStreamName):
-    # logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
     response_logs = logs.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
@@ -39,7 +38,6 @@ def lambda_handler(event, context):
             if response_ddb['Count'] == 0:
                 return "no job deployed\n"
             else:
-                # return str(response_ddb['Items'])+"\n\n###\n\nPlease add a specfic id after the URL to query the detail\n"
                 return (response_ddb['Items'])
         else:
             response_ddb = table.get_item(Key={'id':id})
@@ -52,14 +50,13 @@ def lambda_handler(event, context):
                 if  status == "starting":
                     return str(response_ddb['Item'])+"\n\n###\n\nThis job is starting and waiting for send to Batch\n"
                 else:
-                    response_batch = batch.describe_jobs(
-                        jobs=[
-                            job_id,
-                        ]
-                    )
-                    batch_status = response_batch['jobs'][0]['status']
                     if status == "running":
-                    # return response_batch
+                        response_batch = batch.describe_jobs(
+                            jobs=[
+                                job_id,
+                            ]
+                        )
+                        batch_status = response_batch['jobs'][0]['status']
                         if batch_status == "SUBMITTED":
                             return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
                         elif batch_status == "PENDING":
@@ -73,20 +70,37 @@ def lambda_handler(event, context):
                             messages = getLogs(logStreamName)
                             return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
                     elif status == "allset" :
-                        statusReason = response_batch['jobs'][0]['statusReason']
-                        logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
-                        messages = getLogs(logStreamName)
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
-                    elif status == "failed":
-                        statusReason = response_batch['jobs'][0]['statusReason']
-                        logStreamName = response_batch['jobs'][0]['container']['logStreamName']
                         try:
-                            getLogs(logStreamName)
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
                         except:
-                            messages = 'No Cloudwatch logs for now'
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
                         else:
-                            messages = getLogs(logStreamName)   
-                        return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nMaybe Wrong!!! Please check full logs on cloudwatch logs\n'
+                            batch_status = response_batch['jobs'][0]['status']
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                    elif status == "failed":
+                        try:
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
+                        except:
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        else:
+                            batch_status = response_batch['jobs'][0]['status']
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            logStreamName =  response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
                     else:
                         return "status error,please connact for support"
     else:
