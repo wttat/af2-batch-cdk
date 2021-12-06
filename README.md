@@ -34,6 +34,8 @@ https://github.com/wttat/alphafold
 
 Enjoy!
 
+--use-feature=2020-resolver
+
 ## command.json 参数说明
 
 * fasta：蛋白质名称，可自定义。
