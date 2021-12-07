@@ -82,7 +82,7 @@ def lambda_handler(event, context):
                 data['max_template_date']
             except:
                 print('no max_template_date,using dafault max_template_date 2020-05-14')
-                max_template_date = '2020-05-14'
+                max_template_date = '2021-11-01'
             else:
                 max_template_date = data['max_template_date']
             print(max_template_date)

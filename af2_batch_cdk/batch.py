@@ -93,6 +93,15 @@ class BATCHCdkStack(cdk.Stack):
             user_data = user_data,
             key_name = key_pair, # maybe should not be allowed after debug
             # user_data = ec2.UserData.custom(user_data)
+            block_devices = [ec2.BlockDevice(
+                                           device_name="/dev/xvda",
+                                        # This is a nvme device
+                                        #    device_name="/dev/nvme0n1p1",
+                                           volume=ec2.BlockDeviceVolume.ebs(100,
+                                                                            encrypted=True
+                                                                            )
+                                       )
+                            ],
         )
 
         # Subnets = ec2.SubnetSelection(subnets=[vpc.public_subnets[0]])
@@ -293,9 +302,9 @@ class BATCHCdkStack(cdk.Stack):
                     "log_driver":batch.LogDriver.AWSLOGS
                 }
             },
-
+            
+            # default parameters
             parameters = {
-                # default parameters
                 "model_names": "mn",
                 "max_template_date": "mtd",
                 "preset": "p",
