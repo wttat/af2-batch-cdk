@@ -174,9 +174,9 @@ def lambda_handler(event, context):
             print(response_sqs)
             if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
                 messages = messages + '\nSuccessful submit Batch job for fasta:' + \
-                    data['fasta'] + ', id:' + id+'\n\n' + \
+                    Item['fasta'] + ', id:' + Item['id']+'\n\n' + \
                     'Please use $(curl $auth-info $api-gateway-url/' + \
-                    id+') to query this job'+'\n\n'
+                    Item['id']+') to query this job'+'\n\n'
         return messages
 
     elif method == 'DELETE' or method == 'CANCEL':
