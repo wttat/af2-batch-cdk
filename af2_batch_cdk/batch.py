@@ -111,7 +111,7 @@ class BATCHCdkStack(cdk.Stack):
             self,"ComputeEnvironment_8GPU",
             compute_resources = {
                 "vpc":vpc,
-                "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
+                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
@@ -135,7 +135,7 @@ class BATCHCdkStack(cdk.Stack):
             self,"ComputeEnvironment_4GPU",
             compute_resources = {
                 "vpc":vpc,
-                "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
+                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
@@ -158,7 +158,7 @@ class BATCHCdkStack(cdk.Stack):
             self,"ComputeEnvironment_1GPU",
             compute_resources = {
                 "vpc":vpc,
-                "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
+                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":8,
                 "desiredv_cpus":8,
                 "maxv_cpus":256,
@@ -183,7 +183,7 @@ class BATCHCdkStack(cdk.Stack):
         #     self,"ComputeEnvironment_P4",
         #     compute_resources = {
         #         "vpc":vpc,
-        #         "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
+                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
         #         "minv_cpus":0,
         #         "desiredv_cpus":8,
         #         "maxv_cpus":256,
