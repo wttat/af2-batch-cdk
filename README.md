@@ -1,7 +1,7 @@
 
 # Alphafold2-cdk部署手册
 
-架构图：
+参考blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
 
 ## 优化Alphafold2镜像源代码库：
 
@@ -49,6 +49,9 @@ Enjoy!
 
 ## Changelog
 
+### 01/15/2022
+* 更改为使用当前region所有AZ，充分利用GPU资源。
+
 ### 10/24/2021
 * 支持p4实例/队列，开启需解除batch.py相关注释。
 * 完善sns通知信息，现在可以从邮件直接看到任务名称和所需时间。
@@ -60,7 +63,6 @@ Enjoy!
 * 自动化鉴别该区域没有p4实例。
 
 ## Known Issue
-* 有可能默认AZ没有p3实例，导致初始化失败。
 * 如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，参考：
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败。
 
