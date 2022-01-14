@@ -89,7 +89,7 @@ class BATCHCdkStack(cdk.Stack):
 
         launch_template = ec2.LaunchTemplate(
             self,"AF2Instances",
-            launch_template_name="lustreLaunchTemplate",
+            launch_template_name="BatchLaunchTemplate",
             user_data = user_data,
             key_name = key_pair, # maybe should not be allowed after debug
             # user_data = ec2.UserData.custom(user_data)
@@ -118,7 +118,7 @@ class BATCHCdkStack(cdk.Stack):
                 "instance_types":[ec2.InstanceType("p3.16xlarge")],
                 "launch_template":{
                     # "launch_template_name":launch_template.launch_template_name,
-                    "launch_template_name":"lustreLaunchTemplate",
+                    "launch_template_name":"BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
@@ -141,7 +141,7 @@ class BATCHCdkStack(cdk.Stack):
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.8xlarge")],
                 "launch_template":{
-                    "launch_template_name":"lustreLaunchTemplate",
+                    "launch_template_name":"BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
@@ -164,7 +164,7 @@ class BATCHCdkStack(cdk.Stack):
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{
-                    "launch_template_name":"lustreLaunchTemplate",
+                    "launch_template_name":"BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[

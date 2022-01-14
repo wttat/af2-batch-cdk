@@ -80,10 +80,10 @@ class EC2VPCCdkStack(cdk.Stack):
             self.vpc = ec2.Vpc.from_lookup(self, 'VPC',vpc_id = vpc_id) 
         else:
             self.vpc = ec2.Vpc(self, "VPC",
-            max_azs=1, # single AZ
+            max_azs=99, # use all az in this region
             subnet_configuration=[
                 {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
-                {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
+                # {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
                 ]
             )
 
