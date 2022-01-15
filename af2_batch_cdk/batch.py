@@ -321,7 +321,7 @@ class BATCHCdkStack(cdk.Stack):
                 "db_preset":"dp",
                 "model_preset":"mp",
                 "is_prokaryote_list":"ipl",
-                "use_precomputed_msas":False,
+                "use_precomputed_msas":'false',
             },
             
         )
