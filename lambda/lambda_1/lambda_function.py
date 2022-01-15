@@ -57,10 +57,7 @@ def lambda_handler(event, context):
                 return ('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix+'\n')
             print('fasta found')
 
-            # get fasta seq
-            s3.download_file(bucket, key, '/tmp/'+file_name)
-            fasta_seq = linecache.getline(
-                '/tmp/'+file_name, line_number).strip()
+
 
             id = str(uuid.uuid4())
             now = time.asctime()
@@ -81,31 +78,59 @@ def lambda_handler(event, context):
             try:
                 data['max_template_date']
             except:
-                print('no max_template_date,using dafault max_template_date 2020-05-14')
+                print('no max_template_date,using dafault max_template_date 2021-11-01')
                 max_template_date = '2021-11-01'
             else:
                 max_template_date = data['max_template_date']
             print(max_template_date)
 
-            model_names = ''
+            model_preset = ''
             try:
-                data['model_names']
+                data['model_preset']
             except:
-                print('no model_names,using dafault model_names 1-5')
-                model_names = 'model_1,model_2,model_3,model_4,model_5'
+                return 'You need to specific the model preset.\n'
             else:
-                model_names = data['model_names']
-            print(model_names)
+                if data[model_preset] != 'monomer' and data[model_preset] != 'monomer_casp14' and data[model_preset] != 'monomer_ptm' and data[model_preset] != 'multimer':
+                    return 'The model preset shoudl be monomer or monomer_casp14 or monomer_ptm or multimer'
+                else:
+                    model_preset = data['model_preset']
+            print(model_preset)
 
-            preset = ''
+            # get fasta seq
+            if model_preset != 'multimer':
+                s3.download_file(bucket, key, '/tmp/'+file_name)
+                fasta_seq = linecache.getline(
+                    '/tmp/'+file_name, line_number).strip()
+            else:
+                fasta_seq = "This is a multimer seq"
+
+            db_preset = ''
             try:
-                data['preset']
+                data['db_preset']
             except:
                 print('no preset,using dafault preset full')
-                preset = 'full'
+                db_preset = 'full_dbs'
             else:
-                preset = data['preset']
-            print(preset)
+                if data['db_preset'] != 'full_dbs' and data['db_preset'] != 'reduced_dbs':
+                    return 'The db preset shoudl be full_dbs or reduced_dbs'
+                else:
+                    db_preset = data['db_preset']
+            print(db_preset)
+
+            is_prokaryote_list = ''
+            try:
+                data['is_prokaryote_list']
+            except:
+                print('no preset,using dafault preset false')
+                is_prokaryote_list = 'false'
+            else:
+                if data['is_prokaryote_list'] != 'true' and data['is_prokaryote_list'] != 'false':
+                    return 'The is_prokaryote_list shoudl be true or false'
+                elif data['is_prokaryote_list'] == 'true' and model_preset != 'multimer':
+                    return 'is_prokaryote_list only could be true if model_preset is multimer'
+                else:
+                    is_prokaryote_list = data['is_prokaryote_list']
+            print(is_prokaryote_list)
 
             comment = ''
             try:
@@ -143,8 +168,9 @@ def lambda_handler(event, context):
                 'file_name': file_name,
                 'job_id': 'none',
                 'job_status': 'starting',
-                'model_names': model_names,
-                'preset': preset,
+                'model_preset': model_preset,
+                'db_preset': db_preset,
+                'is_prokaryote_list':is_prokaryote_list,
                 'max_template_date': max_template_date,
                 'que': data['que'],
                 'time': now,
