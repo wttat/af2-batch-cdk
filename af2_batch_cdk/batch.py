@@ -320,7 +320,7 @@ class BATCHCdkStack(cdk.Stack):
                 "max_template_date": "mtd",
                 "db_preset":"dp",
                 "model_preset":"mp",
-                "is_prokaryote_list":"ipl",
+                "is_prokaryote_list":"false",
                 "use_precomputed_msas":'false',
             },
             
