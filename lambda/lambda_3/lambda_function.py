@@ -62,7 +62,7 @@ def lambda_handler(event, context):
 
             if que == 'p4':
                 vcpu = 12
-                memory = 1100000
+                memory = 140000
             else:
                 vcpu = 8
                 memory = 60000
