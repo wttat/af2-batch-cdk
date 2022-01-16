@@ -279,7 +279,7 @@ class BATCHCdkStack(cdk.Stack):
                 "-t","Ref::max_template_date",
                 "-m","Ref::model_preset",
                 "-c","Ref::db_preset",
-                "-l","Ref::is_prokaryote",
+                "-l","Ref::is_prokaryote_list",
                 "-p","Ref::use_precomputed_msas",
                 ],
                 "volumes": [
