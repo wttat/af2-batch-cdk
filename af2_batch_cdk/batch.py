@@ -323,7 +323,7 @@ class BATCHCdkStack(cdk.Stack):
                 "model_preset":"mp",
                 "is_prokaryote_list":"false",
                 "use_precomputed_msas":'false',
-                "benchmank":'false',
+                "benchmark":'false',
             },
             
         )
