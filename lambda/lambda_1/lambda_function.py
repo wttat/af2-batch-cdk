@@ -90,7 +90,7 @@ def lambda_handler(event, context):
             except:
                 return 'You need to specific the model preset.\n'
             else:
-                if data[model_preset] != 'monomer' and data[model_preset] != 'monomer_casp14' and data[model_preset] != 'monomer_ptm' and data[model_preset] != 'multimer':
+                if data['model_preset'] != 'monomer' and data['model_preset'] != 'monomer_casp14' and data['model_preset'] != 'monomer_ptm' and data['model_preset'] != 'multimer':
                     return 'The model preset shoudl be monomer or monomer_casp14 or monomer_ptm or multimer'
                 else:
                     model_preset = data['model_preset']
