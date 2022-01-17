@@ -68,6 +68,10 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 * 引入更完善身份验证机制，但国内没有user pool。
 * 自动化鉴别该区域没有p4实例。
+* Code pipeline更新。
+* 成功时的S3N，改成Eventbridge。
+* Dynamodb加入二级索引，用来通过job id反推id。
+* 前端页面。
 
 ## Known Issue
 * 如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，参考：
