@@ -14,7 +14,6 @@ import aws_cdk.aws_iam as iam
 import aws_cdk.aws_ec2 as ec2
 import aws_cdk.aws_s3 as s3
 import aws_cdk.aws_ecs as ecs
-import aws_cdk.aws_dynamodb as dynamodb
 import aws_cdk.aws_events as events
 import aws_cdk.aws_sns as sns
 import aws_cdk.aws_ecr as ecr

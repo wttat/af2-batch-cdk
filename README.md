@@ -54,6 +54,7 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ### 01/17/2022
 * 支持Alpfadold v2.1.1 关于multimer的预测，参数也对应更新。
+* DynamoDB默认从预置更改为按需计费。
 
 ### 01/15/2022
 * 更改为使用当前region所有AZ，充分利用GPU资源。
