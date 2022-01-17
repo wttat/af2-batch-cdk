@@ -11,7 +11,7 @@
     },
     {
 		"fasta":"3JA9",
-		"file_name":"rcsb_pdb_3JA9_multimer+is_prokaryote_list(true).fasta",
+		"file_name":"rcsb_pdb_3JA9_multimer_is_prokaryote_true.fasta",
 		"db_preset":"full_dbs",
 		"model_preset":"multimer",
 		"max_template_date":"2020-05-14",
@@ -22,7 +22,7 @@
     },
     {
 		"fasta":"7ALC",
-		"file_name":"rcsb_pdb_7ALC_multimer+is_prokaryote_list(false).fasta",
+		"file_name":"rcsb_pdb_7ALC_multimer_is_prokaryote_false.fasta",
 		"db_preset":"full_dbs",
 		"model_preset":"multimer",
 		"max_template_date":"2020-05-14",
