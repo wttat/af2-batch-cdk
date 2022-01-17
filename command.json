@@ -2,28 +2,33 @@
     {
 		"fasta":"7BW6",
 		"file_name":"rcsb_pdb_7BW6.fasta",
-		"model_names":"model_1,model_2,model_3,model_4,model_5",
-		"preset":"full",
+		"db_preset":"reduced_dbs",
+		"model_preset":"monomer",
 		"max_template_date":"2020-05-14",
 		"que":"high",
 		"comment":"水痘带状疱疹病毒衣壳",
 		"gpu":4
     },
     {
-		"fasta":"1A9X",
-		"file_name":"rcsb_pdb_1A9X.fasta",
-		"model_names":"model_1",
-		"preset":"reduced",
+		"fasta":"3JA9",
+		"file_name":"rcsb_pdb_3JA9_multimer+is_prokaryote_list(true).fasta",
+		"db_preset":"full_dbs",
+		"model_preset":"multimer",
 		"max_template_date":"2020-05-14",
+		"is_prokaryote_list":"true",
 		"que":"mid",
-		"comment":"氨基甲酰磷酸合成酶",
+		"comment":"天然人类 PCNA 的结构",
 		"gpu":2
     },
-	{
-		"fasta":"6TBT",
-		"file_name":"rcsb_pdb_6TBT.fasta",
+    {
+		"fasta":"7ALC",
+		"file_name":"rcsb_pdb_7ALC_multimer+is_prokaryote_list(false).fasta",
+		"db_preset":"full_dbs",
+		"model_preset":"multimer",
+		"max_template_date":"2020-05-14",
+		"is_prokaryote_list":"false",
 		"que":"low",
-		"comment":"BCL6 BTB 结构域与 Apt48 肽复合物的晶体结构",
+		"comment":"人 GCH-GFRP 刺激复合物",
 		"gpu":1
-	}
+    }
 ]

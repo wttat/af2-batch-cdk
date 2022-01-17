@@ -34,23 +34,30 @@ https://github.com/wttat/alphafold
 
 Enjoy!
 
---use-feature=2020-resolver
+cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## command.json 参数说明
 
 * fasta：蛋白质名称，可自定义。
 * file_name:氨基酸序列文件名称，必须与S3存储桶中的input文件名对应。
-* model_names:Alphafold模型文件，默认五个都使用，可自行选择。
-* preset(full/reduced/CASP14)：数据库。详见alphafold官方库解释,只测试了full。
+* db_preset: （1）*reduced_dbs*: This preset is optimized for speed and lower hardware requirements. It runs with a reduced version of the BFD database. It requires 8 CPU cores (vCPUs), 8 GB of RAM, and 600 GB of disk space.（2）*full_dbs*: This runs with all genetic databases used at CASP14.
+* model_preset(monomer/monomer_casp14/monomer_ptm/multimer)：（1）monomer（单体）: This is the original model used at CASP14 with no ensembling。（2）monomer_casp14*: This is the original model used at CASP14 with num_ensemble=8, matching our CASP14 configuration. This is largely provided for reproducibility as it is 8x more computationally expensive for limited accuracy gain (+0.1 average GDT gain on CASP14 domains).（3）monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.（4）multimer（多聚体）: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
+* is_prokaryote_list（true/false):true for homomer,false for heteromer.only works when multimer
 * max_template_date:数据库扫描截止日期。详见alphafold官方库解释，建议设置为当天。
 * que(low/mid/high/p4)：分别对应p3.2xlarge、p3.8xlarge、p3.16xlarge和p4d.24xlarge,其中p4因为区域支持不多，需要手动启用代码中注释。目前每个任务默认分配一块卡。
 * comment：本次任务注释，自行填写。
 * gpu：使用gpu数量。p3实例下，每个gpu对应8vcpu，60G内存；p4实例下，每个gpu对应12vcpu，140G内存。
+  
+GPU数量太多意义不大，目前来看超过1000aa的一块V100的显存不够，但是太多也是浪费。
 
 ## Changelog
 
+### 01/17/2022
+* 支持Alpfadold v2.1.1 关于multimer的预测，参数也对应更新。
+
 ### 01/15/2022
 * 更改为使用当前region所有AZ，充分利用GPU资源。
+* 因此修复了当前AZ没有GPU实例的报错，当然全region都没有就没办法了。
 
 ### 10/24/2021
 * 支持p4实例/队列，开启需解除batch.py相关注释。
