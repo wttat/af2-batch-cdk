@@ -76,11 +76,11 @@ def lambda_handler(event, context):
                     'resourceRequirements': [
                         {
                             "type": "MEMORY",
-                            "value": memory*gpu
+                            "value": str(memory*gpu)
                         },
                         {
                             "type": "VCPU",
-                            "value": vcpu*gpu
+                            "value": str(vcpu*gpu)
                         },
                         {
                             'value': str(gpu),
