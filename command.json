@@ -27,8 +27,16 @@
 		"model_preset":"multimer",
 		"max_template_date":"2020-05-14",
 		"is_prokaryote_list":"false",
-		"que":"low",
+		"que":"mid",
 		"comment":"人 GCH-GFRP 刺激复合物",
-		"gpu":1
+		"gpu":2
+    },
+    {
+		"fasta":"6TBT",
+		"file_name":"rcsb_pdb_6TBT.fasta",
+		"db_preset":"reduced_dbs",
+		"model_preset":"monomer_casp14",
+		"que":"low",
+		"comment":"BCL6 BTB 结构域与 Apt48 肽复合物的晶体结构"
     }
 ]
