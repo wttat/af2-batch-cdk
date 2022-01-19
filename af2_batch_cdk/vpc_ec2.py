@@ -200,43 +200,8 @@ class EC2VPCCdkStack(cdk.Stack):
             f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
         )
 
-        # core.CfnOutput(
-        #     self,"af2-VPC",
-        #     description="VPC",
-        #     value=self.vpc.vpc_id,
-        # )
-    
-        # core.CfnOutput(
-        #     self,"af2-S3",
-        #     description="S3",
-        #     value=self.bucket.bucket_name,
-        # )
-
         core.CfnOutput(
-            self,"af2-REPO",
-            description="af2-REPO",
-            value=self.repo.repository_arn, 
+            self,"af2-S3",
+            description="S3",
+            value=self.bucket.bucket_name,
         )
-
-        # core.CfnOutput(
-        #     self,"af2-FSX",
-        #     description="FSX",
-        #     value=self.file_system.dns_name, 
-        # )
-
-        # core.CfnOutput(
-        #     self,"af2-SNS",
-        #     description="SNS",
-        #     value=self.sns_topic.topic_arn, 
-        # )
-
-
-
-
-
-
-
-
-
-
-
