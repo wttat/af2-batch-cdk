@@ -80,9 +80,17 @@ def lambda_handler(event, context):
                 },
                 propagateTags=False,
                 containerOverrides={
-                    'vcpus': vcpu*gpu,
-                    'memory': memory*gpu,
+                    # 'vcpus': vcpu*gpu,
+                    # 'memory': memory*gpu, #containerOverrides.vcpus no longer uses
                     'resourceRequirements': [
+                        {
+                            "type": "MEMORY",
+                            "value": memory*gpu
+                        },
+                        {
+                            "type": "VCPU",
+                            "value": vcpu*gpu
+                        },
                         {
                             'value': str(gpu),
                             'type': 'GPU'
