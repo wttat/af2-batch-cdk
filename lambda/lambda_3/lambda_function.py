@@ -75,6 +75,14 @@ def lambda_handler(event, context):
                     'memory': memory*gpu,
                     'resourceRequirements': [
                         {
+                            "type": "MEMORY",
+                            "value": memory*gpu
+                        },
+                        {
+                            "type": "VCPU",
+                            "value": vcpu*gpu
+                        },
+                        {
                             'value': str(gpu),
                             'type': 'GPU'
                         },
