@@ -50,7 +50,17 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
   
 注：GPU数量太多意义不大，目前来看超过1000aa的一块V100的显存不够，但是太多也是浪费，因为AF2推理的时候还是只用一块卡。
 
+## 目前数据集版本：
+
+* dataset.tar.gz 原始版本。
+* dataset2.tar.gz 更新了multimer需要的数据集和参数。
+* dataset3.tar.gz 模型更新为alphafold_params_2022-01-19.tar。
+
+
 ## Changelog
+
+### 01/20/2022
+* 数据集模型更新为alphafold_params_2022-01-19.tar"
 
 ### 01/17/2022
 * 支持Alpfadold v2.1.1 关于multimer的预测，参数也对应更新。
