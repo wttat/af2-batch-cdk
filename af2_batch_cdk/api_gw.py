@@ -306,15 +306,3 @@ class APIGWCdkStack(cdk.Stack):
             description="APIGW",
             value=apigw.api_endpoint,
         )
-
-        # core.CfnOutput(
-        #     self,"af2-SQS",
-        #     description="SQS",
-        #     value=queue.queue_url,
-        # )
-
-        # core.CfnOutput(
-        #     self,"af2-DDB",
-        #     description="DDB",
-        #     value=ddb_table.table_name,
-        # )

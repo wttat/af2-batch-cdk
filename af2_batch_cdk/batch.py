@@ -161,8 +161,8 @@ class BATCHCdkStack(cdk.Stack):
             compute_resources = {
                 "vpc":vpc,
                 # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
-                "minv_cpus":8,
-                "desiredv_cpus":8,
+                "minv_cpus":0,
+                "desiredv_cpus":0,
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{

@@ -201,9 +201,3 @@ class EC2VPCCdkStack(cdk.Stack):
             # f"aws sns --message {messgae} --topic-arn {self.sns_topic.topic_arn} --subject {subject}"
             f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
         )
-
-        core.CfnOutput(
-            self,"af2-S3",
-            description="S3",
-            value=self.bucket.bucket_name,
-        )
