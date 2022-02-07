@@ -54,6 +54,7 @@ def lambda_handler(event, context):
             model_preset = payload_dict['model_preset']
             db_preset = payload_dict['db_preset']
             is_prokaryote_list = payload_dict['is_prokaryote_list']
+            run_relax = payload_dict['run_relax']
 
             que = payload_dict['que']
             gpu = payload_dict['gpu']
@@ -77,6 +78,7 @@ def lambda_handler(event, context):
                     'model_preset': model_preset,
                     'db_preset': db_preset,
                     'is_prokaryote_list': is_prokaryote_list,
+                    'run_relax':run_relax,
                 },
                 propagateTags=False,
                 containerOverrides={

@@ -280,6 +280,7 @@ class BATCHCdkStack(cdk.Stack):
                 "-c","Ref::db_preset",
                 "-l","Ref::is_prokaryote_list",
                 "-p","Ref::use_precomputed_msas",
+                "-r","Ref::run_relax",
                 "-b","Ref::benchmark",
                 ],
                 "volumes": [
@@ -323,6 +324,7 @@ class BATCHCdkStack(cdk.Stack):
                 "is_prokaryote_list":"false",
                 "use_precomputed_msas":'false',
                 "benchmark":'false',
+                "run_relax":"true"
             },
             
         )

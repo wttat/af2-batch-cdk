@@ -37,6 +37,7 @@
 		"db_preset":"reduced_dbs",
 		"model_preset":"monomer_casp14",
 		"que":"low",
-		"comment":"BCL6 BTB 结构域与 Apt48 肽复合物的晶体结构"
+		"comment":"BCL6 BTB 结构域与 Apt48 肽复合物的晶体结构",
+		"run_relax":"false"
     }
 ]

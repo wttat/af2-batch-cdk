@@ -132,6 +132,19 @@ def lambda_handler(event, context):
                     is_prokaryote_list = data['is_prokaryote_list']
             print(is_prokaryote_list)
 
+            run_relax = ''
+            try:
+                data['run_relax']
+            except:
+                print('no run_relax,using dafault preset true')
+                run_relax = 'true'
+            else:
+                if data['run_relax'] != 'true' and data['run_relax'] != 'false':
+                    return 'The run_relax shoudl be true or false'
+                else:
+                    run_relax = data['run_relax']
+            print(run_relax)
+
             comment = ''
             try:
                 data['comment']
@@ -175,7 +188,8 @@ def lambda_handler(event, context):
                 'que': data['que'],
                 'time': now,
                 'gpu': gpu,
-                'comment': comment
+                'comment': comment,
+                'run_relax':run_relax
             }
 
             Items.append(Item)

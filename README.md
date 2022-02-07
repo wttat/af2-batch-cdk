@@ -42,6 +42,7 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 * file_name 必填:氨基酸序列文件名称，必须与S3存储桶中的input文件名对应。
 * db_preset [reduced_dbs/full_dbs] 必选: （1）reduced_dbs: This preset is optimized for speed and lower hardware requirements. It runs with a reduced version of the BFD database. It requires 8 CPU cores (vCPUs), 8 GB of RAM, and 600 GB of disk space.（2）full_dbs: This runs with all genetic databases used at CASP14.
 * model_preset [monomer/monomer_casp14/monomer_ptm/multimer] 必选：（1）monomer（单体）: This is the original model used at CASP14 with no ensembling。（2）monomer_casp14*: This is the original model used at CASP14 with num_ensemble=8, matching our CASP14 configuration. This is largely provided for reproducibility as it is 8x more computationally expensive for limited accuracy gain (+0.1 average GDT gain on CASP14 domains).（3）monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.（4）multimer（多聚体）: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
+* run_relax.[true/false],Default:[true],Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
 * is_prokaryote_list.[true/false],Default:[false],true for homomer,false for heteromer.only works when multimer
 * max_template_date.Default:[2021-11-01]: 数据库扫描截止日期。详见alphafold官方库解释，建议设置为当天。
 * que [low/mid/high/p4]：分别对应p3.2xlarge、p3.8xlarge、p3.16xlarge和p4d.24xlarge,其中p4因为区域支持不多，需要手动启用代码中注释。目前每个任务默认分配一块卡。
@@ -58,6 +59,9 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 
 ## Changelog
+
+### 02/07/2022
+* 更新支持run_relax参数
 
 ### 01/20/2022
 * 数据集模型更新为alphafold_params_2022-01-19.tar"
