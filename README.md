@@ -60,14 +60,14 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## Changelog
 
-### 01/19/2022
-* 修复了过期api
-
 ### 02/07/2022
 * 更新支持run_relax参数
 
 ### 01/20/2022
 * 数据集模型更新为alphafold_params_2022-01-19.tar"
+
+### 01/19/2022
+* 修复了过期api
 
 ### 01/17/2022
 * 支持Alpfadold v2.1.1 关于multimer的预测，参数也对应更新。
