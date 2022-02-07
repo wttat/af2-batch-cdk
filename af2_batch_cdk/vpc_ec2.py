@@ -28,12 +28,18 @@ account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 if region == 'cn-north-1' or region == 'cn-northwest-1':
-    image_arn='s3://alphafold2-raw-data/af2-batch.tar'
-    dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
+    image_arn='s3://alphafold2-raw-data/af2-batch2.tar'
+    # image_arn='s3://alphafold2-raw-data/af2-batch.tar'
+    dataset_arn='s3://alphafold2-raw-data/dataset3.tar.gz'
+    # dataset_arn='s3://alphafold2-raw-data/dataset2.tar.gz'
+    # dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
     dataset_region='cn-northwest-1'
 else:
-    image_arn='s3://alphafold2/af2-batch.tar'
-    dataset_arn='s3://alphafold2/dataset.tar.gz'
+    image_arn='s3://alphafold2/af2-batch2.tar'
+    # image_arn='s3://alphafold2-raw-data/af2-batch.tar'
+    dataset_arn='s3://alphafold2/dataset3.tar.gz'
+    # dataset_arn='s3://alphafold2-raw-data/dataset2.tar.gz'
+    # dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
     dataset_region='us-east-1'
 
 # af2-batch image file name
@@ -195,44 +201,3 @@ class EC2VPCCdkStack(cdk.Stack):
             # f"aws sns --message {messgae} --topic-arn {self.sns_topic.topic_arn} --subject {subject}"
             f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
         )
-
-        # core.CfnOutput(
-        #     self,"af2-VPC",
-        #     description="VPC",
-        #     value=self.vpc.vpc_id,
-        # )
-    
-        # core.CfnOutput(
-        #     self,"af2-S3",
-        #     description="S3",
-        #     value=self.bucket.bucket_name,
-        # )
-
-        core.CfnOutput(
-            self,"af2-REPO",
-            description="af2-REPO",
-            value=self.repo.repository_arn, 
-        )
-
-        # core.CfnOutput(
-        #     self,"af2-FSX",
-        #     description="FSX",
-        #     value=self.file_system.dns_name, 
-        # )
-
-        # core.CfnOutput(
-        #     self,"af2-SNS",
-        #     description="SNS",
-        #     value=self.sns_topic.topic_arn, 
-        # )
-
-
-
-
-
-
-
-
-
-
-

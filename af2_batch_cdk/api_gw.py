@@ -59,9 +59,11 @@ class APIGWCdkStack(cdk.Stack):
         # create dynamodb table
         ddb_table = dynamodb.Table(
             self,'af2_ddb',
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             partition_key=dynamodb.Attribute(
                 name="id",
-                type=dynamodb.AttributeType.STRING
+                type=dynamodb.AttributeType.STRING,
+                
             )
         )
 
@@ -305,15 +307,3 @@ class APIGWCdkStack(cdk.Stack):
             description="APIGW",
             value=apigw.api_endpoint,
         )
-
-        # core.CfnOutput(
-        #     self,"af2-SQS",
-        #     description="SQS",
-        #     value=queue.queue_url,
-        # )
-
-        # core.CfnOutput(
-        #     self,"af2-DDB",
-        #     description="DDB",
-        #     value=ddb_table.table_name,
-        # )

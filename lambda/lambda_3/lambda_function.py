@@ -16,6 +16,7 @@ queue_url = os.environ['SQS_QUEUE']
 s3 = boto3.resource('s3')
 bucket_name = os.environ['S3_BUCKET']
 bucket = s3.Bucket(bucket_name)
+OUTPUT_PREFIX = "output/"
 job_Definition_name = os.environ['JOB_DEFINITION_NAME']
 
 # Handle POST & DELETE & CANCEL from SQS
@@ -37,6 +38,11 @@ def lambda_handler(event, context):
         )
         print("response_sqs_delete:"+str(response_sqs_delete))
 
+                # 'model_preset': model_preset,
+                # 'db_preset': db_preset,
+                # 'is_prokaryote_list':is_prokaryote_list,
+                # 'max_template_date': max_template_date,
+
         print(method)
         if method == 'POST':
             payload_dict = ast.literal_eval(payload)
@@ -44,9 +50,12 @@ def lambda_handler(event, context):
             # paramaters for batch
             fasta = payload_dict['fasta']
             file_name = payload_dict['file_name']
-            model_names = payload_dict['model_names']
-            preset = payload_dict['preset']
             max_template_date = payload_dict['max_template_date']
+            model_preset = payload_dict['model_preset']
+            db_preset = payload_dict['db_preset']
+            is_prokaryote_list = payload_dict['is_prokaryote_list']
+            run_relax = payload_dict['run_relax']
+
             que = payload_dict['que']
             gpu = payload_dict['gpu']
 
@@ -54,7 +63,7 @@ def lambda_handler(event, context):
 
             if que == 'p4':
                 vcpu = 12
-                memory = 1100000
+                memory = 140000
             else:
                 vcpu = 8
                 memory = 60000
@@ -65,9 +74,11 @@ def lambda_handler(event, context):
                 jobDefinition=job_Definition_name,
                 parameters={
                     'fasta_paths': file_name,
-                    'preset': preset,
-                    'model_names': model_names,
-                    'max_template_date': max_template_date
+                    'max_template_date': max_template_date,
+                    'model_preset': model_preset,
+                    'db_preset': db_preset,
+                    'is_prokaryote_list': is_prokaryote_list,
+                    'run_relax':run_relax,
                 },
                 propagateTags=False,
                 containerOverrides={
@@ -129,7 +140,7 @@ def lambda_handler(event, context):
                     # finished job just delete s3 folder
                     s3_foleder_name = (
                         response_ddb['Item']['file_name'].split('.'))[0]
-                    Prefix = "output/"+s3_foleder_name+"/"
+                    Prefix = OUTPUT_PREFIX+s3_foleder_name+"/"
                     response_s3 = bucket.objects.filter(Prefix=Prefix).delete()
                     print("response_s3:"+str(response_s3))
                     response_ddb = table.delete_item(Key={'id': id})

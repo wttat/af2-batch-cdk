@@ -14,7 +14,6 @@ import aws_cdk.aws_iam as iam
 import aws_cdk.aws_ec2 as ec2
 import aws_cdk.aws_s3 as s3
 import aws_cdk.aws_ecs as ecs
-import aws_cdk.aws_dynamodb as dynamodb
 import aws_cdk.aws_events as events
 import aws_cdk.aws_sns as sns
 import aws_cdk.aws_ecr as ecr
@@ -32,6 +31,9 @@ import aws_cdk.aws_batch as batch
 import base64
 
 mountPath = "/fsx" # do not touch
+
+input_prefix = "input"
+output_prefix = "output"
 
 with open("./user_data/fsx_user_data") as f:
 	    user_data_raw = f.read()
@@ -159,8 +161,8 @@ class BATCHCdkStack(cdk.Stack):
             compute_resources = {
                 "vpc":vpc,
                 # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
-                "minv_cpus":8,
-                "desiredv_cpus":8,
+                "minv_cpus":0,
+                "desiredv_cpus":0,
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{
@@ -268,10 +270,19 @@ class BATCHCdkStack(cdk.Stack):
         af2 = batch.JobDefinition(self,"JobDefinition",
             job_definition_name = job_Definition_name,
             container = {
-                # "image": repo.repository_uri_for_tag("lastest"),
                 "image": image_id,
                 "job_role" : batch_job_role,
-                "command":["/bin/bash","/app/run.sh","-f","Ref::fasta_paths","-m","Ref::model_names","-d","Ref::max_template_date","-p","Ref::preset"],
+                "command":["/bin/bash","/app/run.sh",
+                # come from af2 input paramaters
+                "-f","Ref::fasta_paths",
+                "-t","Ref::max_template_date",
+                "-m","Ref::model_preset",
+                "-c","Ref::db_preset",
+                "-l","Ref::is_prokaryote_list",
+                "-p","Ref::use_precomputed_msas",
+                "-r","Ref::run_relax",
+                "-b","Ref::benchmark",
+                ],
                 "volumes": [
                     {
                         "host":{
@@ -284,7 +295,8 @@ class BATCHCdkStack(cdk.Stack):
                         "XLA_PYTHON_CLIENT_MEM_FRACTION":"4.0",
                         "TF_FORCE_UNIFIED_MEMORY":"1",
                         "BATCH_BUCKET":bucket.bucket_name,
-                        "BATCH_DIR_PREFIX":"input",
+                        "INPUT_PREFIX":input_prefix,
+                        "OUTPUT_PREFIX":output_prefix,
                         "REGION":region,
                 },
                 "mount_points":[
@@ -305,10 +317,14 @@ class BATCHCdkStack(cdk.Stack):
             
             # default parameters
             parameters = {
-                "model_names": "mn",
+                "fasta_paths": "fp",
                 "max_template_date": "mtd",
-                "preset": "p",
-                "fasta_paths": "fp"
+                "db_preset":"dp",
+                "model_preset":"mp",
+                "is_prokaryote_list":"false",
+                "use_precomputed_msas":'false',
+                "benchmark":'false',
+                "run_relax":"true"
             },
             
         )
