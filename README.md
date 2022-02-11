@@ -18,7 +18,7 @@ https://github.com/wttat/alphafold
  * `git clone https://github.com/wttat/af2-batch-cdk`
  * `cd af2-batch-cdk`
  * `pip3 install -r requirements.txt`
- * `npm install -g aws-cdk@1.144.0`
+ * `npm install -g aws-cdk@1.134.0`
  * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
  * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行注释。
  * `cdk bootstrap aws://{ACCOUNT}/{REGION}`
@@ -60,11 +60,14 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## Changelog
 
+### 02/01/2022
+* 修复安装脚本。
+
 ### 02/07/2022
-* 更新支持run_relax参数
+* 更新支持run_relax参数。
 
 ### 01/20/2022
-* 数据集模型更新为alphafold_params_2022-01-19.tar"
+* 数据集模型更新为alphafold_params_2022-01-19.tar。
 
 ### 01/19/2022
 * 修复了过期api
