@@ -18,7 +18,7 @@ https://github.com/wttat/alphafold
  * `git clone https://github.com/wttat/af2-batch-cdk`
  * `cd af2-batch-cdk`
  * `pip3 install -r requirements.txt`
- * `npm install -g aws-cdk`
+ * `npm install -g aws-cdk@1.144.0`
  * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
  * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行注释。
  * `cdk bootstrap aws://{ACCOUNT}/{REGION}`
