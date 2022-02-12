@@ -62,6 +62,9 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## Changelog
 
+### 02/12/2022
+* 增加权限json。
+
 ### 02/01/2022
 * 修复安装脚本。
 
