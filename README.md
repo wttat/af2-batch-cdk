@@ -3,6 +3,9 @@
 
 参考blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
 
+架构图参考：
+![avatar](architecture.png)
+
 ## 优化Alphafold2镜像源代码库：
 
 https://github.com/wttat/alphafold
