@@ -58,12 +58,14 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## 目前数据集版本：
 
-* dataset.tar.gz 原始版本。
-* dataset2.tar.gz 更新了multimer需要的数据集和参数。
 * dataset3.tar.gz 模型更新为alphafold_params_2022-01-19.tar。
-
+* dataset2.tar.gz 更新了multimer需要的数据集和参数。
+* dataset.tar.gz 原始版本。
 
 ## Changelog
+
+### 02/13/2022
+* 更新支持cdk@1.144.0，后续切到cdk v2。
 
 ### 02/12/2022
 * 增加权限json。
