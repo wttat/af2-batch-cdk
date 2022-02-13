@@ -22,6 +22,7 @@ import aws_cdk.aws_fsx as fsx
 import aws_cdk.aws_apigatewayv2 as apigatewayv2
 import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
+from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
 import aws_cdk.aws_s3_notifications as s3n
 import aws_cdk.aws_lambda_event_sources as eventsources
 import aws_cdk.aws_s3_deployment as s3deploy
@@ -148,7 +149,8 @@ class APIGWCdkStack(cdk.Stack):
                                               handler="index.handler",
                                               role = role0,
                                               description = "For apigw auth",
-                                              code=_lambda.Code.asset("./lambda/lambda_0"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_0")
+                                              )
 
         lambda_0.add_environment("AUTH_KEY", auth_key)
 
@@ -159,7 +161,7 @@ class APIGWCdkStack(cdk.Stack):
                                               role = role1,
                                               timeout = core.Duration.seconds(30),
                                               description = "For HTTP POST/DELETE/CANCEL method, send messages to SQS",
-                                              code=_lambda.Code.asset("./lambda/lambda_1"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_1"))
 
         lambda_1.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_1.add_environment("S3_BUCKET", self.bucket.bucket_name)
@@ -172,7 +174,7 @@ class APIGWCdkStack(cdk.Stack):
                                               role = role2,
                                               timeout = core.Duration.seconds(30),
                                               description = "For all GET/GET+id method",
-                                              code=_lambda.Code.asset("./lambda/lambda_2"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_2"))
 
         lambda_2.add_environment("TABLE_NAME", ddb_table.table_name)
 
@@ -183,7 +185,7 @@ class APIGWCdkStack(cdk.Stack):
                                               role = role3,
                                               timeout = core.Duration.seconds(30),
                                               description = "For HTTP POST/DELETE/CANCEL method, receive SQS messages, submit to Batch",
-                                              code=_lambda.Code.asset("./lambda/lambda_3"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_3"))
 
         lambda_3.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_3.add_environment("S3_BUCKET", self.bucket.bucket_name)
@@ -200,7 +202,7 @@ class APIGWCdkStack(cdk.Stack):
                                               role = role4,
                                               timeout = core.Duration.seconds(30),
                                               description = "When job succussed, send SNS to user. Triggered by S3",
-                                              code=_lambda.Code.asset("./lambda/lambda_4"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_4"))
 
         lambda_4.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
@@ -221,7 +223,7 @@ class APIGWCdkStack(cdk.Stack):
                                               role = role5,
                                               timeout = core.Duration.seconds(30),
                                               description = "When job failed,send SNS to user.Triggered by EventBridge",
-                                              code=_lambda.Code.asset("./lambda/lambda_5"))
+                                              code=_lambda.Code.from_asset("./lambda/lambda_5"))
 
         self.lambda_5.add_environment("TABLE_NAME", ddb_table.table_name)
         self.lambda_5.add_environment("SNS_ARN", sns_topic.topic_arn)
@@ -229,6 +231,7 @@ class APIGWCdkStack(cdk.Stack):
         # create api-gateway
 
         apigw_auth = apigatewayv2_authorizers.HttpLambdaAuthorizer(
+            "Af2Authorizer",
             authorizer_name = 'apigw_auth',
             response_types = [apigatewayv2_authorizers.HttpLambdaResponseType('SIMPLE')],
             # payload_format_version = apigatewayv2.AuthorizerPayloadVersion('VERSION_2_0'),
@@ -247,17 +250,14 @@ class APIGWCdkStack(cdk.Stack):
                 api_name = 'af2-apigw',
                 # default_authorizer = apigw_auth
             )
-
-        # 不需要显性授权？
-
-        # lambda_1.grant_invoke(apigw)
-        # lambda_2.grant_invoke(apigw)
         
-        lambda_1_intergation = apigatewayv2_integrations.LambdaProxyIntegration(
-            handler = lambda_1
+        lambda_1_intergation = HttpLambdaIntegration(
+            "expect get",
+            handler=lambda_1
         )
-        lambda_2_intergation = apigatewayv2_integrations.LambdaProxyIntegration(
-            handler = lambda_2
+        lambda_2_intergation = HttpLambdaIntegration(
+            "all get",
+            handler=lambda_2
         )
 
         apigw.add_routes(

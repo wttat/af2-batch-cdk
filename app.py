@@ -9,7 +9,7 @@ from aws_cdk import core as cdk
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import core
 
-from af2_batch_cdk.test_stack import TESTCdkStack
+# from af2_batch_cdk.test_stack import TESTCdkStack
 from af2_batch_cdk.vpc_ec2 import EC2VPCCdkStack
 from af2_batch_cdk.api_gw import APIGWCdkStack
 from af2_batch_cdk.batch import BATCHCdkStack
@@ -29,7 +29,7 @@ use_default_vpc = 0 # set to 0 to do not use the default vpc,set to 1 to use you
 vpc_id = "" # if you wanna to set your own VPC,change this to your vpc'id.
 
 # SSH key pair name, 
-key_pair = 'cn-nw-01' # replace to your own key-pair in the region
+key_pair = 'us-east-2' # replace to your own key-pair in the region
 mail_address = "wttat8600@gmail.com" # replace your own
 
 # # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
