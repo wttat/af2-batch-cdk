@@ -260,6 +260,9 @@ class APIGWCdkStack(cdk.Stack):
             handler=lambda_2
         )
 
+        lambda_1.grant_invoke(apigw)
+        lambda_2.grant_invoke(apigw)
+
         apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.GET],
