@@ -109,6 +109,7 @@
                 "lambda:InvokeFunction", 
                 "lambda:PublishLayerVersion", 
                 "lambda:RemovePermission", 
+                "logs:*",
                 "s3:CreateBucket", 
                 "s3:DeleteBucket", 
                 "s3:DeleteObject*", 
