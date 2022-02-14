@@ -12,22 +12,33 @@ https://github.com/wttat/alphafold
 
 ## 部署所需IAM权限请参考policy.json
 
-## 部署流程
+## 部署流程，基于Amazon Linux 2 
 
+ * 安装node和npm。
  * `wget https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz`  
  * `tar xvf node-v14.18.1-linux-x64.tar.xz`
  * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/node /usr/local/bin` 
  * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin`
+ * 配置PATH环境变量。
  * `export PATH=$PATH:$(npm get prefix)/bin`
+ * 安装git。
  * `sudo yum install -y git`
+ * 克隆本repo。
  * `git clone https://github.com/wttat/af2-batch-cdk`
  * `cd af2-batch-cdk`
+ * 安装所需依赖。
  * `pip3 install -r requirements.txt`
+ * 注：如果国内下载pip包过慢，可以使用清华pip源。
+ * `pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple`
+ * 安装cdk。
  * `npm install -g aws-cdk@1.144.0`
  * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
  * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行注释。
+ * 如本region从未运行过cdk，需要以下脚本初始化。
  * `cdk bootstrap aws://{ACCOUNT}/{REGION}`
+ * 通过cdk生成cloudformation模板
  * `cdk synth`
+ * 部署所有堆栈。
  * `cdk deploy --all`
  * 确认SNS通知邮件
  * 系统会自动开启一台c5.9xlarge下载数据并存放到FSx for Lustre.和一台P3.2xlarge(可以修改计算环境Min VCPU为0关闭)
@@ -38,8 +49,6 @@ https://github.com/wttat/alphafold
  * 任务分析完毕会有邮件通知，用户可以到指定的S3桶下载pdb文件进行在云端或者本地查看。
 
 Enjoy!
-
-cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ## command.json 参数说明
 
