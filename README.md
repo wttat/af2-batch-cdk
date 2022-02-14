@@ -66,6 +66,7 @@ cdk依赖有问题的话用 --use-feature=2020-resolver
 
 ### 02/13/2022
 * 更新支持cdk@1.144.0，后续切到cdk v2。
+* 由此又修复了一个因为cdk导致Api GW不能invoke lambda的奇怪bug..
 
 ### 02/12/2022
 * 增加权限json。
