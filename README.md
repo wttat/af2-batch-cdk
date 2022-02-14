@@ -41,7 +41,7 @@ https://github.com/wttat/alphafold
  * 部署所有堆栈。
  * `cdk deploy --all`
  * 确认SNS通知邮件
- * 系统会自动开启一台c5.9xlarge下载数据并存放到FSx for Lustre.和一台P3.2xlarge(可以修改计算环境Min VCPU为0关闭)
+ * 系统会自动开启一台c5.9xlarge下载数据并存放到FSx for Lustre。
  * 3个小时左右数据准备完毕会有邮件通知，此时可以删除临时下载机器，开始任务。
  * 修改目录下的command.json文件
  * 任务提交 curl -X "POST" -H "Authorization: af2" -H "Content-Type: application/json" APIGW——URL -d @command.json
