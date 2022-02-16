@@ -121,4 +121,4 @@ Enjoy!
 * 如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，建议统一使用新建VPV。参考：
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败。
 * jax似乎对4GPU调度有问题，建议使用2GPU。
-
+* CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge不能创造标签，需要手动补充。
