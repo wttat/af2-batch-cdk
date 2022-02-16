@@ -75,6 +75,7 @@
                 "fsx:CreateFileSystem", 
                 "fsx:DeleteFileSystem", 
                 "fsx:DescribeFileSystems", 
+                "fsx:TagResource",
                 "iam:AddRoleToInstanceProfile", 
                 "iam:AttachRolePolicy", 
                 "iam:CreateInstanceProfile", 
