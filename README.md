@@ -73,6 +73,9 @@ Enjoy!
 
 ## Changelog
 
+### 02/16/2022
+* 将所有资源加入标签{AWS-GCR-HLCS-Solutions:Alphafold2},方便追踪总体成本。
+
 ### 02/13/2022
 * 更新支持cdk@1.144.0，后续切到cdk v2。
 * 由此又修复了一个因为cdk导致Api GW不能invoke lambda的奇怪bug..
