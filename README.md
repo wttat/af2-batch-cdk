@@ -54,7 +54,7 @@ Enjoy!
 
 * fasta 必填：蛋白质名称，可自定义。
 * file_name 必填:氨基酸序列文件名称，必须与S3存储桶中的input文件名对应。
-* db_preset [reduced_dbs/full_dbs] 必选: （1）reduced_dbs: This preset is optimized for speed and lower hardware requirements. It runs with a reduced version of the BFD database. It requires 8 CPU cores (vCPUs), 8 GB of RAM, and 600 GB of disk space.（2）full_dbs: This runs with all genetic databases used at CASP14.
+* db_preset [reduced_dbs/full_dbs] Default:[full_dbs]: （1）reduced_dbs: This preset is optimized for speed and lower hardware requirements. It runs with a reduced version of the BFD database. It requires 8 CPU cores (vCPUs), 8 GB of RAM, and 600 GB of disk space.（2）full_dbs: This runs with all genetic databases used at CASP14.
 * model_preset [monomer/monomer_casp14/monomer_ptm/multimer] 必选：（1）monomer（单体）: This is the original model used at CASP14 with no ensembling。（2）monomer_casp14*: This is the original model used at CASP14 with num_ensemble=8, matching our CASP14 configuration. This is largely provided for reproducibility as it is 8x more computationally expensive for limited accuracy gain (+0.1 average GDT gain on CASP14 domains).（3）monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.（4）multimer（多聚体）: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
 * run_relax.[true/false],Default:[true],Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
 * is_prokaryote_list.[true/false],Default:[false],true for homomer,false for heteromer.only works when multimer
@@ -64,6 +64,10 @@ Enjoy!
 * gpu.Default:[1],number of GPU。p3实例下，每个gpu对应8vcpu，60G内存；p4实例下，每个gpu对应12vcpu，140G内存。
   
 注：GPU数量太多意义不大，目前来看超过1000aa的一块V100的显存不够，但是太多也是浪费，因为AF2推理的时候还是只用一块卡。
+
+## 方案总体成本计算：
+* DynamoDB里面cost字段统计了每次任务运行的秒数。
+* AWS控制台中激活成本分配标签AWS-GCR-HLCS-Solutions:Alphafold2，激活后可在。https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
 
 ## 目前数据集版本：
 
