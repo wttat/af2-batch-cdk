@@ -17,10 +17,6 @@ from af2_batch_cdk.nice_dcv import NICEDEVCdkStack
 
 app = core.App()
 
-# test_stack = TESTCdkStack(
-#     app,"TESTCdkStack",
-# )
-
 ### As af2 input/output both in S3, there is no need to put it in a exist VPC.
 ### Thus, follow setting is recommanded.
 

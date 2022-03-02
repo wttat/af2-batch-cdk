@@ -115,10 +115,6 @@ class EC2VPCCdkStack(cdk.Stack):
 
             removal_policy=cdk.RemovalPolicy.DESTROY,
             security_group = self.sg,
-            # security_group = ec2.SecurityGroup.from_security_group_id(
-            #                     self,"FSXSG",
-            #                     security_group_id=self.vpc.vpc_default_security_group
-            #                 ),
         )
 
         amzn_linux = ec2.MachineImage.latest_amazon_linux(generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
@@ -141,34 +137,24 @@ class EC2VPCCdkStack(cdk.Stack):
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
             vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
-            # security_group = ec2.SecurityGroup.from_security_group_id(
-            #                     self,"EC2TMPSG",
-            #                     security_group_id=self.vpc.vpc_default_security_group
-            #                 ),
             machine_image = amzn_linux,
             key_name = key_pair,
             block_devices = [ec2.BlockDevice(
                                            device_name="/dev/xvda",
-                                        # This is a nvme device
-                                        #    device_name="/dev/nvme0n1p1",
                                            volume=ec2.BlockDeviceVolume.ebs(50,
                                                                             encrypted=True
                                                                             )
                                        )
                             ],
-            # user_data = ec2.UserData.custom(user_data)
         )
         ec2_tmp.add_security_group(self.sg)
 
         self.file_system.connections.allow_default_port_from(ec2_tmp)
 
-        # connect to fsx
-        # ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonFSxFullAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
 
-        # add ec2_tmp user data 
         ec2_tmp.user_data.add_commands("set -eux",
                                         "yum update -y",
                                         "yum install pigz -y",
@@ -190,14 +176,9 @@ class EC2VPCCdkStack(cdk.Stack):
                                         f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('lastest')}",
                                         f"docker push {self.repo.repository_uri_for_tag('lastest')}",
                                         f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
-                                        f"tar -I pigz -xvf {dataset_name} --directory={mountPath}",
-                                        # f"rm -rf {dataset_name}",
-                                        # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
-                                        # f"if {dataset_upload_s3};then aws s3 sync dataset/ s3://{self.bucket.bucket_name}/dataset/;fi ",
+                                        f"tar -I pigz -xvf {dataset_name} --directory={mountPath}"
                                         )
 
-        # after success, send sns to user.
         ec2_tmp.user_data.add_on_exit_commands(
-            # f"aws sns --message {messgae} --topic-arn {self.sns_topic.topic_arn} --subject {subject}"
             f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
         )

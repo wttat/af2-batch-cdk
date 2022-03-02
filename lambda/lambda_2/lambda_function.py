@@ -26,9 +26,6 @@ def getLogs(logStreamName):
         messages = messages+'\n'+(str(event['message']))
     return messages
 
-# Handle all GET
-
-
 def lambda_handler(event, context):
     # return event
     method = eval(json.dumps(event['requestContext']['http']['method']))
