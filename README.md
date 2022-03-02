@@ -278,3 +278,121 @@ Enjoy!
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 
 * jax seems to have a problem with multi GPU scheduling, recommends a maximum of 2GPU.
 * CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge's tag cannot be created and need to be added manually.
+
+## Citing this work
+
+If you use the code or data in this package, please cite:
+
+```bibtex
+@Article{AlphaFold2021,
+  author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and Green, Tim and Figurnov, Michael and Ronneberger, Olaf and Tunyasuvunakool, Kathryn and Bates, Russ and {\v{Z}}{\'\i}dek, Augustin and Potapenko, Anna and Bridgland, Alex and Meyer, Clemens and Kohl, Simon A A and Ballard, Andrew J and Cowie, Andrew and Romera-Paredes, Bernardino and Nikolov, Stanislav and Jain, Rishub and Adler, Jonas and Back, Trevor and Petersen, Stig and Reiman, David and Clancy, Ellen and Zielinski, Michal and Steinegger, Martin and Pacholska, Michalina and Berghammer, Tamas and Bodenstein, Sebastian and Silver, David and Vinyals, Oriol and Senior, Andrew W and Kavukcuoglu, Koray and Kohli, Pushmeet and Hassabis, Demis},
+  journal = {Nature},
+  title   = {Highly accurate protein structure prediction with {AlphaFold}},
+  year    = {2021},
+  volume  = {596},
+  number  = {7873},
+  pages   = {583--589},
+  doi     = {10.1038/s41586-021-03819-2}
+}
+```
+
+In addition, if you use the AlphaFold-Multimer mode, please cite:
+
+```bibtex
+@article {AlphaFold-Multimer2021,
+  author       = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v{Z}}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
+  journal      = {bioRxiv}
+  title        = {Protein complex prediction with AlphaFold-Multimer},
+  year         = {2021},
+  elocation-id = {2021.10.04.463034},
+  doi          = {10.1101/2021.10.04.463034},
+  URL          = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034},
+  eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
+}
+```
+
+## Community contributions
+
+Colab notebooks provided by the community (please note that these notebooks may
+vary from our full AlphaFold system and we did not validate their accuracy):
+
+*   The [ColabFold AlphaFold2 notebook](https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb)
+    by Martin Steinegger, Sergey Ovchinnikov and Milot Mirdita, which uses an
+    API hosted at the Södinglab based on the MMseqs2 server [(Mirdita et al.
+    2019, Bioinformatics)](https://academic.oup.com/bioinformatics/article/35/16/2856/5280135)
+    for the multiple sequence alignment creation.
+
+## Acknowledgements
+
+AlphaFold communicates with and/or references the following separate libraries
+and packages:
+
+*   [Abseil](https://github.com/abseil/abseil-py)
+*   [Biopython](https://biopython.org)
+*   [Chex](https://github.com/deepmind/chex)
+*   [Colab](https://research.google.com/colaboratory/)
+*   [Docker](https://www.docker.com)
+*   [HH Suite](https://github.com/soedinglab/hh-suite)
+*   [HMMER Suite](http://eddylab.org/software/hmmer)
+*   [Haiku](https://github.com/deepmind/dm-haiku)
+*   [Immutabledict](https://github.com/corenting/immutabledict)
+*   [JAX](https://github.com/google/jax/)
+*   [Kalign](https://msa.sbc.su.se/cgi-bin/msa.cgi)
+*   [matplotlib](https://matplotlib.org/)
+*   [ML Collections](https://github.com/google/ml_collections)
+*   [NumPy](https://numpy.org)
+*   [OpenMM](https://github.com/openmm/openmm)
+*   [OpenStructure](https://openstructure.org)
+*   [pandas](https://pandas.pydata.org/)
+*   [pymol3d](https://github.com/avirshup/py3dmol)
+*   [SciPy](https://scipy.org)
+*   [Sonnet](https://github.com/deepmind/sonnet)
+*   [TensorFlow](https://github.com/tensorflow/tensorflow)
+*   [Tree](https://github.com/deepmind/tree)
+*   [tqdm](https://github.com/tqdm/tqdm)
+
+We thank all their contributors and maintainers!
+
+## License and Disclaimer
+
+This is not an officially supported Google product.
+
+Copyright 2021 DeepMind Technologies Limited.
+
+### AlphaFold Code License
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at https://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+### Model Parameters License
+
+The AlphaFold parameters are made available under the terms of the Creative
+Commons Attribution 4.0 International (CC BY 4.0) license. You can find details
+at: https://creativecommons.org/licenses/by/4.0/legalcode
+
+### Third-party software
+
+Use of the third-party software, libraries or code referred to in the
+[Acknowledgements](#acknowledgements) section above may be governed by separate
+terms and conditions or license provisions. Your use of the third-party
+software, libraries or code is subject to any such terms and you should check
+that you can comply with any applicable restrictions or terms and conditions
+before use.
+
+### Mirrored Databases
+
+The following databases have been mirrored by DeepMind, and are available with reference to the following:
+
+*   [BFD](https://bfd.mmseqs.com/) (unmodified), by Steinegger M. and Söding J., available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+*   [BFD](https://bfd.mmseqs.com/) (modified), by Steinegger M. and Söding J., modified by DeepMind, available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/). See the Methods section of the [AlphaFold proteome paper](https://www.nature.com/articles/s41586-021-03828-1) for details.
+
+*   [Uniclust30: v2018_08](http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/) (unmodified), by Mirdita M. et al., available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+*   [MGnify: v2018_12](http://ftp.ebi.ac.uk/pub/databases/metagenomics/peptide_database/current_release/README.txt) (unmodified), by Mitchell AL et al., available free of all copyright restrictions and made fully and freely available for both non-commercial and commercial use under [CC0 1.0 Universal (CC0 1.0) Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).
