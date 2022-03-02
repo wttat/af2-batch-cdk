@@ -34,7 +34,7 @@ sudo yum install -y git
 git clone https://github.com/wttat/af2-batch-cdk
 cd af2-batch-cdk
 ```
-1. Install dependancy
+5. Install dependancy
 ```
 pip3 install -r requirements.txt
 ```
@@ -110,7 +110,7 @@ cdk deploy --all
    - Line 184-205. Uncomment to use P4 batch CE.
    - Line 241-250. Uncomment to use P4 batch que.
       
-      Note: You have to do this in the same time.
+      Note: You have to do this at the same time.
 
 ## Parameter Description of command.json 
 
@@ -203,7 +203,7 @@ curl -X "CANCEL" -H "Authorization: {KEY}"  {ApiGW_URL}/{id}
 curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}
 ```
 
-1. DELETE ONE:DELETE finished or failed job,change the KEY(if set) and ApiGW_URL to your own,the id of job could be searched via GET ALL or POST: 
+7. DELETE ONE:DELETE finished or failed job,change the KEY(if set) and ApiGW_URL to your own,the id of job could be searched via GET ALL or POST: 
 
 ```
 curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}/{id}
