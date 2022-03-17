@@ -1,5 +1,5 @@
 
-# Alphafold2 on AWS deploy guide:
+# Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
 
@@ -79,7 +79,7 @@ cdk deploy --all
       vpc_id=""
       ```
 
-      - Use a new vpc:
+      - Use a existed vpc:
       ```
       use_default_vpc=0
       vpc_id="{vpc_id}"
