@@ -34,17 +34,17 @@ sudo yum install -y git
 git clone https://github.com/wttat/af2-batch-cdk
 cd af2-batch-cdk
 ```
-5. Install dependancy
+5. Install CDK@v1
+```
+npm install -g aws-cdk@1.150.0
+```
+6. Install dependancy
 ```
 pip3 install -r requirements.txt
 ```
 & if in China 
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-6. Install CDK@v1
-```
-npm install -g aws-cdk@1.144.0
 ```
 7. Modify app.py (**Required**) and af2_batch_cdk/batch.py, check details below. 
 8. If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID and REGION:
@@ -229,6 +229,10 @@ Enjoy!
     original version.
 
 ## Changelog
+
+
+### 03/31/2022
+* Update aws-cdk to @1.150.0
 
 ### 02/16/2022
 * Tag all resources by {AWS-GCR-HLCS-Solutions:Alphafold2} to track overall costs.
