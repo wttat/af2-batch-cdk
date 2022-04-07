@@ -72,7 +72,7 @@ def lambda_handler(event, context):
                     'max_template_date': max_template_date,
                     'model_preset': model_preset,
                     'db_preset': db_preset,
-                    'num_multimer_predictions_per_model': num_multimer_predictions_per_model,
+                    'num_multimer_predictions_per_model': str(num_multimer_predictions_per_model),
                     'run_relax':run_relax,
                 },
                 propagateTags=False,

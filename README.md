@@ -153,9 +153,9 @@ For Alphfold2 Settings:
 3. run_relax.type:string(bool).options:*{true/false}*,Default:true
    
    Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
-4. is_prokaryote_list.type:string(bool).options:[true/false].Default:[false]
+4. num_multimer_predictions_per_model.type:int.Default:[5]:
 
-    Determine whether all input sequences in the given fasta file are prokaryotic. If that is not the case or the origin is unknown, set to false for that fasta.
+    Controls how many predictions will be made per model, by default the offline system will run each model 5 times for a total of 25 predictions.
 
 5. max_template_date.type:string(YYYY-MM-DD),Default:[2021-11-01]: 
     
@@ -218,17 +218,25 @@ Enjoy!
 
 ## Current dataset version：
 
-1. dataset3.tar.gz
+1. dataset4.tar.gz
+
+    update params to alphafold_params_2022-03-02.tar.
+2. dataset3.tar.gz
     
     update params to alphafold_params_2022-01-19.tar.
-2. dataset2.tar.gz
+3. dataset2.tar.gz
     
     update the dataset and params used by multimer.
-3. dataset.tar.gz
+4. dataset.tar.gz
 
     original version.
 
 ## Changelog
+
+### 04/07/2022
+* Support Alpfadold v2.2.0, therefore the 'is_prokaryote_list' parameter has changed to 'num_multimer_predictions_per_model'.
+* Update aws-cdk to @1.151.0
+* Change fsx DeploymentType from PERSISTENT_1 to SCRATCH_2.
 
 
 ### 03/31/2022

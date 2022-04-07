@@ -109,14 +109,14 @@ class EC2VPCCdkStack(cdk.Stack):
         # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
 
         self.file_system = fsx.LustreFileSystem(
-            self,'FSX',
-            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-                                    "per_unit_storage_throughput":100}, # 
+            self,'FsxLustreFileSystemforAF2',
+            # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+            #                         "per_unit_storage_throughput":100},
+            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
             vpc = self.vpc,
             vpc_subnet=self.vpc.public_subnets[0],
             # vpc_subnet=self.vpc.private_subnets[0],
             storage_capacity_gib = 4800,
-
             removal_policy=cdk.RemovalPolicy.DESTROY,
             security_group = self.sg,
         )
