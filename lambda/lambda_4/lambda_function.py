@@ -6,9 +6,7 @@ from pyh import *
 # created by sunliang
 # modified by wutong
 
-# 指定要分享的文件名, type = str，分享全部文件用 '*'
 fileIndex = '*'
-#包含文件下载地址列表的html文件名
 html = 'index.html'
 
 s3Client = boto3.client('s3')
@@ -24,7 +22,6 @@ expiretime = 86400 # 24h*60min*60s = 1day
 
 def getSharedFileList(fileBucket, dirPrefix):
     fileList = []
-    # 原文件名为*则查文件列表，否则就查单个文件
     try:
         if fileIndex == '*':
             response_fileList = s3Client.list_objects_v2(
@@ -33,7 +30,7 @@ def getSharedFileList(fileBucket, dirPrefix):
                 MaxKeys = 1000
             )
             for n in response_fileList['Contents']:
-                if n['Key'][-1] != '/':      # Key以'/'结尾的是子目录，不处理
+                if n['Key'][-1] != '/':      
                     presignUrl = s3Client.generate_presigned_url(
                         'get_object',
                         Params = {
@@ -53,7 +50,7 @@ def getSharedFileList(fileBucket, dirPrefix):
                     MaxKeys = 1000,
                     ContinuationToken = response_fileList['NextContinuationToken']
                 )
-                if n['Key'][-1] != '/':      # Key以'/“结尾的是子目录，不处理
+                if n['Key'][-1] != '/':      
                     presignUrl = s3Client.generate_presigned_url(
                         'get_object',
                         Params = {
@@ -98,14 +95,11 @@ def generteHtml(fileList):
     for file in fileList:
         tr1 = mytab << tr()
         tr1 << td(file['Key']) + td(str(file['Size'])) + td(a('Download', href = file['Url']))
-    #page.addObj('<script src="http://code.jquery.com/jquery-latest.js"></script>')
-    # 输出 html到string
+
     result = page.printStr()
     return result
 
-# Main
 def lambda_handler(event, context):
-    # print (event)
     for record in event['Records']:
         fileBucket = record['s3']['bucket']['name']
         dirPrefix = (record['s3']['object']['key']).split('.')[0]
@@ -117,7 +111,6 @@ def lambda_handler(event, context):
             print('[ERROR] Bucket name is not valid')
             os._exit(0)
     
-        # 检查bucket能否写入
         try:
             testKey = os.path.join(dirPrefix, 'access_test')
             s3Client.put_object(
@@ -133,11 +126,8 @@ def lambda_handler(event, context):
             print('[ERROR] Not authorized to write to destination bucket/prefix. Err: ', e)
             os._exit(0)
     
-        # 获取分享的文件列表
         shareFileList = getSharedFileList(fileBucket, dirPrefix)
-        # 生成包含文件下载地址列表的html文件
         htmlStr = generteHtml(shareFileList)
-        # 上传html文件到分享目录
         if htmlStr.strip() != '':
             htmlKey = os.path.join(dirPrefix, html)
             s3Client.put_object(
@@ -149,7 +139,6 @@ def lambda_handler(event, context):
             print('[ERROR] Html is blank')
             os._exit(0)
     
-        # 生成分享url
         htmlPresignUrl = s3Client.generate_presigned_url(
                             'get_object',
                             Params = {
@@ -161,7 +150,6 @@ def lambda_handler(event, context):
                             )
         print('htmlPresignUrl: ', htmlPresignUrl)
 
-        # get id
         id = s3Client.head_object(Bucket=fileBucket, Key=record['s3']['object']['key'])['Metadata']['id']
         
         response_ddb = ddb.get_item(Key={'id':id})
@@ -189,11 +177,7 @@ def lambda_handler(event, context):
             Subject = jobName +"'s result data is now available for download"
         )
         print('Sns publish response: ', response_sns)
-        
-
-        # return usage
-        
-        # update dynamodb
+  
         response_ddb = ddb.update_item(
             Key={
                 'id': id
@@ -204,7 +188,6 @@ def lambda_handler(event, context):
                 ':job_status': 'allset',
                 ':cost': cost
             }
-            # ReturnValues: "UPDATED_NEW"
         )
         
         print ("response_ddb from update_item"+str(response_ddb))

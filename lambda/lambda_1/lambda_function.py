@@ -250,15 +250,11 @@ def lambda_handler(event, context):
                     method+' command to all Batch job.\n\n'
             messages = messages + '####\nPlease wait 2min and try again.\n\n'
             return messages
-
-            # return("please specific id for delete or cancel\n")
         else:
             response_ddb = table.get_item(Key={'id': id})
             if 'Item' not in response_ddb:
                 return "no such job id to terminate\n"
             else:
-                # response_ddb = table.delete_item(Key={'id': id})
-
                 status = (response_ddb)['Item']['job_status']
 
                 if status == 'allset' and method == 'CANCEL':
@@ -284,7 +280,6 @@ def lambda_handler(event, context):
                 print(response_sqs)
                 if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
                     return('Success send '+method+' command to Batch job ,id :' + id+' \n####\nPlease wait 2min and try again.\n')
-                # return response_sqs
 
     else:
         return ('Unknown method, Please use POST / DELETE / CANCEL instead.\n')

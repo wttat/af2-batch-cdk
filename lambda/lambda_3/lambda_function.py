@@ -38,11 +38,6 @@ def lambda_handler(event, context):
         )
         print("response_sqs_delete:"+str(response_sqs_delete))
 
-                # 'model_preset': model_preset,
-                # 'db_preset': db_preset,
-                # 'is_prokaryote_list':is_prokaryote_list,
-                # 'max_template_date': max_template_date,
-
         print(method)
         if method == 'POST':
             payload_dict = ast.literal_eval(payload)
@@ -82,8 +77,6 @@ def lambda_handler(event, context):
                 },
                 propagateTags=False,
                 containerOverrides={
-                    # 'vcpus': vcpu*gpu,
-                    # 'memory': memory*gpu,
                     'resourceRequirements': [
                         {
                             "type": "MEMORY",
@@ -110,7 +103,6 @@ def lambda_handler(event, context):
 
             job_id = response_batch['jobId']
 
-            # update dynamodb
             response_ddb = table.update_item(
                 Key={
                     'id': id
@@ -120,7 +112,6 @@ def lambda_handler(event, context):
                     ':job_id': job_id,
                     ':job_status': 'running'
                 }
-                # ReturnValues: "UPDATED_NEW"
             )
 
             print("response_ddb from update_item"+str(response_ddb))
@@ -137,7 +128,6 @@ def lambda_handler(event, context):
                     print("failed jobs just delete dynamodb")
                     response_ddb = table.delete_item(Key={'id': id})
                 elif job_status == "allset":
-                    # finished job just delete s3 folder
                     s3_foleder_name = (
                         response_ddb['Item']['file_name'].split('.'))[0]
                     Prefix = OUTPUT_PREFIX+s3_foleder_name+"/"
@@ -153,7 +143,6 @@ def lambda_handler(event, context):
                         job_id,
                     ]
                 )
-                # return response_batch
                 print("response_batch from describe_jobs:"+str(response_batch))
                 batch_status = response_batch['jobs'][0]['status']
                 if batch_status == "STARTING" or batch_status == "RUNNING":
@@ -166,13 +155,10 @@ def lambda_handler(event, context):
                     print("response_batch from terminate_job:"+str(response_batch))
 
                 elif batch_status == "SUBMITTED" or batch_status == "PENDING" or batch_status == "RUNNABLE":
-                    # something wrong with RUNNABLE
                     response_batch = batch.cancel_job(
                         jobId=job_id,
                         reason='Canceled by user via cli'
                     )
                     print("response_batch from cancel_job:"+str(response_batch))
-
-            # only DELETE method delete ddb
 
             print("response_ddb from delete_item:"+str(response_ddb))

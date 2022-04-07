@@ -250,93 +250,50 @@ class APIGWCdkStack(cdk.Stack):
                 api_name = 'af2-apigw',
                 # default_authorizer = apigw_auth
             )
-        # new cdk@1.44.0 bug https://github.com/aws/aws-cdk/issues/18201
-        # has to create each integration for each route....
-        # hope it will fix in cdk v2
 
-        # lambda_1_intergation = HttpLambdaIntegration(
-        #     "expect get",
-        #     handler=lambda_1
-        # )
-        # lambda_2_intergation = HttpLambdaIntegration(
-        #     "all get",
-        #     handler=lambda_2
-        # )
-
-        getall_intergation = HttpLambdaIntegration(
-            "get all",
+        not_GET_intergation = HttpLambdaIntegration(
+            "expect get",
+            handler=lambda_1
+        )
+        GET_intergation = HttpLambdaIntegration(
+            "all get",
             handler=lambda_2
         )
+
         apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.GET],
-            integration = getall_intergation
-            # integration = lambda_2_intergation
-        )
-        getone_intergation = HttpLambdaIntegration(
-            "get one",
-            handler=lambda_2
+            integration = GET_intergation
         )
         apigw.add_routes(
             path = '/{id}',
             methods = [apigatewayv2.HttpMethod.GET],
-            integration = getone_intergation
-            # integration = lambda_2_intergation
-        )
-        
-        post_intergation = HttpLambdaIntegration(
-            "post",
-            handler=lambda_1
+            integration = GET_intergation
         )
         apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.POST],
-            integration = post_intergation
-            # integration = lambda_1_intergation
-        )
-
-        deleteall_intergation = HttpLambdaIntegration(
-            "delete all",
-            handler=lambda_1
+            integration = not_GET_intergation
         )
         apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.DELETE],
-            integration = deleteall_intergation
-            # integration = lambda_1_intergation
-        )
-
-        cancelall_intergation = HttpLambdaIntegration(
-            "cancel all",
-            handler=lambda_1
+            integration = not_GET_intergation
         )
         apigw.add_routes(
             path = '/',
             methods = [apigatewayv2.HttpMethod.ANY],# for CANCEL method
-            integration = cancelall_intergation
-            # integration = lambda_1_intergation
-        )
-
-        deleteone_intergation = HttpLambdaIntegration(
-            "delete one",
-            handler=lambda_1
+            integration = not_GET_intergation
         )
         apigw.add_routes(
             path = '/{id}',
             methods = [apigatewayv2.HttpMethod.DELETE],
-            # integration = lambda_1_intergation
-            integration = deleteone_intergation
-        )
-
-        deleteall_intergation = HttpLambdaIntegration(
-            "delete all",
-            handler=lambda_1
+            integration = not_GET_intergation
         )
         apigw.add_routes(
             path = '/{id}',
             methods = [apigatewayv2.HttpMethod.ANY],# for CANCEL method
-            # integration = lambda_1_intergation
-            integration = deleteall_intergation
+            integration = not_GET_intergation
         )
 
         core.CfnOutput(
