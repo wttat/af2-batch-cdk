@@ -1,55 +1,17 @@
 
-# Alphafold2-cdk部署手册
+# Alphafold2 on AWS Deploy Guide:
 
-参考blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
+AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
 
-架构图参考：
+Architecture diagram on AWS：
 ![avatar](architecture.png)
 
-## 优化Alphafold2镜像源代码库：
+## Modified Alphafold2 source code GitHub Repo：
 
 https://github.com/wttat/alphafold
 
-## 部署所需IAM权限请参考policy.json
+## For IAM policy when deployed please check policy.json
 
-## 部署流程，基于Amazon Linux 2 
-
- * 安装node和npm。
- * `wget https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz`  
- * `tar xvf node-v14.18.1-linux-x64.tar.xz`
- * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/node /usr/local/bin` 
- * `sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin`
- * 配置PATH环境变量。
- * `export PATH=$PATH:$(npm get prefix)/bin`
- * 安装git。
- * `sudo yum install -y git`
- * 克隆本repo。
- * `git clone https://github.com/wttat/af2-batch-cdk`
- * `cd af2-batch-cdk`
- * 安装所需依赖。
- * `pip3 install -r requirements.txt`
- * 注：如果国内下载pip包过慢，可以使用清华pip源。
- * `pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple`
- * 安装cdk。
- * `npm install -g aws-cdk@1.144.0`
- * 修改app.py内28～37，如需要nicedcv，可解除75-84行注释。
- * 如需要p4,可解除af2_batch_cdk/batch.py的173-194以及230-239行注释。
- * 如本region从未运行过cdk，需要以下脚本初始化。
- * `cdk bootstrap aws://{ACCOUNT}/{REGION}`
- * 通过cdk生成cloudformation模板
- * `cdk synth`
- * 部署所有堆栈。
- * `cdk deploy --all`
- * 确认SNS通知邮件
- * 系统会自动开启一台c5.9xlarge下载数据并存放到FSx for Lustre。
- * 3个小时左右数据准备完毕会有邮件通知，此时可以删除临时下载机器，开始任务。
- * 修改目录下的command.json文件
- * 任务提交 curl -X "POST" -H "Authorization: af2" -H "Content-Type: application/json" APIGW——URL -d @command.json
- * 查看任务状态 curl -H "Authorization: af2" APIGW——URL/{id}
- * 任务分析完毕会有邮件通知，用户可以到指定的S3桶下载pdb文件进行在云端或者本地查看。
-
-<<<<<<< Updated upstream
-=======
 ## Deployed steps. Based on Amazon Linux 2 AMI
 
 1. Install Node and Npm.
@@ -191,9 +153,9 @@ For Alphfold2 Settings:
 3. run_relax.type:string(bool).options:*{true/false}*,Default:true
    
    Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
-4. num_multimer_predictions_per_model.type:string(bool).type:int.Default:[5]:
+4. is_prokaryote_list.type:string(bool).options:[true/false].Default:[false]
 
-    Controls how many predictions will be made per model, by default the offline system will run each model 5 times for a total of 25 predictions.
+    Determine whether all input sequences in the given fasta file are prokaryotic. If that is not the case or the origin is unknown, set to false for that fasta.
 
 5. max_template_date.type:string(YYYY-MM-DD),Default:[2021-11-01]: 
     
@@ -246,108 +208,195 @@ curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}
 ```
 curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}/{id}
 ```
->>>>>>> Stashed changes
 Enjoy!
 
-## command.json 参数说明
 
-* fasta 必填：蛋白质名称，可自定义。
-* file_name 必填:氨基酸序列文件名称，必须与S3存储桶中的input文件名对应。
-* db_preset [reduced_dbs/full_dbs] 必选: （1）reduced_dbs: This preset is optimized for speed and lower hardware requirements. It runs with a reduced version of the BFD database. It requires 8 CPU cores (vCPUs), 8 GB of RAM, and 600 GB of disk space.（2）full_dbs: This runs with all genetic databases used at CASP14.
-* model_preset [monomer/monomer_casp14/monomer_ptm/multimer] 必选：（1）monomer（单体）: This is the original model used at CASP14 with no ensembling。（2）monomer_casp14*: This is the original model used at CASP14 with num_ensemble=8, matching our CASP14 configuration. This is largely provided for reproducibility as it is 8x more computationally expensive for limited accuracy gain (+0.1 average GDT gain on CASP14 domains).（3）monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.（4）multimer（多聚体）: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
-* run_relax.[true/false],Default:[true],Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
-* is_prokaryote_list.[true/false],Default:[false],true for homomer,false for heteromer.only works when multimer
-* max_template_date.Default:[2021-11-01]: 数据库扫描截止日期。详见alphafold官方库解释，建议设置为当天。
-* que [low/mid/high/p4]：分别对应p3.2xlarge、p3.8xlarge、p3.16xlarge和p4d.24xlarge,其中p4因为区域支持不多，需要手动启用代码中注释。目前每个任务默认分配一块卡。
-* comment：本次任务注释，自行填写。
-* gpu.Default:[1],number of GPU。p3实例下，每个gpu对应8vcpu，60G内存；p4实例下，每个gpu对应12vcpu，140G内存。
-  
-注：GPU数量太多意义不大，目前来看超过1000aa的一块V100的显存不够，但是太多也是浪费，因为AF2推理的时候还是只用一块卡。
 
-## 目前数据集版本：
-
-<<<<<<< Updated upstream
-* dataset3.tar.gz 模型更新为alphafold_params_2022-01-19.tar。
-* dataset2.tar.gz 更新了multimer需要的数据集和参数。
-* dataset.tar.gz 原始版本。
-
-## Changelog
-
-=======
 ## Total cost calculate：
 * The cost filed in DynamoDB counts the number of seconds each task runs. 
 * Use tag {AWS-GCR-HLCS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
 
 ## Current dataset version：
 
-1. dataset4.tar.gz
-
-   update params to alphafold_params_2022-03-02.tar. Update multimer models to v2.
-2. dataset3.tar.gz
+1. dataset3.tar.gz
     
     update params to alphafold_params_2022-01-19.tar.
-3. dataset2.tar.gz
+2. dataset2.tar.gz
     
     update the dataset and params used by multimer.
-4. dataset.tar.gz
+3. dataset.tar.gz
 
     original version.
 
 ## Changelog
 
-### 04/07 2022
-* Support Alphafold v2.2.0, the is_prokaryote_list parameter has been removed, add a new one :num_multimer_predictions_per_model. 
 
 ### 03/31/2022
 * Update aws-cdk to @1.150.0
 
->>>>>>> Stashed changes
 ### 02/16/2022
-* 将所有资源加入标签{AWS-GCR-HLCS-Solutions:Alphafold2},方便追踪总体成本。
+* Tag all resources by {AWS-GCR-HLCS-Solutions:Alphafold2} to track overall costs.
 
 ### 02/13/2022
-* 更新支持cdk@1.144.0，后续切到cdk v2。
-* 由此又修复了一个因为cdk导致Api GW不能invoke lambda的奇怪bug..
+* Update to cdk@1.144.0, will update to cdk@v2 later.
 
 ### 02/12/2022
-* 增加权限json。
+* Update policy json.
 
 ### 02/01/2022
-* 修复安装脚本。
+* Fix install script.
 
 ### 02/07/2022
-* 更新支持run_relax参数。
+* Update to support run_relax feature.
 
 ### 01/20/2022
-* 数据集模型更新为alphafold_params_2022-01-19.tar。
+* Update params.
 
 ### 01/19/2022
-* 修复了过期api
+* Fix some outdated api.
 
 ### 01/17/2022
-* 支持Alpfadold v2.1.1 关于multimer的预测，参数也对应更新。
-* DynamoDB默认从预置更改为按需计费。
+* Support Alpfadold v2.1.1 to predict multimer and params files.
+* Change DynamoDB's default setting from provisioned to on-demand.
 
 ### 01/15/2022
-* 更改为使用当前region所有AZ，充分利用GPU资源。
-* 因此修复了当前AZ没有GPU实例的报错，当然全region都没有就没办法了。
+* Change to use all az in the region to make full use of GPU resources.
+* Therefore, the error that no GPU instance in the current AZ has been fixed. Of course, there is no way to do it if the entire region does not.
 
 ### 10/24/2021
-* 支持p4实例/队列，开启需解除batch.py相关注释。
-* 完善sns通知信息，现在可以从邮件直接看到任务名称和所需时间。
-* S3 presigned URL expire in 1day
+* Support p4 instances/que，this need manually operate。
+* Perfect the sns notification information, now you can see the task name and cost time directly from the mail.
+* S3 presigned URL expire in 1day now.
 
 ## TODO
 
-* 引入更完善身份验证机制，但国内没有user pool。
-* 自动化鉴别该区域没有p4实例。
-* Code pipeline更新。
-* 成功时的S3N，改成Eventbridge。
-* Dynamodb加入二级索引，用来通过job id反推id。
-* 前端页面。
+* Better authentication mechanism.
+* Auto check p4.
+* Use Code pipeline to update images.
+* The S3N when job successed changed to Eventbridge.
+* Use  secondary index in Dynamodb to reverse the id by the job id.
+* Frontend pages.
 
 ## Known Issue
-* 如果手动选择vpc后，很快提示数据下载完成，可能是因为VPC DNS/DHCP设置问题导致fsx没有正确挂载，此时可登陆tmp ec2手动执行挂载命令测试原因，建议统一使用新建VPV。参考：
-https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 使用 DNS 名称挂载文件系统失败。
-* jax似乎对4GPU调度有问题，建议使用2GPU。
-* CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge不能创造标签，需要手动补充。
+* If the dataset download is completed really soon when manually selecting the vpc, it may be because the Fsx for lustre is not mounted correctly due to the VPC DNS/DHCP settings. You could ssh into tmp ec2 to manually execute the mount command to test the reason,or just create a new VPC to avoid such questions.check：
+https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 
+* jax seems to have a problem with multi GPU scheduling, recommends a maximum of 2GPU.
+* CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge's tag cannot be created and need to be added manually.
+
+## Citing this work
+
+If you use the code or data in this package, please cite:
+
+```bibtex
+@Article{AlphaFold2021,
+  author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and Green, Tim and Figurnov, Michael and Ronneberger, Olaf and Tunyasuvunakool, Kathryn and Bates, Russ and {\v{Z}}{\'\i}dek, Augustin and Potapenko, Anna and Bridgland, Alex and Meyer, Clemens and Kohl, Simon A A and Ballard, Andrew J and Cowie, Andrew and Romera-Paredes, Bernardino and Nikolov, Stanislav and Jain, Rishub and Adler, Jonas and Back, Trevor and Petersen, Stig and Reiman, David and Clancy, Ellen and Zielinski, Michal and Steinegger, Martin and Pacholska, Michalina and Berghammer, Tamas and Bodenstein, Sebastian and Silver, David and Vinyals, Oriol and Senior, Andrew W and Kavukcuoglu, Koray and Kohli, Pushmeet and Hassabis, Demis},
+  journal = {Nature},
+  title   = {Highly accurate protein structure prediction with {AlphaFold}},
+  year    = {2021},
+  volume  = {596},
+  number  = {7873},
+  pages   = {583--589},
+  doi     = {10.1038/s41586-021-03819-2}
+}
+```
+
+In addition, if you use the AlphaFold-Multimer mode, please cite:
+
+```bibtex
+@article {AlphaFold-Multimer2021,
+  author       = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v{Z}}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
+  journal      = {bioRxiv}
+  title        = {Protein complex prediction with AlphaFold-Multimer},
+  year         = {2021},
+  elocation-id = {2021.10.04.463034},
+  doi          = {10.1101/2021.10.04.463034},
+  URL          = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034},
+  eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
+}
+```
+
+## Community contributions
+
+Colab notebooks provided by the community (please note that these notebooks may
+vary from our full AlphaFold system and we did not validate their accuracy):
+
+*   The [ColabFold AlphaFold2 notebook](https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb)
+    by Martin Steinegger, Sergey Ovchinnikov and Milot Mirdita, which uses an
+    API hosted at the Södinglab based on the MMseqs2 server [(Mirdita et al.
+    2019, Bioinformatics)](https://academic.oup.com/bioinformatics/article/35/16/2856/5280135)
+    for the multiple sequence alignment creation.
+
+## Acknowledgements
+
+AlphaFold communicates with and/or references the following separate libraries
+and packages:
+
+*   [Abseil](https://github.com/abseil/abseil-py)
+*   [Biopython](https://biopython.org)
+*   [Chex](https://github.com/deepmind/chex)
+*   [Colab](https://research.google.com/colaboratory/)
+*   [Docker](https://www.docker.com)
+*   [HH Suite](https://github.com/soedinglab/hh-suite)
+*   [HMMER Suite](http://eddylab.org/software/hmmer)
+*   [Haiku](https://github.com/deepmind/dm-haiku)
+*   [Immutabledict](https://github.com/corenting/immutabledict)
+*   [JAX](https://github.com/google/jax/)
+*   [Kalign](https://msa.sbc.su.se/cgi-bin/msa.cgi)
+*   [matplotlib](https://matplotlib.org/)
+*   [ML Collections](https://github.com/google/ml_collections)
+*   [NumPy](https://numpy.org)
+*   [OpenMM](https://github.com/openmm/openmm)
+*   [OpenStructure](https://openstructure.org)
+*   [pandas](https://pandas.pydata.org/)
+*   [pymol3d](https://github.com/avirshup/py3dmol)
+*   [SciPy](https://scipy.org)
+*   [Sonnet](https://github.com/deepmind/sonnet)
+*   [TensorFlow](https://github.com/tensorflow/tensorflow)
+*   [Tree](https://github.com/deepmind/tree)
+*   [tqdm](https://github.com/tqdm/tqdm)
+
+We thank all their contributors and maintainers!
+
+## License and Disclaimer
+
+This is not an officially supported Google product.
+
+Copyright 2021 DeepMind Technologies Limited.
+
+### AlphaFold Code License
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at https://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+### Model Parameters License
+
+The AlphaFold parameters are made available under the terms of the Creative
+Commons Attribution 4.0 International (CC BY 4.0) license. You can find details
+at: https://creativecommons.org/licenses/by/4.0/legalcode
+
+### Third-party software
+
+Use of the third-party software, libraries or code referred to in the
+[Acknowledgements](#acknowledgements) section above may be governed by separate
+terms and conditions or license provisions. Your use of the third-party
+software, libraries or code is subject to any such terms and you should check
+that you can comply with any applicable restrictions or terms and conditions
+before use.
+
+### Mirrored Databases
+
+The following databases have been mirrored by DeepMind, and are available with reference to the following:
+
+*   [BFD](https://bfd.mmseqs.com/) (unmodified), by Steinegger M. and Söding J., available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+*   [BFD](https://bfd.mmseqs.com/) (modified), by Steinegger M. and Söding J., modified by DeepMind, available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/). See the Methods section of the [AlphaFold proteome paper](https://www.nature.com/articles/s41586-021-03828-1) for details.
+
+*   [Uniclust30: v2018_08](http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/) (unmodified), by Mirdita M. et al., available under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+*   [MGnify: v2018_12](http://ftp.ebi.ac.uk/pub/databases/metagenomics/peptide_database/current_release/README.txt) (unmodified), by Mitchell AL et al., available free of all copyright restrictions and made fully and freely available for both non-commercial and commercial use under [CC0 1.0 Universal (CC0 1.0) Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).
