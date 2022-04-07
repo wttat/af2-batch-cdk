@@ -36,7 +36,7 @@ cd af2-batch-cdk
 ```
 5. Install CDK@v1
 ```
-npm install -g aws-cdk@1.150.0
+npm install -g aws-cdk@1.151.0
 ```
 6. Install dependancy
 ```
