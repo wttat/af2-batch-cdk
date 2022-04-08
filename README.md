@@ -113,17 +113,26 @@ cdk deploy --all
       Note: You have to do this at the same time.
 
 3. Additional settings:
-   **This action will lower fsx price and throughput, therefore may increase the EC2 cost, please think ahead although you could change it later.**
-    If you want to deeply reduce cost, you could change the fsx volume size in vpc_ec2.py,row 119:
+   
+   **This action will lower fsx price and throughput, therefore may increase the EC2 cost, please think ahead although you could edit it later.**
+
+    If you want to deeply reduce cost, you could edit the fsx volume size in vpc_ec2.py,row 119:
+    
     from
+        
         storage_capacity_gib = 4800,
     to
+        
         storage_capacity_gib = 2400,
     then you have to manually change the fsx compression type to lz4 before all file are decompressed.
-    Or change row 113-115 if you know what this means:
-        #lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-        #                     "per_unit_storage_throughput":100},
-        lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
+    
+    Or edit row 113-115 if you know what this means:
+    
+    ```
+    #lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+    #                     "per_unit_storage_throughput":100},
+    lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
+    ```
 
 ## Parameter Description of command.json 
 
