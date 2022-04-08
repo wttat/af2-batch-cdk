@@ -11,22 +11,22 @@
     },
     {
 		"fasta":"3JA9",
-		"file_name":"rcsb_pdb_3JA9_multimer_is_prokaryote_true.fasta",
+		"file_name":"rcsb_pdb_3JA9_multimer.fasta",
 		"db_preset":"full_dbs",
 		"model_preset":"multimer",
 		"max_template_date":"2021-11-01",
-		"num_multimer_predictions_per_model":"5",
+		"num_multimer_predictions_per_model":5,
 		"que":"mid",
 		"comment":"天然人类 PCNA 的结构",
 		"gpu":2
     },
     {
 		"fasta":"7ALC",
-		"file_name":"rcsb_pdb_7ALC_multimer_is_prokaryote_false.fasta",
+		"file_name":"rcsb_pdb_7ALC_multimer.fasta",
 		"db_preset":"full_dbs",
 		"model_preset":"multimer",
 		"max_template_date":"2021-11-01",
-		"num_multimer_predictions_per_model":"1",
+		"num_multimer_predictions_per_model":1,
 		"que":"mid",
 		"comment":"人 GCH-GFRP 刺激复合物",
 		"gpu":2
