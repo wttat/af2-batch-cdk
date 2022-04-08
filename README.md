@@ -259,6 +259,7 @@ Enjoy!
 * Change fsx DeploymentType from PERSISTENT_1 to SCRATCH_2.
 * Add Resource Cleanup guide.
 * Update Readme.
+* Force s3 BlockPublicAccess policy to BLOCK_ALL.
 
 ### 03/31/2022
 * Update aws-cdk to @1.150.0

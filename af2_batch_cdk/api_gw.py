@@ -47,6 +47,7 @@ class APIGWCdkStack(cdk.Stack):
         # create a s3 bucket
         self.bucket = s3.Bucket(
             self,"BUCKET",
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             # removal_policy=cdk.RemovalPolicy.DESTROY,
             # auto_delete_objects=True
         )
