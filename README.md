@@ -112,6 +112,19 @@ cdk deploy --all
       
       Note: You have to do this at the same time.
 
+3. Additional settings:
+   **This action will lower fsx price and throughput, therefore may increase the EC2 cost, please think ahead although you could change it later.**
+    If you want to deeply reduce cost, you could change the fsx volume size in vpc_ec2.py,row 119:
+    from
+        storage_capacity_gib = 4800,
+    to
+        storage_capacity_gib = 2400,
+    then you have to manually change the fsx compression type to lz4 before all file are decompressed.
+    Or change row 113-115 if you know what this means:
+        #lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+        #                     "per_unit_storage_throughput":100},
+        lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
+
 ## Parameter Description of command.json 
 
 For Job Settings:
@@ -160,8 +173,6 @@ For Alphfold2 Settings:
 5. max_template_date.type:string(YYYY-MM-DD),Default:[2021-11-01]: 
     
     If you are predicting the structure of a protein that is already in PDB and you wish to avoid using it as a template, then max_template_date must be set to be before the release date of the structure
-
-  
 
 ## API for Alphafold2
 
@@ -237,7 +248,8 @@ Enjoy!
 * Support Alpfadold v2.2.0, therefore the 'is_prokaryote_list' parameter has changed to 'num_multimer_predictions_per_model'.
 * Update aws-cdk to @1.151.0
 * Change fsx DeploymentType from PERSISTENT_1 to SCRATCH_2.
-
+* Add Resource Cleanup guide.
+* Update Readme.
 
 ### 03/31/2022
 * Update aws-cdk to @1.150.0
@@ -282,10 +294,18 @@ Enjoy!
 * Auto check p4.
 * Use Code pipeline to update images.
 * The S3N when job successed changed to Eventbridge.
-* Use  secondary index in Dynamodb to reverse the id by the job id.
+* Use secondary index in Dynamodb to reverse the id by the job id.
 * Frontend pages.
 
-## Known Issue
+## Resource Cleanup
+
+Manually delete the image in the ECR Repo, then run:
+
+```
+cdk deploy --all
+```
+
+## Known Issues
 * If the dataset download is completed really soon when manually selecting the vpc, it may be because the Fsx for lustre is not mounted correctly due to the VPC DNS/DHCP settings. You could ssh into tmp ec2 to manually execute the mount command to test the reason,or just create a new VPC to avoid such questions.check：
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 
 * jax seems to have a problem with multi GPU scheduling, recommends a maximum of 2GPU.
