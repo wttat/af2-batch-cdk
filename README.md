@@ -302,7 +302,7 @@ Enjoy!
 Manually delete the image in the ECR Repo, then run:
 
 ```
-cdk deploy --all
+cdk destroy --all
 ```
 
 ## Known Issues
