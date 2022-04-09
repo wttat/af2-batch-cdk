@@ -319,7 +319,7 @@ cdk destroy --all
 * If the dataset download is completed really soon when manually selecting the vpc, it may be because the Fsx for lustre is not mounted correctly due to the VPC DNS/DHCP settings. You could ssh into tmp ec2 to manually execute the mount command to test the reason,or just create a new VPC to avoid such questions.check：
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 
 * jax seems to have a problem with multi GPU scheduling, recommends a maximum of 2GPU.
-* CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge's tag cannot be created and need to be added manually.
+* CDK Bug.EventBridge's tag cannot be created and need to be added manually.
 
 ## Citing this work
 
