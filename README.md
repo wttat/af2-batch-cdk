@@ -253,6 +253,9 @@ Enjoy!
 
 ## Changelog
 
+### 04/10/2022
+* Fix html s3 pre-signed url expire time.
+
 ### 04/07/2022
 * Support Alpfadold v2.2.0, therefore the 'is_prokaryote_list' parameter has changed to 'num_multimer_predictions_per_model'.
 * Update aws-cdk to @1.151.0
