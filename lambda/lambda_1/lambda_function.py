@@ -117,19 +117,20 @@ def lambda_handler(event, context):
                     db_preset = data['db_preset']
             print(db_preset)
 
-            num_multimer_predictions_per_model = ''
+            is_prokaryote_list = ''
             try:
-                data['num_multimer_predictions_per_model']
+                data['is_prokaryote_list']
             except:
-                print('no num_multimer_predictions_per_model,use default num_multimer_predictions_per_model=5')
-                num_multimer_predictions_per_model = 5
+                print('no preset,using dafault preset false')
+                is_prokaryote_list = 'false'
             else:
-                if str(data['num_multimer_predictions_per_model']).isdigit() :
-                    num_multimer_predictions_per_model = data['num_multimer_predictions_per_model']
+                if data['is_prokaryote_list'] != 'true' and data['is_prokaryote_list'] != 'false':
+                    return 'The is_prokaryote_list shoudl be true or false'
+                elif data['is_prokaryote_list'] == 'true' and model_preset != 'multimer':
+                    return 'is_prokaryote_list only could be true if model_preset is multimer'
                 else:
-                    return 'The num_multimer_predictions_per_model should be a number.\n'
-
-            print(num_multimer_predictions_per_model)
+                    is_prokaryote_list = data['is_prokaryote_list']
+            print(is_prokaryote_list)
 
             run_relax = ''
             try:
@@ -157,13 +158,11 @@ def lambda_handler(event, context):
             try:
                 data['gpu']
             except:
-                print('no gpu,use default gpu=1')
+                print('no gpu')
                 gpu = 1
             else:
-                if str(data['gpu']).isdigit() :
-                    gpu = data['gpu']
-                else:
-                    return 'The gpu should be a number.\n'
+                gpu = data['gpu']
+
             print(gpu)
 
             if gpu > 1:
@@ -184,7 +183,7 @@ def lambda_handler(event, context):
                 'job_status': 'starting',
                 'model_preset': model_preset,
                 'db_preset': db_preset,
-                'num_multimer_predictions_per_model':num_multimer_predictions_per_model,
+                'is_prokaryote_list':is_prokaryote_list,
                 'max_template_date': max_template_date,
                 'que': data['que'],
                 'time': now,

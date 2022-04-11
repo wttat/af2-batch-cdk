@@ -68,9 +68,9 @@ batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
     )
 )
 
-Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
-Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
-Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
+Tags.of(vpc_stack).add("AWS-GCR-HLCS-Solutions", "Alphafold2")
+Tags.of(api_gw_stack).add("AWS-GCR-HLCS-Solutions", "Alphafold2")
+Tags.of(batch_stack).add("AWS-GCR-HLCS-Solutions", "Alphafold2")
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     key_pair = key_pair,

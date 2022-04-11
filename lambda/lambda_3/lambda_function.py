@@ -48,7 +48,7 @@ def lambda_handler(event, context):
             max_template_date = payload_dict['max_template_date']
             model_preset = payload_dict['model_preset']
             db_preset = payload_dict['db_preset']
-            num_multimer_predictions_per_model = payload_dict['num_multimer_predictions_per_model']
+            is_prokaryote_list = payload_dict['is_prokaryote_list']
             run_relax = payload_dict['run_relax']
 
             que = payload_dict['que']
@@ -72,7 +72,7 @@ def lambda_handler(event, context):
                     'max_template_date': max_template_date,
                     'model_preset': model_preset,
                     'db_preset': db_preset,
-                    'num_multimer_predictions_per_model': str(num_multimer_predictions_per_model),
+                    'is_prokaryote_list': is_prokaryote_list,
                     'run_relax':run_relax,
                 },
                 propagateTags=False,
