@@ -33,9 +33,14 @@ def lambda_handler(event, context):
 
     if method == 'GET':
         if id == '':
-            response_ddb = table.scan()
+                
+            try:
+                response_ddb = table.scan()
+            except:
+                return 'Cannt find the dynamodbDB table, please contact admin.\n'
+            
             if response_ddb['Count'] == 0:
-                return "no job deployed\n"
+                return "No job was deployed.\n"
             else:
                 return (response_ddb['Items'])
         else:
