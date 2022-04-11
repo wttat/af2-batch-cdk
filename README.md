@@ -36,7 +36,7 @@ cd af2-batch-cdk
 ```
 5. Install CDK@v1
 ```
-npm install -g aws-cdk@1.150.0
+npm install -g aws-cdk@1.151.0
 ```
 6. Install dependancy
 ```
@@ -112,6 +112,28 @@ cdk deploy --all
       
       Note: You have to do this at the same time.
 
+3. Additional settings:
+   
+   **This action will lower fsx price and throughput, therefore may increase the EC2 cost, please think ahead although you could edit it later.**
+
+    If you want to deeply reduce cost, you could edit the fsx volume size in vpc_ec2.py,row 119:
+    
+    from
+        
+        storage_capacity_gib = 4800,
+    to
+        
+        storage_capacity_gib = 2400,
+    then you have to manually change the fsx compression type to lz4 before all file are decompressed.
+    
+    Or edit row 113-115 if you know what this means:
+    
+    ```
+    #lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+    #                     "per_unit_storage_throughput":100},
+    lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
+    ```
+
 ## Parameter Description of command.json 
 
 For Job Settings:
@@ -153,15 +175,13 @@ For Alphfold2 Settings:
 3. run_relax.type:string(bool).options:*{true/false}*,Default:true
    
    Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
-4. is_prokaryote_list.type:string(bool).options:[true/false].Default:[false]
+4. num_multimer_predictions_per_model.type:int.Default:[5]:
 
-    Determine whether all input sequences in the given fasta file are prokaryotic. If that is not the case or the origin is unknown, set to false for that fasta.
+    Controls how many predictions will be made per model, by default the offline system will run each model 5 times for a total of 25 predictions.
 
 5. max_template_date.type:string(YYYY-MM-DD),Default:[2021-11-01]: 
     
     If you are predicting the structure of a protein that is already in PDB and you wish to avoid using it as a template, then max_template_date must be set to be before the release date of the structure
-
-  
 
 ## API for Alphafold2
 
@@ -218,18 +238,31 @@ Enjoy!
 
 ## Current dataset version：
 
-1. dataset3.tar.gz
+1. dataset4.tar.gz
+
+    update params to alphafold_params_2022-03-02.tar.
+2. dataset3.tar.gz
     
     update params to alphafold_params_2022-01-19.tar.
-2. dataset2.tar.gz
+3. dataset2.tar.gz
     
     update the dataset and params used by multimer.
-3. dataset.tar.gz
+4. dataset.tar.gz
 
     original version.
 
 ## Changelog
 
+### 04/10/2022
+* Fix html s3 pre-signed url expire time.
+
+### 04/07/2022
+* Support Alpfadold v2.2.0, therefore the 'is_prokaryote_list' parameter has changed to 'num_multimer_predictions_per_model'.
+* Update aws-cdk to @1.151.0
+* Change fsx DeploymentType from PERSISTENT_1 to SCRATCH_2.
+* Add Resource Cleanup guide.
+* Update Readme.
+* Force s3 BlockPublicAccess policy to BLOCK_ALL.
 
 ### 03/31/2022
 * Update aws-cdk to @1.150.0
@@ -274,14 +307,22 @@ Enjoy!
 * Auto check p4.
 * Use Code pipeline to update images.
 * The S3N when job successed changed to Eventbridge.
-* Use  secondary index in Dynamodb to reverse the id by the job id.
+* Use secondary index in Dynamodb to reverse the id by the job id.
 * Frontend pages.
 
-## Known Issue
+## Resource Cleanup
+
+Manually delete the image in the ECR Repo, then run:
+
+```
+cdk destroy --all
+```
+
+## Known Issues
 * If the dataset download is completed really soon when manually selecting the vpc, it may be because the Fsx for lustre is not mounted correctly due to the VPC DNS/DHCP settings. You could ssh into tmp ec2 to manually execute the mount command to test the reason,or just create a new VPC to avoid such questions.check：
 https://docs.amazonaws.cn/fsx/latest/LustreGuide/troubleshooting.html 
 * jax seems to have a problem with multi GPU scheduling, recommends a maximum of 2GPU.
-* CDK Bug。IAM role/DynamoDB/LaunchTemplate/EventBridge's tag cannot be created and need to be added manually.
+* CDK Bug.EventBridge's tag cannot be created and need to be added manually.
 
 ## Citing this work
 
