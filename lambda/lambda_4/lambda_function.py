@@ -69,9 +69,7 @@ def getSharedFileList(fileBucket, dirPrefix):
                         Params = {
                             'Bucket': fileBucket,
                             'Key': fileKey
-                        },
-                        ExpiresIn = expiretime
-                        )
+                        })
             response_fileList = s3Client.head_object(
                 Bucket = fileBucket,
                 Key = fileKey

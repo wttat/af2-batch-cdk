@@ -278,7 +278,7 @@ class BATCHCdkStack(cdk.Stack):
                 "-t","Ref::max_template_date",
                 "-m","Ref::model_preset",
                 "-c","Ref::db_preset",
-                "-l","Ref::num_multimer_predictions_per_model",
+                "-l","Ref::is_prokaryote_list",
                 "-p","Ref::use_precomputed_msas",
                 "-r","Ref::run_relax",
                 "-b","Ref::benchmark",
@@ -321,7 +321,7 @@ class BATCHCdkStack(cdk.Stack):
                 "max_template_date": "mtd",
                 "db_preset":"dp",
                 "model_preset":"mp",
-                "num_multimer_predictions_per_model":"5",
+                "is_prokaryote_list":"false",
                 "use_precomputed_msas":'false',
                 "benchmark":'false',
                 "run_relax":"true"
