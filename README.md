@@ -1,4 +1,6 @@
 
+# Current support Alphafold Version : 2.2.0
+Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.0
 # Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
@@ -11,6 +13,7 @@ Architecture diagram on AWS：
 https://github.com/wttat/alphafold
 
 ## For IAM policy when deployed please check policy.json
+
 
 ## Deployed steps. Based on Amazon Linux 2 AMI
 
