@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="af2_batch_cdk"),
 
     install_requires=[
-        "aws-cdk.core==1.150.0",
+        "aws-cdk.core==1.151.0",
     ],
 
     python_requires=">=3.6",

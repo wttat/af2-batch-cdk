@@ -28,18 +28,16 @@ account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 if region == 'cn-north-1' or region == 'cn-northwest-1':
-    image_arn='s3://alphafold2-raw-data/af2-batch2.tar'
-    # image_arn='s3://alphafold2-raw-data/af2-batch.tar'
-    dataset_arn='s3://alphafold2-raw-data/dataset3.tar.gz'
-    # dataset_arn='s3://alphafold2-raw-data/dataset2.tar.gz'
-    # dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
+    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch3.tar'
+    # image_arn='s3://alphafold2-raw-data/af2-batch2.tar'
+    dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset4v2.tar.gz'
+    # dataset_arn='s3://alphafold2-raw-data/dataset3.tar.gz'
     dataset_region='cn-northwest-1'
 else:
-    image_arn='s3://alphafold2/af2-batch2.tar'
-    # image_arn='s3://alphafold2-raw-data/af2-batch.tar'
-    dataset_arn='s3://alphafold2/dataset3.tar.gz'
-    # dataset_arn='s3://alphafold2-raw-data/dataset2.tar.gz'
-    # dataset_arn='s3://alphafold2-raw-data/dataset.tar.gz'
+    image_arn='s3://alphafold2/prod/images/af2-batch3.tar'
+    # image_arn='s3://alphafold2/af2-batch2.tar'
+    dataset_arn='s3://alphafold2/prod/datasets/dataset4v2.tar.gz'
+    # dataset_arn='s3://alphafold2/dataset3.tar.gz'
     dataset_region='us-east-1'
 
 # af2-batch image file name
@@ -105,14 +103,14 @@ class EC2VPCCdkStack(cdk.Stack):
         # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
 
         self.file_system = fsx.LustreFileSystem(
-            self,'FSX',
-            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-                                    "per_unit_storage_throughput":100}, # 
+            self,'FsxLustreFileSystemforAF2',
+            # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
+            #                         "per_unit_storage_throughput":100},
+            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
             vpc = self.vpc,
             vpc_subnet=self.vpc.public_subnets[0],
             # vpc_subnet=self.vpc.private_subnets[0],
             storage_capacity_gib = 4800,
-
             removal_policy=cdk.RemovalPolicy.DESTROY,
             security_group = self.sg,
         )
