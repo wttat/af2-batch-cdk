@@ -26,6 +26,8 @@ from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
 import aws_cdk.aws_s3_notifications as s3n
 import aws_cdk.aws_lambda_event_sources as eventsources
 import aws_cdk.aws_s3_deployment as s3deploy
+import aws_cdk.aws_events as events
+import aws_cdk.aws_events_targets as targets
 
 # get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
@@ -133,17 +135,6 @@ class APIGWCdkStack(cdk.Stack):
         role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
         role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
 
-        # create IAM role 5
-        role5 = iam.Role(
-            self,'role_5',
-            assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_5',
-        )
-
-        role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
-        role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSNSFullAccess'))
-        role5.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
-
         # create Lambda 0
         lambda_0 = _lambda.Function(self, "lambda_0",
                                               runtime=_lambda.Runtime.NODEJS_14_X,
@@ -202,35 +193,30 @@ class APIGWCdkStack(cdk.Stack):
                                               handler="lambda_function.lambda_handler",
                                               role = role4,
                                               timeout = core.Duration.seconds(30),
-                                              description = "When job succussed, send SNS to user. Triggered by S3",
+                                              description = "Track job status, update dynamodb and send messages to SNS",
                                               code=_lambda.Code.from_asset("./lambda/lambda_4"))
 
         lambda_4.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
 
-        # create s3 notification
-        self.bucket.add_event_notification(
-            s3.EventType.OBJECT_CREATED,
-            s3n.LambdaDestination(lambda_4),
-            s3.NotificationKeyFilter(
-                prefix="output/",suffix="tar.gz"
-                )
+        Batch_status_change_rule = events.Rule(
+            self,"Batch_status_change_rule",
+            description = "Track batch job status change",
+            event_pattern = events.EventPattern(
+                source = ["aws.batch"],
+                detail_type = ["Batch Job State Change"]
             )
+        )
 
-        # create Lambda 5
-        self.lambda_5 = _lambda.Function(self, "lambda_5",
-                                              runtime=_lambda.Runtime.PYTHON_3_7,
-                                              handler="lambda_function.lambda_handler",
-                                              role = role5,
-                                              timeout = core.Duration.seconds(30),
-                                              description = "When job failed,send SNS to user.Triggered by EventBridge",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_5"))
-
-        self.lambda_5.add_environment("TABLE_NAME", ddb_table.table_name)
-        self.lambda_5.add_environment("SNS_ARN", sns_topic.topic_arn)
+        Batch_status_change_rule.add_target(
+            targets.LambdaFunction(
+                self.lambda_4,
+                max_event_age=cdk.Duration.hours(2), # Otional: set the maxEventAge retry policy
+                retry_attempts=2
+            )
+        )
 
         # create api-gateway
-
         apigw_auth = apigatewayv2_authorizers.HttpLambdaAuthorizer(
             "Af2Authorizer",
             authorizer_name = 'apigw_auth',

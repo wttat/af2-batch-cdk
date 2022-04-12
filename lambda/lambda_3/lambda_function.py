@@ -110,7 +110,7 @@ def lambda_handler(event, context):
                 UpdateExpression='SET job_id = :job_id,job_status = :job_status',
                 ExpressionAttributeValues={
                     ':job_id': job_id,
-                    ':job_status': 'running'
+                    ':job_status': 'Initializing_Batch'
                 }
             )
 
@@ -124,10 +124,10 @@ def lambda_handler(event, context):
             job_status = response_ddb['Item']['job_status']
 
             if method == 'DELETE':
-                if job_status == "failed":
+                if job_status == "FAILED":
                     print("failed jobs just delete dynamodb")
                     response_ddb = table.delete_item(Key={'id': id})
-                elif job_status == "allset":
+                elif job_status == "SUCCEEDED":
                     s3_foleder_name = (
                         response_ddb['Item']['file_name'].split('.'))[0]
                     Prefix = OUTPUT_PREFIX+s3_foleder_name+"/"
@@ -144,8 +144,7 @@ def lambda_handler(event, context):
                     ]
                 )
                 print("response_batch from describe_jobs:"+str(response_batch))
-                batch_status = response_batch['jobs'][0]['status']
-                if batch_status == "STARTING" or batch_status == "RUNNING":
+                if job_status == "STARTING" or job_status == "RUNNING":
 
                     response_batch = batch.terminate_job(
                         jobId=job_id,
@@ -154,7 +153,7 @@ def lambda_handler(event, context):
 
                     print("response_batch from terminate_job:"+str(response_batch))
 
-                elif batch_status == "SUBMITTED" or batch_status == "PENDING" or batch_status == "RUNNABLE":
+                elif job_status == "SUBMITTED" or job_status == "PENDING" or job_status == "RUNNABLE":
                     response_batch = batch.cancel_job(
                         jobId=job_id,
                         reason='Canceled by user via cli'

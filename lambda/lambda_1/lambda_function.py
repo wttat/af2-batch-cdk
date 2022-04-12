@@ -25,8 +25,6 @@ def lambda_handler(event, context):
     method = eval(json.dumps(event['requestContext']['http']['method']))
 
     if method == 'POST':
-        # check for body
-
         messages = ""
         Items = []
 
@@ -48,8 +46,6 @@ def lambda_handler(event, context):
             file_name = data['file_name']
             key = prefix+file_name
 
-            # return key
-
             # check file path
             try:
                 s3.head_object(Bucket=bucket, Key=key)
@@ -57,12 +53,8 @@ def lambda_handler(event, context):
                 return ('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix+'\n')
             print('fasta found')
 
-
-
             id = str(uuid.uuid4())
             now = time.asctime()
-
-            # decouple Item for both SQS and dynamoDB usage
 
             try:
                 data['fasta']
@@ -180,8 +172,8 @@ def lambda_handler(event, context):
                 'fasta': data['fasta'],
                 'fasta_seq': fasta_seq,
                 'file_name': file_name,
-                'job_id': 'none',
-                'job_status': 'starting',
+                'job_id': 'None',
+                'job_status': 'Initializing_SQS',
                 'model_preset': model_preset,
                 'db_preset': db_preset,
                 'num_multimer_predictions_per_model':num_multimer_predictions_per_model,
@@ -194,7 +186,6 @@ def lambda_handler(event, context):
             }
 
             Items.append(Item)
-            # return str(type(Item))
 
         for Item in Items:
             response_ddb = table.put_item(Item=Item)
@@ -235,7 +226,6 @@ def lambda_handler(event, context):
             for Item in response_ddb['Items']:
                 status = Item['job_status']
                 id = Item['id']
-                # if status == 'allset' or status == 'failed':
                 response_sqs = sqs.send_message(
                     QueueUrl=queue_url,
                     MessageBody=id,
@@ -259,13 +249,13 @@ def lambda_handler(event, context):
             else:
                 status = (response_ddb)['Item']['job_status']
 
-                if status == 'allset' and method == 'CANCEL':
+                if status == 'SUCCEEDED' and method == 'CANCEL':
                     return "This job has completed, you could use delete method to delete all files.\n"
 
-                if status == 'failed' and method == 'CANCEL':
+                if status == 'FAILED' and method == 'CANCEL':
                     return "This job has failed, you could use delete method to delete all files.\n"
 
-                if (status == 'starting' or status == 'running') and method == 'DELETE':
+                if (status != 'SUCCEEDED' and status != 'FAILED') and method == 'DELETE':
                     return ("You can't DELETE a "+status+" job, please use CANCEL method.\n")
 
                 response_sqs = sqs.send_message(

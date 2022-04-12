@@ -24,8 +24,6 @@ import aws_cdk.aws_apigatewayv2 as apigatewayv2
 import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
 import aws_cdk.aws_s3_notifications as s3n
-import aws_cdk.aws_events as events
-import aws_cdk.aws_events_targets as targets
 import aws_cdk.aws_batch as batch
 
 import base64
@@ -44,30 +42,9 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,lambda_5,job_Definition_name, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        failed_rule = events.Rule(
-            self,"FAILEDSNS",
-            description = "for failed batch job",
-            event_pattern = events.EventPattern(
-                source = ["aws.batch"],
-                detail = {
-                    "status": [
-                        "FAILED"
-                        ]
-                    },
-                detail_type = ["Batch Job State Change"],
-            )
-        )
-
-        failed_rule.add_target(
-            targets.LambdaFunction(
-                lambda_5,
-                max_event_age=cdk.Duration.hours(2), # Otional: set the maxEventAge retry policy
-                retry_attempts=2
-            )
-        )
 
         dnsName = file_system.dns_name
         mountName = file_system.mount_name

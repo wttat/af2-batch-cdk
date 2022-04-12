@@ -101,6 +101,41 @@ def generteHtml(fileList):
     result = page.printStr()
     return result
 
+
+# def lambda_handler(event, context):
+#     print (event)
+#     for i in event['detail']['container']['environment']:
+#         if i['name'] == 'id':
+#             id = i['value']
+    
+#     statusReason = event['detail']['statusReason']
+
+#     # update dynamodb
+#     response_ddb = ddb.update_item(
+#         Key={
+#             'id': id
+#         },
+#         UpdateExpression='SET failed_Reason = :failed_Reason,job_status = :job_status',
+#         ExpressionAttributeValues={
+#             ':failed_Reason': statusReason,
+#             ':job_status': 'failed'
+#         }
+#         # ReturnValues: "UPDATED_NEW"
+#     )
+    
+#     print ("response_ddb from update_item"+str(response_ddb))
+    
+    
+#     messageStr = 'Job failed,id:' + id + '.\nFailed reason: ' + statusReason
+#     response_sns = snsClient.publish(
+#         TopicArn = sns_arn,
+#         Message = messageStr,
+#         Subject = 'Af2-batch job failed'
+#     )
+#     print('Sns publish response: ', response_sns)
+    
+#     return response_sns
+
 def lambda_handler(event, context):
     for record in event['Records']:
         fileBucket = record['s3']['bucket']['name']
