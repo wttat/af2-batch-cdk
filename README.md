@@ -238,7 +238,7 @@ Enjoy!
 
 ## Current dataset version：
 
-1. dataset4.tar.gz
+1. dataset4v2.tar.gz
 
     update params to alphafold_params_2022-03-02.tar.
 2. dataset3.tar.gz
