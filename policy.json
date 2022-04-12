@@ -71,6 +71,7 @@
                 "ecr:GetLifecyclePolicy",
                 "ecr:GetRepositoryPolicy",
                 "ecr:ListTagsForResource",
+                "ecr:PutImageScanningConfiguration",
                 "ecr:TagResource",
                 "events:DeleteRule",
                 "events:DescribeRule",
