@@ -204,7 +204,7 @@ class APIGWCdkStack(cdk.Stack):
 
         Batch_status_change_rule.add_target(
             targets.LambdaFunction(
-                self.lambda_4,
+                lambda_4,
                 max_event_age=cdk.Duration.hours(2), # Otional: set the maxEventAge retry policy
                 retry_attempts=2
             )
