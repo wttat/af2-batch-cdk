@@ -37,20 +37,8 @@ sudo yum install -y git
 git clone https://github.com/wttat/af2-batch-cdk
 cd af2-batch-cdk
 ```
-5. Install CDK@v1
-```
-npm install -g aws-cdk@1.152.0
-```
-6. Install dependancy
-```
-pip3 install -r requirements.txt
-```
-& if in China 
-```
-pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-7. Modify af2_batch_cdk/batch.py if needed, check details below. 
-8. Set parameters via env,replace ****** to your own.
+5. Modify af2_batch_cdk/batch.py if needed, check details below. 
+6. Set parameters via env,replace ****** to your own.
 ```
 echo 'export KEYPAIR="******"' >> ~/.bashrc
 echo 'export MAIL="******"' >> ~/.bashrc
@@ -59,6 +47,18 @@ echo 'export AUTH="******"' >> ~/.bashrc
 echo 'export ACCOUNTID="******"' >> ~/.bashrc
 source ~/.bashrc
 aws configure set default.region ${REGION}
+```
+7. Install CDK@v1.152.0
+```
+npm install -g aws-cdk@1.152.0
+```
+8. Install dependancy
+```
+pip3 install -r requirements.txt
+```
+& if in China 
+```
+pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 9.  If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID to your own:
 ```
