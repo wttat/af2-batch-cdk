@@ -39,7 +39,7 @@ cd af2-batch-cdk
 ```
 5. Install CDK@v1
 ```
-npm install -g aws-cdk@1.151.0
+npm install -g aws-cdk@1.152.0
 ```
 6. Install dependancy
 ```
@@ -227,8 +227,6 @@ curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}/{id}
 ```
 Enjoy!
 
-
-
 ## Total cost calculate：
 * The cost filed in DynamoDB counts the number of seconds each task runs. 
 * Use tag {AWS-GCR-HLCS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
@@ -254,6 +252,7 @@ Enjoy!
 * Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/
 * Update env setting, now you don't have to edit app.py.
 * Update resource naming.
+* * Update aws-cdk to @1.152.0
 
 ### 04/10/2022
 * Fix html s3 pre-signed url expire time.
@@ -308,7 +307,6 @@ Enjoy!
 * Better authentication mechanism.
 * Auto check p4.
 * Use Code pipeline to update images.
-* The S3N when job successed changed to Eventbridge.
 * Use secondary index in Dynamodb to reverse the id by the job id.
 * Frontend pages.
 
