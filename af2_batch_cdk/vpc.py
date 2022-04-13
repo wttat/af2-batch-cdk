@@ -127,7 +127,7 @@ class VPCCdkStack(cdk.Stack):
 
 
         # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
-        ec2_tmp = ec2.Instance(self, "Alphafold2DatasetDownloadEC2",
+        ec2_tmp = ec2.Instance(self, "Alphafold2DatasetDownload",
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
             vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),

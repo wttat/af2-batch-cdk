@@ -88,7 +88,7 @@ class BATCHCdkStack(cdk.Stack):
                 "instance_types":[ec2.InstanceType("p3.16xlarge")],
                 "launch_template":{
                     # "launch_template_name":launch_template.launch_template_name,
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
@@ -107,7 +107,7 @@ class BATCHCdkStack(cdk.Stack):
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.8xlarge")],
                 "launch_template":{
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
@@ -126,7 +126,7 @@ class BATCHCdkStack(cdk.Stack):
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
