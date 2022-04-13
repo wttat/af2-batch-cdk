@@ -49,7 +49,7 @@ dataset_name=dataset_arn.split("/")[-1]
 with open("./user_data/tmpec2_user_data") as f:
 	    user_data_raw = f.read()
 
-class EC2VPCCdkStack(cdk.Stack):
+class VPCCdkStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,mail_address,vpc_id,use_default_vpc,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -60,12 +60,12 @@ class EC2VPCCdkStack(cdk.Stack):
 
         #  create a SNS topic   
         self.sns_topic = sns.Topic(
-            self, "TOPIC",
-            display_name="Customer subscription topic",
+            self, "Alphafold2SnsTopic",
+            display_name="Receive Alphafold2 job status notification",
         )
 
         sns.Subscription(
-            self,"SUBSCRIPTION",
+            self,"Alphafold2SnsSubscription",
             topic=self.sns_topic,
             endpoint=mail_address,
             protocol=sns.SubscriptionProtocol.EMAIL,
@@ -73,17 +73,17 @@ class EC2VPCCdkStack(cdk.Stack):
 
         # create ECR repo
         self.repo = ecr.Repository(
-            self,'REPO',
+            self,'Alphafold2EcrRepo',
             removal_policy=cdk.RemovalPolicy.DESTROY
         )
 
         # choose or create a vpc
         if use_default_vpc:
-            self.vpc = ec2.Vpc.from_lookup(self, 'VPC', is_default = True) 
+            self.vpc = ec2.Vpc.from_lookup(self, 'Alphafold2VPC', is_default = True) 
         elif len(vpc_id)!=0:
-            self.vpc = ec2.Vpc.from_lookup(self, 'VPC',vpc_id = vpc_id) 
+            self.vpc = ec2.Vpc.from_lookup(self, 'Alphafold2VPC',vpc_id = vpc_id) 
         else:
-            self.vpc = ec2.Vpc(self, "VPC",
+            self.vpc = ec2.Vpc(self, "Alphafold2VPC",
             max_azs=99, # use all az in this region
             subnet_configuration=[
                 {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
@@ -91,9 +91,9 @@ class EC2VPCCdkStack(cdk.Stack):
                 ]
             )
 
-        self.sg = ec2.SecurityGroup(self, "SG",
+        self.sg = ec2.SecurityGroup(self, "Alphafold2SecurityGroup",
                                 vpc=self.vpc,
-                                description="",
+                                description="Allow access from VPC CIDR and SSH",
                                 security_group_name="CDK SecurityGroup",
                                 allow_all_outbound=True,
                             )
@@ -103,7 +103,7 @@ class EC2VPCCdkStack(cdk.Stack):
         # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
 
         self.file_system = fsx.LustreFileSystem(
-            self,'FsxLustreFileSystemforAF2',
+            self,'Alphafold2FileSystem',
             # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
             #                         "per_unit_storage_throughput":100},
             lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
@@ -131,7 +131,7 @@ class EC2VPCCdkStack(cdk.Stack):
 
 
         # create EC2 for dataset.tar.gz download & ECR image upload & dataset upload
-        ec2_tmp = ec2.Instance(self, "EC2TMP",
+        ec2_tmp = ec2.Instance(self, "Alphafold2DatasetDownloadEC2",
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
             vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
@@ -178,5 +178,5 @@ class EC2VPCCdkStack(cdk.Stack):
                                         )
 
         ec2_tmp.user_data.add_on_exit_commands(
-            f"aws sns publish --message 'You could start training, and manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
+            f"aws sns publish --message 'You could check the fsx volume and start training, then manully terminated the EC2.' --topic-arn {self.sns_topic.topic_arn} --subject 'Your dataset have perpared.' --region {region}"
         )

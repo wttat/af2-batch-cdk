@@ -125,7 +125,7 @@ def lambda_handler(event, context):
 
             if method == 'DELETE':
                 if job_status == "FAILED":
-                    print("failed jobs just delete dynamodb")
+                    print("Failed jobs just delete dynamodb")
                     response_ddb = table.delete_item(Key={'id': id})
                 elif job_status == "SUCCEEDED":
                     s3_foleder_name = (

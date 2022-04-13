@@ -40,15 +40,11 @@ class APIGWCdkStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, auth_key,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
-        # auth_key = self.node.try_get_context("auth_key") # replace your own
-        # auth_key = "af2" # replace your own
-
         self.job_Definition_name = 'af2'
 
         # create a s3 bucket
         self.bucket = s3.Bucket(
-            self,"BUCKET",
+            self,"Alphafold2S3Bucket",
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             # removal_policy=cdk.RemovalPolicy.DESTROY,
             # auto_delete_objects=True
@@ -60,9 +56,8 @@ class APIGWCdkStack(cdk.Stack):
             destination_key_prefix="input/"
         )
 
-        # create dynamodb table
         ddb_table = dynamodb.Table(
-            self,'af2_ddb',
+            self,'Alphafold2DDBTable',
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             partition_key=dynamodb.Attribute(
                 name="id",
@@ -71,12 +66,11 @@ class APIGWCdkStack(cdk.Stack):
             )
         )
 
-        #  create a SQS queue
-        queue = sqs.Queue(self, "SQSQueue")
+        queue = sqs.Queue(self, "Alphafold2SQSQueue")
 
         # create IAM role 0
         role0 = iam.Role(
-            self,'role_0',
+            self,'Alphafold2IAMrole0',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             description =' IAM role for lambda_0',
         )
@@ -85,7 +79,7 @@ class APIGWCdkStack(cdk.Stack):
 
         # create IAM role 1
         role1 = iam.Role(
-            self,'role_1',
+            self,'Alphafold2IAMrole1',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             description =' IAM role for lambda_1',
         )
@@ -97,7 +91,7 @@ class APIGWCdkStack(cdk.Stack):
 
         # create IAM role 2
         role2 = iam.Role(
-            self,'role_2',
+            self,'Alphafold2IAMrole2',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             description =' IAM role for lambda_2',
         )
@@ -111,7 +105,7 @@ class APIGWCdkStack(cdk.Stack):
 
         # create IAM role 3
         role3 = iam.Role(
-            self,'role_3',
+            self,'Alphafold2IAMrole3',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             description =' IAM role for lambda_3',
         )
@@ -124,7 +118,7 @@ class APIGWCdkStack(cdk.Stack):
 
         # create IAM role 4
         role4 = iam.Role(
-            self,'role_4',
+            self,'Alphafold2IAMrole4',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             description =' IAM role for lambda_4',
         )
@@ -136,23 +130,23 @@ class APIGWCdkStack(cdk.Stack):
         role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
 
         # create Lambda 0
-        lambda_0 = _lambda.Function(self, "lambda_0",
+        lambda_0 = _lambda.Function(self, "Alphafold2Lambda0",
                                               runtime=_lambda.Runtime.NODEJS_14_X,
                                               handler="index.handler",
                                               role = role0,
-                                              description = "For apigw auth",
+                                              description = "Api Gateway Auth",
                                               code=_lambda.Code.from_asset("./lambda/lambda_0")
                                               )
 
         lambda_0.add_environment("AUTH_KEY", auth_key)
 
         # create Lambda 1
-        lambda_1 = _lambda.Function(self, "lambda_1",
+        lambda_1 = _lambda.Function(self, "Alphafold2Lambda1",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role1,
                                               timeout = core.Duration.seconds(30),
-                                              description = "For HTTP POST/DELETE/CANCEL method, send messages to SQS",
+                                              description = "Receive not-GET method HTTP request, send messages to SQS",
                                               code=_lambda.Code.from_asset("./lambda/lambda_1"))
 
         lambda_1.add_environment("TABLE_NAME", ddb_table.table_name)
@@ -160,23 +154,23 @@ class APIGWCdkStack(cdk.Stack):
         lambda_1.add_environment("SQS_QUEUE", queue.queue_url)
 
         # create Lambda 2
-        lambda_2 = _lambda.Function(self, "lambda_2",
+        lambda_2 = _lambda.Function(self, "Alphafold2Lambda2",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role2,
                                               timeout = core.Duration.seconds(30),
-                                              description = "For all GET/GET+id method",
+                                              description = "Receive GET method HTTP request, query DynamoDB",
                                               code=_lambda.Code.from_asset("./lambda/lambda_2"))
 
         lambda_2.add_environment("TABLE_NAME", ddb_table.table_name)
 
         # create Lambda 3
-        lambda_3 = _lambda.Function(self, "lambda_3",
+        lambda_3 = _lambda.Function(self, "Alphafold2Lambda3",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role3,
                                               timeout = core.Duration.seconds(30),
-                                              description = "For HTTP POST/DELETE/CANCEL method, receive SQS messages, submit to Batch",
+                                              description = "Receive SQS messages, Submit to Batch",
                                               code=_lambda.Code.from_asset("./lambda/lambda_3"))
 
         lambda_3.add_environment("TABLE_NAME", ddb_table.table_name)
@@ -188,7 +182,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_3.add_event_source(eventsources.SqsEventSource(queue))
 
         # create Lambda 4
-        lambda_4 = _lambda.Function(self, "lambda_4",
+        lambda_4 = _lambda.Function(self, "Alphafold2Lambda4",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role4,
@@ -200,7 +194,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
 
         Batch_status_change_rule = events.Rule(
-            self,"Batch_status_change_rule",
+            self,"Alphafold2BatchStatusChangeRule",
             description = "Track batch job status change",
             event_pattern = events.EventPattern(
                 source = ["aws.batch"],
@@ -218,8 +212,8 @@ class APIGWCdkStack(cdk.Stack):
 
         # create api-gateway
         apigw_auth = apigatewayv2_authorizers.HttpLambdaAuthorizer(
-            "Af2Authorizer",
-            authorizer_name = 'apigw_auth',
+            "Alphafold2Auth",
+            authorizer_name = 'Alphafold2Auth',
             response_types = [apigatewayv2_authorizers.HttpLambdaResponseType('SIMPLE')],
             # payload_format_version = apigatewayv2.AuthorizerPayloadVersion('VERSION_2_0'),
             handler = lambda_0
@@ -227,23 +221,22 @@ class APIGWCdkStack(cdk.Stack):
 
         if len(auth_key)!=0:
             apigw = apigatewayv2.HttpApi(
-                self,'apigw',
-                api_name = 'af2-apigw',
+                self,'Alphafold2ApiGateway',
+                api_name = 'Alphafold2ApiGateway',
                 default_authorizer = apigw_auth
             )
         else:
             apigw = apigatewayv2.HttpApi(
-                self,'apigw',
-                api_name = 'af2-apigw',
-                # default_authorizer = apigw_auth
+                self,'Alphafold2ApiGateway',
+                api_name = 'Alphafold2ApiGateway'
             )
 
         not_GET_intergation = HttpLambdaIntegration(
-            "expect get",
+            "not-GET method",
             handler=lambda_1
         )
         GET_intergation = HttpLambdaIntegration(
-            "all get",
+            "all-Get method",
             handler=lambda_2
         )
 

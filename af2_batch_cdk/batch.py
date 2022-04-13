@@ -23,7 +23,6 @@ import aws_cdk.aws_fsx as fsx
 import aws_cdk.aws_apigatewayv2 as apigatewayv2
 import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
-import aws_cdk.aws_s3_notifications as s3n
 import aws_cdk.aws_batch as batch
 
 import base64
@@ -36,8 +35,6 @@ output_prefix = "output"
 with open("./user_data/fsx_user_data") as f:
 	    user_data_raw = f.read()
 
-# get account ID and region
-# account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(cdk.Stack):
@@ -67,15 +64,12 @@ class BATCHCdkStack(cdk.Stack):
             )
 
         launch_template = ec2.LaunchTemplate(
-            self,"AF2Instances",
-            launch_template_name="BatchLaunchTemplate",
+            self,"Alphafold2BatchLaunchTemplate",
+            launch_template_name="Alphafold2BatchLaunchTemplate",
             user_data = user_data,
-            key_name = key_pair, # maybe should not be allowed after debug
-            # user_data = ec2.UserData.custom(user_data)
+            key_name = key_pair,
             block_devices = [ec2.BlockDevice(
                                            device_name="/dev/xvda",
-                                        # This is a nvme device
-                                        #    device_name="/dev/nvme0n1p1",
                                            volume=ec2.BlockDeviceVolume.ebs(100,
                                                                             encrypted=True
                                                                             )
@@ -83,14 +77,11 @@ class BATCHCdkStack(cdk.Stack):
                             ],
         )
 
-        # Subnets = ec2.SubnetSelection(subnets=[vpc.public_subnets[0]])
-
         # create compute env high
         af2_8GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_8GPU",
+            self,"Alphafold2ComputeEnvironment8GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
@@ -101,17 +92,13 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF28GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                 ]
             }
         )
 
         af2_4GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_4GPU",
+            self,"Alphafold2ComputeEnvironment4GPU",
             compute_resources = {
                 "vpc":vpc,
                 # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
@@ -124,17 +111,13 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF24GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                             ]
             }
         )
 
         af2_1GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_1GPU",
+            self,"Alphafold2ComputeEnvironment1GPU",
             compute_resources = {
                 "vpc":vpc,
                 # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
@@ -147,10 +130,6 @@ class BATCHCdkStack(cdk.Stack):
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF21GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                             ]
                 }
@@ -182,7 +161,7 @@ class BATCHCdkStack(cdk.Stack):
         # )
 
         # create job queue
-        af_high = batch.JobQueue(self, "JobQueue_High",
+        af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
             compute_environments=[{
                 # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_8GPU,
@@ -193,7 +172,7 @@ class BATCHCdkStack(cdk.Stack):
             job_queue_name = 'high',
         )
 
-        af_mid = batch.JobQueue(self, "JobQueue_Mid",
+        af_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
             compute_environments=[{
                 # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_4GPU,
@@ -204,13 +183,14 @@ class BATCHCdkStack(cdk.Stack):
             job_queue_name = 'mid',
         )
 
-        af_low = batch.JobQueue(self, "JobQueue_Low",
-            compute_environments=[{
+        af_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
+            compute_environments=[
+                {
                 # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_1GPU,
                 # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
-            }
+                }
             ],
             job_queue_name = 'low',
         )
@@ -226,31 +206,27 @@ class BATCHCdkStack(cdk.Stack):
         #     job_queue_name = 'p4',
         # )
 
-
-
         image_id = ecs.ContainerImage.from_ecr_repository(
             repository=ecr.Repository.from_repository_name(self, "GetCompRegRepoName",repo.repository_name),
             tag="lastest"
         )
 
         batch_job_role =  iam.Role(
-            self,'batch job role',
+            self,'Alphafold2BatchJobRole',
             assumed_by=iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
             description =' IAM role for batch job',
         )
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEC2ContainerRegistryReadOnly'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
-        # batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonFSxReadOnlyAccess'))
 
         # create job definition
-        af2 = batch.JobDefinition(self,"JobDefinition",
+        af2 = batch.JobDefinition(self,"Alphafold2JobDefinition",
             job_definition_name = job_Definition_name,
             container = {
                 "image": image_id,
                 "job_role" : batch_job_role,
                 "command":["/bin/bash","/app/run.sh",
-                # come from af2 input paramaters
                 "-f","Ref::fasta_paths",
                 "-t","Ref::max_template_date",
                 "-m","Ref::model_preset",
