@@ -51,12 +51,8 @@ with open("./user_data/tmpec2_user_data") as f:
 
 class VPCCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,mail_address,vpc_id,use_default_vpc,**kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,sns_mail,vpc_id,use_default_vpc,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        # Set whether to upload the entire dataset to S3 for backup.
-        # dataset_upload_s3 = self.node.try_get_context("dataset_upload_s3") # replace your own
-        # dataset_upload_s3 = 'False'
 
         #  create a SNS topic   
         self.sns_topic = sns.Topic(
@@ -67,7 +63,7 @@ class VPCCdkStack(cdk.Stack):
         sns.Subscription(
             self,"Alphafold2SnsSubscription",
             topic=self.sns_topic,
-            endpoint=mail_address,
+            endpoint=sns_mail,
             protocol=sns.SubscriptionProtocol.EMAIL,
         )
 

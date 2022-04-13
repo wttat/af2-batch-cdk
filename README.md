@@ -26,7 +26,7 @@ sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin
 ```
 2. Set PATH env.
 ```
-export PATH=$PATH:$(npm get prefix)/bin
+echo 'export PATH=$PATH:$(npm get prefix)/bin' >> ~/.bashrc
 ```
 3. Install Git.
 ```
@@ -49,26 +49,36 @@ pip3 install -r requirements.txt
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-7. Modify app.py (**Required**) and af2_batch_cdk/batch.py, check details below. 
-8. If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID and REGION:
+7. Modify af2_batch_cdk/batch.py if needed, check details below. 
+8. Set parameters via env,replace ****** to your own.
 ```
-cdk bootstrap aws://{ACCOUNT_ID}/{REGION}
+echo 'export KEYPAIR="******"' >> ~/.bashrc
+echo 'export MAIL="******"' >> ~/.bashrc
+echo 'export REGION="******"' >> ~/.bashrc
+echo 'export AUTH="******"' >> ~/.bashrc
+echo 'export ACCOUNTID="******"' >> ~/.bashrc
+source ~/.bashrc
+aws configure set default.region ${REGION}
 ```
-9. Generate Cloudformation template
+9.  If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID to your own:
+```
+cdk bootstrap aws://${ACCOUNTID}/${REGION}
+```
+10. Generate Cloudformation template
 ```
 cdk synth
 ```
-10. Deploy all stacks.
+11. Deploy all stacks.
 ```
 cdk deploy --all
 ```
-11. Confirm the SNS email to receive follow-up notification.
-12. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
-13. Modify the command.json, check details below. 
+12. Confirm the SNS email to receive follow-up notification.
+13. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
+14. Modify the command.json, check details below. 
 
 ## Manually Settings
 
-1. app.py. (Change to set by env instead of editing file later)
+1. app.py.
     
     - Line 23/24. VPC settings:
       - Create a new vpc(Highly recommended): 
@@ -90,22 +100,6 @@ cdk deploy --all
 
       Note: if you set use_default_vpc=1 and vpc_id at the same time, use_default_vpc will override vpc_id and use default vpc.
 
-    - Line 27. Key pair setting:
-
-      ```
-      key_pair = '{key_pair}'
-      ```
-
-    - Line 28. SNS email setting:
-
-        ```
-        mail_address = "{mail_address}"
-        ```
-
-    - Line 32. API GW Authentication key.:
-        ```
-        auth_key = "{auth_key}"
-        ```
     - Line 75-84. Nice DCV instance(Only tested in AWS China region).
         
         Uncomment to use Nice DCV to visualize output pdb files.
@@ -255,6 +249,11 @@ Enjoy!
     original version.
 
 ## Changelog
+
+### 04/13/2022
+* Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/
+* Update env setting, now you don't have to edit app.py.
+* Update resource naming.
 
 ### 04/10/2022
 * Fix html s3 pre-signed url expire time.

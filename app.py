@@ -20,17 +20,15 @@ use_default_vpc = 0 # set to 0 to do not use the default vpc,set to 1 to use you
 vpc_id = "" # if you wanna to set your own VPC,change this to your vpc'id.
 
 # SSH key pair name, 
-key_pair = 'us-east-2' # replace to your own key-pair in the region
-mail_address = "wttat8600@gmail.com" # replace your own
-
-# # Set the api-gateway auth_key, it's essential for api gateway in AWS china if you don't have an ICP.
-auth_key = "af2" # replace your own
+key_pair = os.environ["KEYPAIR"]
+sns_mail = os.environ["MAIL"]
+auth_key = os.environ["AUTH"]
 
 vpc_stack = VPCCdkStack(app, "VPCCdkStack",
     use_default_vpc = use_default_vpc,
     vpc_id = vpc_id,
     key_pair = key_pair,
-    mail_address = mail_address,
+    sns_mail = sns_mail,
     env=core.Environment(
     account=os.environ["CDK_DEFAULT_ACCOUNT"],
     region=os.environ["CDK_DEFAULT_REGION"]
