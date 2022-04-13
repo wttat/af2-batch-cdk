@@ -39,6 +39,12 @@ cd af2-batch-cdk
 ```
 5. Modify af2_batch_cdk/batch.py if needed, check details below. 
 6. Set parameters via env,replace ****** to your own.
+KEYPAIR: The EC2 key pair's name which available in the AWS region.
+MAIL: The email address used to receive SNS notification.
+
+REGION: The region you want to deploy.
+AUTH: The auth key used in HTTP Authentication Header.
+ACCOUNTID: AWS Account ID.
 ```
 echo 'export KEYPAIR="******"' >> ~/.bashrc
 echo 'export MAIL="******"' >> ~/.bashrc
