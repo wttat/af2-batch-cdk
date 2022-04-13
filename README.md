@@ -48,17 +48,17 @@ echo 'export ACCOUNTID="******"' >> ~/.bashrc
 source ~/.bashrc
 aws configure set default.region ${REGION}
 ```
-7. Install CDK@v1.152.0
-```
-npm install -g aws-cdk@1.152.0
-```
-8. Install dependancy
+7. Install dependancy
 ```
 pip3 install -r requirements.txt
 ```
 & if in China 
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+8. Install CDK@v1.152.0
+```
+npm install -g aws-cdk@1.152.0
 ```
 9.  If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID to your own:
 ```
