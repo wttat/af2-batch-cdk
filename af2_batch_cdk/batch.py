@@ -64,7 +64,7 @@ class BATCHCdkStack(cdk.Stack):
             )
 
         launch_template = ec2.LaunchTemplate(
-            self,"Alphafold2BatchLaunchTemplate",
+            self,"Alphafold2BatchInstances",
             launch_template_name="Alphafold2BatchLaunchTemplate",
             user_data = user_data,
             key_name = key_pair,
@@ -79,7 +79,7 @@ class BATCHCdkStack(cdk.Stack):
 
         # create compute env high
         af2_8GPU = batch.ComputeEnvironment(
-            self,"Alphafold2ComputeEnvironment8GPU",
+            self,"Alphafold2CE8GPU",
             compute_resources = {
                 "vpc":vpc,
                 "minv_cpus":0,
@@ -87,7 +87,6 @@ class BATCHCdkStack(cdk.Stack):
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.16xlarge")],
                 "launch_template":{
-                    # "launch_template_name":launch_template.launch_template_name,
                     "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
@@ -98,10 +97,9 @@ class BATCHCdkStack(cdk.Stack):
         )
 
         af2_4GPU = batch.ComputeEnvironment(
-            self,"Alphafold2ComputeEnvironment4GPU",
+            self,"Alphafold2CE4GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
@@ -117,10 +115,9 @@ class BATCHCdkStack(cdk.Stack):
         )
 
         af2_1GPU = batch.ComputeEnvironment(
-            self,"Alphafold2ComputeEnvironment1GPU",
+            self,"Alphafold2CE1GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
@@ -136,7 +133,7 @@ class BATCHCdkStack(cdk.Stack):
         )
 
         # af2_p4 = batch.ComputeEnvironment(
-        #     self,"Alphafold2ComputeEnvironment1GPU",
+        #     self,"Alphafold2CE1GPU",
         #     compute_resources = {
         #         "vpc":vpc,
         #         "minv_cpus":0,
@@ -156,9 +153,7 @@ class BATCHCdkStack(cdk.Stack):
         # create job queue
         af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
             compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_8GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
             }
             ],
@@ -167,9 +162,7 @@ class BATCHCdkStack(cdk.Stack):
 
         af_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
             compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_4GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
             }
             ],
@@ -179,9 +172,7 @@ class BATCHCdkStack(cdk.Stack):
         af_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
             compute_environments=[
                 {
-                # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_1GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
                 }
             ],
@@ -190,9 +181,7 @@ class BATCHCdkStack(cdk.Stack):
 
         # af_p4 = batch.JobQueue(self, "JobQueue_P4",
         #     compute_environments=[{
-        #         # Defines a collection of compute resources to handle assigned batch jobs
         #         "computeEnvironment": af2_p4,
-        #         # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
         #         "order": 1
         #     }
         #     ],
