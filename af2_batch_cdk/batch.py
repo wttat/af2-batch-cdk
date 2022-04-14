@@ -135,31 +135,24 @@ class BATCHCdkStack(cdk.Stack):
                 }
         )
 
-        ## TODO check p4 auto
-
         # af2_p4 = batch.ComputeEnvironment(
-        #     self,"ComputeEnvironment_P4",
+        #     self,"Alphafold2ComputeEnvironment1GPU",
         #     compute_resources = {
         #         "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
         #         "minv_cpus":0,
-        #         "desiredv_cpus":8,
+        #         "desiredv_cpus":0,
         #         "maxv_cpus":256,
         #         "instance_types":[ec2.InstanceType("p4d.24xlarge")],
         #         "launch_template":{
-        #             "launch_template_name":"lustreLaunchTemplate",
+        #             "launch_template_name":"Alphafold2BatchLaunchTemplate",
         #             "version":"$Latest"
         #         },
         #         "security_groups":[
-        #             # ec2.SecurityGroup.from_security_group_id(
-        #             #             self,"AF21GPUSG",
-        #             #             security_group_id=vpc.vpc_default_security_group
-        #             #         )
         #             sg,
         #                     ]
         #         }
         # )
-
+        
         # create job queue
         af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
             compute_environments=[{

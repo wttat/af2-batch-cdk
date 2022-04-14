@@ -266,7 +266,7 @@ Enjoy!
 * Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/
 * Update env setting, now you don't have to edit app.py.
 * Update resource naming.
-* * Update aws-cdk to @1.152.0
+* Update aws-cdk to @1.152.0
 
 ### 04/10/2022
 * Fix html s3 pre-signed url expire time.
