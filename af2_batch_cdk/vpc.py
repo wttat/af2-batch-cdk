@@ -57,7 +57,7 @@ class VPCCdkStack(cdk.Stack):
         #  create a SNS topic   
         self.sns_topic = sns.Topic(
             self, "Alphafold2SnsTopic-",
-            display_name="Alphafold2 Notifaication",
+            display_name="Alphafold2 Notification",
         )
 
         sns.Subscription(
