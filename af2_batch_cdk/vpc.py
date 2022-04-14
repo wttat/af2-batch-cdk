@@ -56,8 +56,8 @@ class VPCCdkStack(cdk.Stack):
 
         #  create a SNS topic   
         self.sns_topic = sns.Topic(
-            self, "Alphafold2SnsTopic",
-            display_name="Receive Alphafold2 job status notification",
+            self, "Alphafold2SnsTopic-",
+            display_name="Alphafold2 Notifaication",
         )
 
         sns.Subscription(
@@ -69,7 +69,7 @@ class VPCCdkStack(cdk.Stack):
 
         # create ECR repo
         self.repo = ecr.Repository(
-            self,'Alphafold2EcrRepo',
+            self,'Alphafold2EcrRepo-',
             removal_policy=cdk.RemovalPolicy.DESTROY
         )
 

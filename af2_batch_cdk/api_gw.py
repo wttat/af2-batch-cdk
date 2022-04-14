@@ -44,7 +44,7 @@ class APIGWCdkStack(cdk.Stack):
 
         # create a s3 bucket
         self.bucket = s3.Bucket(
-            self,"Alphafold2S3Bucket",
+            self,"Alphafold2S3Bucket-",
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             # removal_policy=cdk.RemovalPolicy.DESTROY,
             # auto_delete_objects=True
@@ -57,7 +57,7 @@ class APIGWCdkStack(cdk.Stack):
         )
 
         ddb_table = dynamodb.Table(
-            self,'Alphafold2DDBTable',
+            self,'Alphafold2DDBTable-',
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             partition_key=dynamodb.Attribute(
                 name="id",
@@ -141,7 +141,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_0.add_environment("AUTH_KEY", auth_key)
 
         # create Lambda 1
-        lambda_1 = _lambda.Function(self, "Alphafold2Lambda1",
+        lambda_1 = _lambda.Function(self, "Alphafold2Lambda1-",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role1,
@@ -154,7 +154,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_1.add_environment("SQS_QUEUE", queue.queue_url)
 
         # create Lambda 2
-        lambda_2 = _lambda.Function(self, "Alphafold2Lambda2",
+        lambda_2 = _lambda.Function(self, "Alphafold2Lambda2-",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role2,
@@ -165,7 +165,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_2.add_environment("TABLE_NAME", ddb_table.table_name)
 
         # create Lambda 3
-        lambda_3 = _lambda.Function(self, "Alphafold2Lambda3",
+        lambda_3 = _lambda.Function(self, "Alphafold2Lambda3-",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role3,
@@ -182,7 +182,7 @@ class APIGWCdkStack(cdk.Stack):
         lambda_3.add_event_source(eventsources.SqsEventSource(queue))
 
         # create Lambda 4
-        lambda_4 = _lambda.Function(self, "Alphafold2Lambda4",
+        lambda_4 = _lambda.Function(self, "Alphafold2Lambda4-",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role4,
@@ -192,9 +192,11 @@ class APIGWCdkStack(cdk.Stack):
 
         lambda_4.add_environment("TABLE_NAME", ddb_table.table_name)
         lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
+        lambda_4.add_environment("S3_BUCKET", self.bucket.bucket_name)
+
 
         Batch_status_change_rule = events.Rule(
-            self,"Alphafold2BatchStatusChangeRule",
+            self,"Alphafold2BatchStatusChangeRule-",
             description = "Track batch job status change",
             event_pattern = events.EventPattern(
                 source = ["aws.batch"],
