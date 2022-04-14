@@ -1,278 +1,97 @@
 import json
-import os
 import boto3
-from pyh import *
-
-fileIndex = '*'
-html = 'index.html'
-
-s3Client = boto3.client('s3')
-bucket_name = os.environ['S3_BUCKET']
-
-snsClient = boto3.client('sns')
-sns_arn = os.environ['SNS_ARN']
-batch = boto3.client('batch')
+import uuid
+import time
+from boto3.dynamodb.conditions import Key, Attr
+import os
 
 dynamodb = boto3.resource('dynamodb')
-ddb = dynamodb.Table(os.environ['TABLE_NAME'])
+table = dynamodb.Table(os.environ['TABLE_NAME'])
 
-expiretime = 86400 # 24h*60min*60s = 1day
+batch = boto3.client('batch')
+logs = boto3.client('logs')
 
-def getSharedFileList(bucket_name, dirPrefix):
-    fileList = []
-    try:
-        if fileIndex == '*':
-            response_fileList = s3Client.list_objects_v2(
-                Bucket = bucket_name,
-                Prefix = dirPrefix,
-                MaxKeys = 1000
-            )
-            for n in response_fileList['Contents']:
-                if n['Key'][-1] != '/':      
-                    presignUrl = s3Client.generate_presigned_url(
-                        'get_object',
-                        Params = {
-                            'Bucket': bucket_name,
-                            'Key': n['Key']
-                        })
-                    fileList.append({
-                        'Key': n['Key'],
-                        'Url': presignUrl,
-                        'Size': n['Size']
-                    })
-            
-            while response_fileList['IsTruncated']:
-                response_fileList = s3Client.list_objects_v2(
-                    Bucket = bucket_name,
-                    Prefix = dirPrefix,
-                    MaxKeys = 1000,
-                    ContinuationToken = response_fileList['NextContinuationToken']
-                )
-                if n['Key'][-1] != '/':      
-                    presignUrl = s3Client.generate_presigned_url(
-                        'get_object',
-                        Params = {
-                            'Bucket': bucket_name,
-                            'Key': n['Key']
-                        })
-                    fileList.append({
-                        'Key': n['Key'],
-                        'Url': presignUrl,
-                        'Size': n['Size']
-                    })
-        else:
-            fileKey = os.path.join(dirPrefix, fileIndex)
-            presignUrl = s3Client.generate_presigned_url(
-                        'get_object',
-                        Params = {
-                            'Bucket': bucket_name,
-                            'Key': fileKey
-                        },
-                        ExpiresIn = expiretime
-                        )
-            response_fileList = s3Client.head_object(
-                Bucket = bucket_name,
-                Key = fileKey
-            )
-            fileList = [{
-                'Key': fileKey,
-                'Url': presignUrl,
-                'Size': response_fileList['ContentLength']
-            }]
-    except Exception as e:
-        print('[ERROR] Can not get file bucket/prefix. Err: ', e)
-        os._exit(0)
-    return fileList
-
-def generteHtml(fileList):
-    page = PyH('Shared Files')
-    page << h2('Shared Files')
-
-    mytab = page << table()
-    th = mytab << tr()
-    th << td(b('Name')) + td(b('Size (Bytes)')) + td(b('Link'))
-
-    for file in fileList:
-        tr1 = mytab << tr()
-        tr1 << td(file['Key']) + td(str(file['Size'])) + td(a('Download', href = file['Url']))
-
-    result = page.printStr()
-    return result
+logGroupName = '/aws/batch/job'
 
 
-def check_id(id):
-    # Check whether this job status change event belongs to Alphafold2 solution
-    if id == '':
-        print("Cannot found the id field, This batch job does not belong to Alphafold2 solution")
-        return 1
-    else:
-        try:
-            response_ddb = ddb.get_item(Key={'id':id})
-        except:
-            print("Cannot found this record in dynamodb from id: ",id)
-            return 1
-        else:
-            print("Found the id:",id ,"in dynamodb.")
-            return 0
-
-def job_status_update_others(id,job_status):
-    # Only update the job status in ddb.
-    response_ddb = ddb.update_item(
-        Key={
-            'id': id
-        },
-        UpdateExpression='SET job_status = :job_status',
-        ExpressionAttributeValues={
-            ':job_status': job_status
-        }
+def getLogs(logStreamName):
+    response_logs = logs.get_log_events(
+        logGroupName=logGroupName,
+        logStreamName=logStreamName,
+        startFromHead=False,
+        limit=20,
     )
-    print ("Update dynamodb for id: "+id+"completed.")
-    
-def job_status_failed_others(id,statusReason):
-    # Update the job status in ddb first.
-    response_ddb = ddb.update_item(
-        Key={
-            'id': id
-        },
-        UpdateExpression='SET failed_Reason = :failed_Reason,job_status = :job_status',
-        ExpressionAttributeValues={
-            ':failed_Reason': statusReason,
-            ':job_status': 'FAILED'
-        }
-    )
-    
-    print ("Update dynamodb for id: "+id+"completed.")
-    
-    # Send SNS message.
-    messageStr = 'Job failed,id:' + id + '.\nFailed reason: ' + statusReason + '.\n Please contact admin.'
-    response_sns = snsClient.publish(
-        TopicArn = sns_arn,
-        Message = messageStr,
-        Subject = 'Af2-batch job failed'
-    )
-    print('Sns publish response: ', response_sns)
-    
-def job_status_succeeded_others(id):
-    # First check whether this job is truly succeeded.
-    response_ddb = ddb.get_item(Key={'id': id})
-    fasta_file_name = response_ddb['Item']['file_name']
-    dirPrefix = fasta_file_name.split('.')[0]
-    test_file = os.path.join(fasta_file_name.split('.')[0],'ranked_0.pdb')
-    
-    # Check S3 permission.
-    if bucket_name.strip() == '': 
-        print('[ERROR] Bucket name is not valid')
-        os._exit(0)
-    try:
-        testKey = os.path.join(dirPrefix, 'access_test')
-        s3Client.put_object(
-            Bucket = bucket_name,
-            Key = testKey,
-            Body = 'access_test_content'
-        )
-        s3Client.delete_object(
-            Bucket = bucket_name,
-            Key = testKey
-        )
-    except Exception as e:
-        print('[ERROR] Not authorized to write to destination bucket/prefix. Err: ', e)
-        os._exit(0)
-    
-    # Check pdb file.
-    try:
-        s3Client.get_object(
-            Bucket = bucket_name,
-            Key = test_file
-            )
-    except:
-        print("no pdb file found for job id :",id, "something wrong, change status from succeeded to failed")
-        job_status_failed_others(id,"no pdb file found")
-        return
-    else:
-        print("found pdb file for job id :",id)
-    
-    # Generate s3 pre-signed url html
-    shareFileList = getSharedFileList(bucket_name, dirPrefix)
-    htmlStr = generteHtml(shareFileList)
-    if htmlStr.strip() != '':
-        htmlKey = os.path.join(dirPrefix, html)
-        s3Client.put_object(
-            Bucket = bucket_name,
-            Key = htmlKey,
-            Body = htmlStr
-        )
-    else:
-        print('[ERROR] Html is blank')
-        os._exit(0)
-        
-    htmlPresignUrl = s3Client.generate_presigned_url(
-                        'get_object',
-                        Params = {
-                            'Bucket': bucket_name,
-                            'Key': htmlKey
-                        },
-                        ExpiresIn = expiretime
-                        
-                        )
-    print('htmlPresignUrl: ', htmlPresignUrl)
-    
-    # Get job runtime
-    job_id = response_ddb['Item']['job_id']
-    response_batch = batch.describe_jobs(
-        jobs=[
-            job_id,
-        ]
-    )
-        
-    jobName = response_batch['jobs'][0]['jobName']
+    messages = ''
+    for event in (response_logs)['events']:
+        messages = messages+'\n'+(str(event['message']))
+    return messages
 
-    startedAt = response_batch['jobs'][0]['startedAt']
-    stoppedAt = response_batch['jobs'][0]['stoppedAt']
-    cost = round((stoppedAt-startedAt)/1000)
-
-    if os.environ['AWS_REGION'] == 'cn-north-1' or os.environ['AWS_REGION'] == 'cn-northwest-1':
-        messageStr = 'Total runtime is '+str(cost)+'s.\n\nIn AWS China,Presigned URLs work only if the resource owner has an ICP license , otherwise, please use aws cli $aws s3 sync s3://'+bucket_name+'/'+dirPrefix+' ./ to download entire foleder'+'\n\nDownload files from the html: ' + htmlPresignUrl
-    else:
-        messageStr = 'Total runtime is '+str(cost)+'s.\n\nYou can download files from the html: ' + htmlPresignUrl+'.\n\nYou can alsp use aws cli $aws s3 sync s3://'+bucket_name+'/'+dirPrefix+' ./ to download entire foleder'
-    response_sns = snsClient.publish(
-        TopicArn = sns_arn,
-        Message = messageStr,
-        Subject = jobName +"'s result data is now available for download"
-    )
-    print('Sns publish response: ', response_sns)
-
-    response_ddb = ddb.update_item(
-        Key={
-            'id': id
-        },
-        UpdateExpression='SET s3_url = :s3_url,job_status = :job_status,cost = :cost',
-        ExpressionAttributeValues={
-            ':s3_url': htmlPresignUrl,
-            ':job_status': 'SUCCEEDED',
-            ':cost': cost
-        }
-    )
-        
-    print ("Update dynamodb for id: "+id+"completed.")
-
-    
 def lambda_handler(event, context):
-    
-    # Check id validity.
-    id = ''
-    for i in event['detail']['container']['environment']:
-        if i['name'] == 'id':
-            id = i['value']
-    if check_id(id) == 1:
-        return
-    
-    job_status = event['detail']['status']
-    print("Found job status:",job_status)
-    
-    if job_status == 'SUCCEEDED':
-        job_status_succeeded_others(id)
-    elif job_status == 'FAILED':
-        statusReason = event['detail']['statusReason']
-        job_status_failed_others(id,statusReason)
-    else:
-        job_status_update_others(id,job_status)
+    # return event
+    method = eval(json.dumps(event['requestContext']['http']['method']))
+    id = json.dumps(event['requestContext']['http']['path']).strip('"/')
+
+    if method == 'GET':
+        if id == '':
+            try:
+                response_ddb = table.scan()
+            except:
+                return 'Cannt find the dynamodbDB table, please contact admin.\n'
+            
+            if response_ddb['Count'] == 0:
+                return "No job was deployed.\n"
+            else:
+                return (response_ddb['Items'])
+        else:
+            response_ddb = table.get_item(Key={'id': id})
+            if 'Item' not in response_ddb:
+                return "Wrong id!\nPlease remove the id after url to scan all ids~\n"
+            else:
+                job_status = (response_ddb)['Item']['job_status']
+                job_id = response_ddb['Item']['job_id']
+
+                if (job_status == "Initializing_SQS" or job_status == "Initializing_Batch"):
+                    return str(response_ddb['Item'])+"\n\n###\n\nThis job is starting and waiting for sending to Batch\n"
+                elif job_status == "FAILED":
+                        try:
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
+                        except:
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        else:
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
+                elif job_status == "SUCCEEDED":
+                        try:
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
+                        except:
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        else:
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                else:# status = SUBMITTED/PENDING/RUNNABLE/STARTING/RUNNING
+                        response_batch = batch.describe_jobs(
+                            jobs=[
+                                job_id,
+                            ]
+                        )
+                        if job_status == "RUNNING":
+                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
+                        else:
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+',going to run.'+'\n\n'
+        return "please use GET/GET{id}/POST/DELETE{id}\n"

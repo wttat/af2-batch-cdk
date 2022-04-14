@@ -112,7 +112,7 @@ def check_id(id):
             print("Cannot found this record in dynamodb from id: ",id)
             return 1
         else:
-            print("Found it!")
+            print("Found the id:",id ,"in dynamodb.")
             return 0
 
 def job_status_update_others(id,job_status):
@@ -126,10 +126,12 @@ def job_status_update_others(id,job_status):
             ':job_status': job_status
         }
     )
-    print ("response_ddb from update_item"+str(response_ddb))
+    print ("Update dynamodb for id: "+id+"completed.")
     
 def job_status_failed_others(id,statusReason):
     # Update the job status in ddb first.
+    response_ddb = ddb.get_item(Key={'id': id})
+    fasta_file_name = response_ddb['Item']['file_name']
     response_ddb = ddb.update_item(
         Key={
             'id': id
@@ -141,23 +143,23 @@ def job_status_failed_others(id,statusReason):
         }
     )
     
-    print ("response_ddb from update_item"+str(response_ddb))
+    print ("Update dynamodb for id: "+id+"completed.")
     
     # Send SNS message.
     messageStr = 'Job failed,id:' + id + '.\nFailed reason: ' + statusReason + '.\n Please contact admin.'
     response_sns = snsClient.publish(
         TopicArn = sns_arn,
         Message = messageStr,
-        Subject = 'Af2-batch job failed'
+        Subject = 'Alphafold2'+fasta_file_name+' job failed'
     )
     print('Sns publish response: ', response_sns)
     
 def job_status_succeeded_others(id):
     # First check whether this job is truly succeeded.
-    response_ddb = table.get_item(Key={'id': id})
+    response_ddb = ddb.get_item(Key={'id': id})
     fasta_file_name = response_ddb['Item']['file_name']
-    dirPrefix = fasta_file_name.split('.')[0]
-    test_file = os.path.join(fasta_file_name.split('.')[0],'ranked_0.pdb')
+    dirPrefix = 'output/'+fasta_file_name.split('.')[0]
+    tar_gz = 'output/'+fasta_file_name.split('.')[0]+'.tar'+'.gz'
     
     # Check S3 permission.
     if bucket_name.strip() == '': 
@@ -182,14 +184,14 @@ def job_status_succeeded_others(id):
     try:
         s3Client.get_object(
             Bucket = bucket_name,
-            Key = test_file
+            Key = tar_gz
             )
     except:
-        print("no pdb file found for job id :",id, "something wrong, change status from succeeded to failed")
-        job_status_failed_others(id,"no pdb file found")
+        print("no tar.gz file found for job id :",id, "something wrong, change status from succeeded to failed")
+        job_status_failed_others(id,"no tar.gz file found")
         return
     else:
-        print("found pdb file for job id :",id)
+        print("found tar.gz file for job id :",id)
     
     # Generate s3 pre-signed url html
     shareFileList = getSharedFileList(bucket_name, dirPrefix)
@@ -230,7 +232,7 @@ def job_status_succeeded_others(id):
     stoppedAt = response_batch['jobs'][0]['stoppedAt']
     cost = round((stoppedAt-startedAt)/1000)
 
-    if record['awsRegion'] == 'cn-north-1' or record['awsRegion'] == 'cn-northwest-1':
+    if os.environ['AWS_REGION'] == 'cn-north-1' or os.environ['AWS_REGION'] == 'cn-northwest-1':
         messageStr = 'Total runtime is '+str(cost)+'s.\n\nIn AWS China,Presigned URLs work only if the resource owner has an ICP license , otherwise, please use aws cli $aws s3 sync s3://'+bucket_name+'/'+dirPrefix+' ./ to download entire foleder'+'\n\nDownload files from the html: ' + htmlPresignUrl
     else:
         messageStr = 'Total runtime is '+str(cost)+'s.\n\nYou can download files from the html: ' + htmlPresignUrl+'.\n\nYou can alsp use aws cli $aws s3 sync s3://'+bucket_name+'/'+dirPrefix+' ./ to download entire foleder'
@@ -253,7 +255,7 @@ def job_status_succeeded_others(id):
         }
     )
         
-    print ("response_ddb from update_item"+str(response_ddb))
+    print ("Update dynamodb for id: "+id+"completed.")
 
     
 def lambda_handler(event, context):

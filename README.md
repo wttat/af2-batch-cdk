@@ -94,7 +94,7 @@ cdk deploy --all
 
 1. app.py.
     
-    - Line 23/24. VPC settings:
+    - Line 19/20. VPC settings:
       - Create a new vpc(Highly recommended): 
       ```
       use_default_vpc=0
