@@ -131,7 +131,7 @@ def job_status_update_others(id,job_status):
 def job_status_failed_others(id,statusReason):
     # Update the job status in ddb first.
     response_ddb = ddb.get_item(Key={'id': id})
-    fasta_file_name = response_ddb['Item']['file_name']
+    fasta_name = response_ddb['Item']['file_name'].split('.')[0]
     response_ddb = ddb.update_item(
         Key={
             'id': id
@@ -150,7 +150,7 @@ def job_status_failed_others(id,statusReason):
     response_sns = snsClient.publish(
         TopicArn = sns_arn,
         Message = messageStr,
-        Subject = 'Alphafold2'+fasta_file_name+' job failed'
+        Subject = 'Alphafold2 '+fasta_name+' job failed'
     )
     print('Sns publish response: ', response_sns)
     
