@@ -262,8 +262,12 @@ Enjoy!
 
 ## Changelog
 
+### 04/18/2022
+* Add SNS notification for job starting.
+* Update lambda code.
+
 ### 04/13/2022
-* Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/
+* Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/SUBMITTED/PENDING/RUNNABLE/STARTING/RUNNING/SUCCEEDED/FAILED
 * Update env setting, now you don't have to edit app.py.
 * Update resource naming.
 * Update aws-cdk to @1.152.0

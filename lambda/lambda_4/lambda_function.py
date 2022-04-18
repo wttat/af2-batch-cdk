@@ -128,7 +128,7 @@ def job_status_update_others(id,job_status):
     )
     print ("Update dynamodb for id: "+id+"completed.")
     
-def job_status_failed_others(id,statusReason):
+def job_status_update_failed(id,statusReason):
     # Update the job status in ddb first.
     response_ddb = ddb.get_item(Key={'id': id})
     fasta_name = response_ddb['Item']['file_name'].split('.')[0]
@@ -154,7 +154,20 @@ def job_status_failed_others(id,statusReason):
     )
     print('Sns publish response: ', response_sns)
     
-def job_status_succeeded_others(id):
+def job_status_update_starting(id):
+    
+    response_ddb = ddb.get_item(Key={'id': id})
+    fasta_name = response_ddb['Item']['file_name'].split('.')[0]
+    # Send SNS message.
+    messageStr = 'Job Starting,id:' + id +'.\nYou can get the logs now.'
+    response_sns = snsClient.publish(
+        TopicArn = sns_arn,
+        Message = messageStr,
+        Subject = 'Alphafold2 '+fasta_name+' job starting'
+    )
+    print('Sns publish response: ', response_sns)
+    
+def job_status_update_succeeded(id):
     # First check whether this job is truly succeeded.
     response_ddb = ddb.get_item(Key={'id': id})
     fasta_file_name = response_ddb['Item']['file_name']
@@ -188,7 +201,7 @@ def job_status_succeeded_others(id):
             )
     except:
         print("no tar.gz file found for job id :",id, "something wrong, change status from succeeded to failed")
-        job_status_failed_others(id,"no tar.gz file found")
+        job_status_update_failed(id,"no tar.gz file found")
         return
     else:
         print("found tar.gz file for job id :",id)
@@ -271,10 +284,12 @@ def lambda_handler(event, context):
     job_status = event['detail']['status']
     print("Found job status:",job_status)
     
-    if job_status == 'SUCCEEDED':
-        job_status_succeeded_others(id)
+    if job_status == 'STARTING':
+        job_status_update_starting(id)
+    elif job_status == 'SUCCEEDED':
+        job_status_update_succeeded(id)
     elif job_status == 'FAILED':
         statusReason = event['detail']['statusReason']
-        job_status_failed_others(id,statusReason)
+        job_status_update_failed(id,statusReason)
     else:
         job_status_update_others(id,job_status)

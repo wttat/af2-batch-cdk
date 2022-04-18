@@ -64,9 +64,15 @@ def lambda_handler(event, context):
                             return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
                         else:
                             statusReason = response_batch['jobs'][0]['statusReason']
-                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
-                            messages = getLogs(logStreamName)
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
+                            
+                            try:
+                                logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                                messages = getLogs(logStreamName)
+                            except:
+                                print("This failed job does not have logs yet")
+                                return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nThis failed job does not have logs yet.\n'
+                            else:
+                                return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
                 elif job_status == "SUCCEEDED":
                         try:
                             response_batch = batch.describe_jobs(
