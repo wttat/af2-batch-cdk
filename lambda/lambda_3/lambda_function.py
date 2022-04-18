@@ -93,7 +93,7 @@ def method_post(payload):
         UpdateExpression='SET job_id = :job_id,job_status = :job_status',
         ExpressionAttributeValues={
             ':job_id': job_id,
-            ':job_status': 'Initializing_Batch'
+            ':job_status': 'Initializing_BATCH'
         }
     )
 
@@ -109,7 +109,7 @@ def method_delete(id):
     elif job_status == "SUCCEEDED":
         s3_foleder_name = (
             response_ddb['Item']['file_name'].split('.'))[0]
-        Prefix = OUTPUT_PREFIX+s3_foleder_name+"/"
+        Prefix = OUTPUT_PREFIX+s3_foleder_name
         response_s3 = bucket.objects.filter(Prefix=Prefix).delete()
         print("response_s3:"+str(response_s3))
         response_ddb = table.delete_item(Key={'id': id})

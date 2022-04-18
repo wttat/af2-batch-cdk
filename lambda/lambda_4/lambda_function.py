@@ -165,6 +165,7 @@ def job_status_update_starting(id):
         Message = messageStr,
         Subject = 'Alphafold2 '+fasta_name+' job starting'
     )
+    job_status_update_others(id,'STARTING')
     print('Sns publish response: ', response_sns)
     
 def job_status_update_succeeded(id):

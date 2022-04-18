@@ -265,6 +265,7 @@ Enjoy!
 ### 04/18/2022
 * Add SNS notification for job starting.
 * Update lambda code.
+* Add check max_template_date.
 
 ### 04/13/2022
 * Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/SUBMITTED/PENDING/RUNNABLE/STARTING/RUNNING/SUCCEEDED/FAILED

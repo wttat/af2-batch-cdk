@@ -94,6 +94,8 @@ def check_body(event):
             print('no max_template_date,using dafault max_template_date 2021-11-01')
             max_template_date = '2021-11-01'
         print('max_template_date: ',max_template_date)
+        if time.strptime(max_template_date,'%Y-%m-%d') == False:
+            raise Exception('the max_template_date does not match %Y-%m-%d format.')
 
         # check if model_preset meet the requirements
         if data['model_preset'] != 'monomer' and data['model_preset'] != 'monomer_casp14' and data['model_preset'] != 'monomer_ptm' and data['model_preset'] != 'multimer':
@@ -252,6 +254,8 @@ def method_cancel(id):
             job_status = (response_ddb)['Item']['job_status']
             if (job_status == 'SUCCEEDED' or job_status == 'FAILED'):
                 raise Exception("You can't CANCEL a "+job_status+" job, please use DELETE method.\n")
+            if (job_status == 'Initializing_SQS' or job_status == 'Initializing_BATCH'):
+                raise Exception("You can't CANCEL a "+job_status+" job, please wait until it goes to batch and cancel again.\n")
             return submit_sqs(id,'CANCEL')    
 
 def lambda_handler(event, context):
