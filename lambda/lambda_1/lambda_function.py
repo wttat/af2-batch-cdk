@@ -149,6 +149,7 @@ def check_body(event):
             comment = data['comment']
         except:
             print('no comment')
+            comment = ''
         print('comment: ',comment)
         
         # check gpu
