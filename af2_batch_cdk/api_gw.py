@@ -204,8 +204,12 @@ class APIGWCdkStack(cdk.Stack):
                 detail = {
                     "container": {
                         "environment": {
-                            "name": "AWS-GCR-HCLS-Solutions",
-                            "value": "Alphafold2"
+                            "name": [
+                            "AWS-GCR-HCLS-Solutions"
+                        ],
+                            "value": [
+                            "Alphafold2"
+                        ]
                         }
                     }
                 }
