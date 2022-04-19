@@ -74,7 +74,7 @@ pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 npm install -g aws-cdk@1.152.0
 ```
-9.  If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID to your own:
+1.  If never run cdk before in this region, use below code to init cdk:
 ```
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 ```
@@ -95,7 +95,7 @@ cdk deploy --all
 1. app.py.
     
     - Line 19/20. VPC settings:
-      - Create a new vpc(Highly recommended): 
+      - Create a new vpc(**Default, Highly recommended not to change**): 
       ```
       use_default_vpc=0
       vpc_id=""
@@ -135,7 +135,7 @@ cdk deploy --all
     to
         
         storage_capacity_gib = 2400,
-    then you have to manually change the fsx compression type to lz4 before all file are decompressed.
+    **then you have to manually change the fsx compression type to lz4 before all file are decompressed.**
     
     Or edit row 113-115 if you know what this means:
     
@@ -243,7 +243,7 @@ Enjoy!
 
 ## Total cost calculate：
 * The cost filed in DynamoDB counts the number of seconds each task runs. 
-* Use tag {AWS-GCR-HLCS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
+* Use tag {AWS-GCR-HCLS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
 
 ## Current dataset version：
 
@@ -326,7 +326,6 @@ Enjoy!
 * Better authentication mechanism.
 * Auto check p4.
 * Use Code pipeline to update images.
-* Use secondary index in Dynamodb to reverse the id by the job id.
 * Frontend pages.
 
 ## Resource Cleanup

@@ -200,7 +200,15 @@ class APIGWCdkStack(cdk.Stack):
             description = "Track batch job status change",
             event_pattern = events.EventPattern(
                 source = ["aws.batch"],
-                detail_type = ["Batch Job State Change"]
+                detail_type = ["Batch Job State Change"],
+                detail = {
+                    "container": {
+                        "environment": {
+                            "name": "AWS-GCR-HCLS-Solutions",
+                            "value": "Alphafold2"
+                        }
+                    }
+                }
             )
         )
 
