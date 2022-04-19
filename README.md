@@ -26,7 +26,7 @@ sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin
 ```
 2. Set PATH env.
 ```
-export PATH=$PATH:$(npm get prefix)/bin
+echo 'export PATH=$PATH:$(npm get prefix)/bin' >> ~/.bashrc
 ```
 3. Install Git.
 ```
@@ -37,11 +37,32 @@ sudo yum install -y git
 git clone https://github.com/wttat/af2-batch-cdk
 cd af2-batch-cdk
 ```
-5. Install CDK@v1
+5. Modify af2_batch_cdk/batch.py if needed, check details below. 
+6. Set parameters via env,replace ****** to your own.
+
+
 ```
-npm install -g aws-cdk@1.151.0
+echo 'export KEYPAIR="******"' >> ~/.bashrc
+echo 'export MAIL="******"' >> ~/.bashrc
+echo 'export REGION="******"' >> ~/.bashrc
+echo 'export AUTH="******"' >> ~/.bashrc
+echo 'export ACCOUNTID="******"' >> ~/.bashrc
+source ~/.bashrc
+aws configure set default.region ${REGION}
 ```
-6. Install dependancy
+**Parameter Description**:
+
+*KEYPAIR*: The EC2 key pair's name which available in the AWS region.
+
+*MAIL*: The email address used to receive SNS notification.
+
+*REGION*: The region you want to deploy.
+
+*AUTH*: The auth key used in HTTP Authentication Header.
+
+*ACCOUNTID*: AWS Account ID.
+
+7. Install dependancy
 ```
 pip3 install -r requirements.txt
 ```
@@ -49,29 +70,32 @@ pip3 install -r requirements.txt
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-7. Modify app.py (**Required**) and af2_batch_cdk/batch.py, check details below. 
-8. If never run cdk before in this region, use below code to init, do change the ACCOUNT_ID and REGION:
+8. Install CDK@v1.152.0
 ```
-cdk bootstrap aws://{ACCOUNT_ID}/{REGION}
+npm install -g aws-cdk@1.152.0
 ```
-9. Generate Cloudformation template
+1.  If never run cdk before in this region, use below code to init cdk:
+```
+cdk bootstrap aws://${ACCOUNTID}/${REGION}
+```
+10. Generate Cloudformation template
 ```
 cdk synth
 ```
-10. Deploy all stacks.
+11. Deploy all stacks.
 ```
 cdk deploy --all
 ```
-11. Confirm the SNS email to receive follow-up notification.
-12. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
-13. Modify the command.json, check details below. 
+12. Confirm the SNS email to receive follow-up notification.
+13. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
+14. Modify the command.json, check details below. 
 
 ## Manually Settings
 
-1. app.py. (Change to set by env instead of editing file later)
+1. app.py.
     
-    - Line 23/24. VPC settings:
-      - Create a new vpc(Highly recommended): 
+    - Line 19/20. VPC settings:
+      - Create a new vpc(**Default, Highly recommended not to change**): 
       ```
       use_default_vpc=0
       vpc_id=""
@@ -90,22 +114,6 @@ cdk deploy --all
 
       Note: if you set use_default_vpc=1 and vpc_id at the same time, use_default_vpc will override vpc_id and use default vpc.
 
-    - Line 27. Key pair setting:
-
-      ```
-      key_pair = '{key_pair}'
-      ```
-
-    - Line 28. SNS email setting:
-
-        ```
-        mail_address = "{mail_address}"
-        ```
-
-    - Line 32. API GW Authentication key.:
-        ```
-        auth_key = "{auth_key}"
-        ```
     - Line 75-84. Nice DCV instance(Only tested in AWS China region).
         
         Uncomment to use Nice DCV to visualize output pdb files.
@@ -127,7 +135,7 @@ cdk deploy --all
     to
         
         storage_capacity_gib = 2400,
-    then you have to manually change the fsx compression type to lz4 before all file are decompressed.
+    **then you have to manually change the fsx compression type to lz4 before all file are decompressed.**
     
     Or edit row 113-115 if you know what this means:
     
@@ -190,7 +198,7 @@ For Alphfold2 Settings:
 
 * Upload the fasta file to the input folder in the S3 bucket just created. Check the S3 bucket arn in the cdk output.
 * Check the API Gateway's URL in the cdk output or via AWS console.  
-* Using Postman to do this more convenient.
+* **Using Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
 1. POST:Submit a job using POST method,change the KEY(if set) and ApiGW_URL to your own. 
 
 ```
@@ -233,11 +241,9 @@ curl -X "DELETE" -H "Authorization: {KEY}"  {ApiGW_URL}/{id}
 ```
 Enjoy!
 
-
-
 ## Total cost calculate：
 * The cost filed in DynamoDB counts the number of seconds each task runs. 
-* Use tag {AWS-GCR-HLCS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
+* Use tag {AWS-GCR-HCLS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
 
 ## Current dataset version：
 
@@ -255,6 +261,17 @@ Enjoy!
     original version.
 
 ## Changelog
+
+### 04/18/2022
+* Add SNS notification for job starting.
+* Update lambda code.
+* Add check max_template_date.
+
+### 04/13/2022
+* Update job status from starting/running/failed/allset to match the Batch job status Initializing_SQS/Initializing_Batch/SUBMITTED/PENDING/RUNNABLE/STARTING/RUNNING/SUCCEEDED/FAILED
+* Update env setting, now you don't have to edit app.py.
+* Update resource naming.
+* Update aws-cdk to @1.152.0
 
 ### 04/10/2022
 * Fix html s3 pre-signed url expire time.
@@ -309,8 +326,6 @@ Enjoy!
 * Better authentication mechanism.
 * Auto check p4.
 * Use Code pipeline to update images.
-* The S3N when job successed changed to Eventbridge.
-* Use secondary index in Dynamodb to reverse the id by the job id.
 * Frontend pages.
 
 ## Resource Cleanup

@@ -33,7 +33,6 @@ def lambda_handler(event, context):
 
     if method == 'GET':
         if id == '':
-                
             try:
                 response_ddb = table.scan()
             except:
@@ -48,64 +47,57 @@ def lambda_handler(event, context):
             if 'Item' not in response_ddb:
                 return "Wrong id!\nPlease remove the id after url to scan all ids~\n"
             else:
-                status = (response_ddb)['Item']['job_status']
+                job_status = (response_ddb)['Item']['job_status']
                 job_id = response_ddb['Item']['job_id']
 
-                if status == "starting":
-                    return str(response_ddb['Item'])+"\n\n###\n\nThis job is starting and waiting for send to Batch\n"
-                else:
-                    if status == "running":
+                if (job_status == "Initializing_SQS" or job_status == "Initializing_Batch"):
+                    return str(response_ddb['Item'])+"\n\n###\n\nThis job is starting and waiting for sending to Batch\n"
+                elif job_status == "FAILED":
+                        try:
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
+                        except:
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        else:
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            
+                            try:
+                                logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                                messages = getLogs(logStreamName)
+                            except:
+                                print("This failed job does not have logs yet")
+                                return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nThis failed job does not have logs yet.\n'
+                            else:
+                                return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
+                elif job_status == "SUCCEEDED":
+                        try:
+                            response_batch = batch.describe_jobs(
+                                jobs=[
+                                    job_id,
+                                ]
+                            )
+                        except:
+                            messages = 'Logs have been deleted'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                        else:
+                            statusReason = response_batch['jobs'][0]['statusReason']
+                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
+                            messages = getLogs(logStreamName)
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                else:# status = SUBMITTED/PENDING/RUNNABLE/STARTING/RUNNING
                         response_batch = batch.describe_jobs(
                             jobs=[
                                 job_id,
                             ]
                         )
-                        batch_status = response_batch['jobs'][0]['status']
-                        if batch_status == "SUBMITTED":
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
-                        elif batch_status == "PENDING":
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n'
-                        elif batch_status == "RUNNABLE":
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',if you stuck in this status for a long time, please check your GPU ec2 instances limit.'+'\n\n'
-                        elif batch_status == "STARTING":
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+',going to run.'+'\n\n'
-                        elif batch_status == "RUNNING":
+                        if job_status == "RUNNING":
                             logStreamName = response_batch['jobs'][0]['container']['logStreamName']
                             messages = getLogs(logStreamName)
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
-                    elif status == "allset":
-                        try:
-                            response_batch = batch.describe_jobs(
-                                jobs=[
-                                    job_id,
-                                ]
-                            )
-                        except:
-                            messages = 'Logs have been deleted'
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nFull logs on cloudwatch logs\n'
                         else:
-                            batch_status = response_batch['jobs'][0]['status']
-                            statusReason = response_batch['jobs'][0]['statusReason']
-                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
-                            messages = getLogs(logStreamName)
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
-                    elif status == "failed":
-                        try:
-                            response_batch = batch.describe_jobs(
-                                jobs=[
-                                    job_id,
-                                ]
-                            )
-                        except:
-                            messages = 'Logs have been deleted'
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nPlease check your email for download info.\n'
-                        else:
-                            batch_status = response_batch['jobs'][0]['status']
-                            statusReason = response_batch['jobs'][0]['statusReason']
-                            logStreamName = response_batch['jobs'][0]['container']['logStreamName']
-                            messages = getLogs(logStreamName)
-                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+batch_status+'\n\n####\n\nstatusReason :'+statusReason+'\n\n####\n\nRecent logs :'+messages+'\n\n####\n\nSomething Wrong!!! Please check full logs on cloudwatch logs\n'
-                    else:
-                        return "status error,please connact for support"
-    else:
+                            return '####\n\njob info : \n\n'+str((response_ddb)['Item'])+'\n\n####\n\njob status :'+job_status+',going to run.'+'\n\n'
         return "please use GET/GET{id}/POST/DELETE{id}\n"

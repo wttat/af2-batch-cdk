@@ -23,9 +23,6 @@ import aws_cdk.aws_fsx as fsx
 import aws_cdk.aws_apigatewayv2 as apigatewayv2
 import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
 import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
-import aws_cdk.aws_s3_notifications as s3n
-import aws_cdk.aws_events as events
-import aws_cdk.aws_events_targets as targets
 import aws_cdk.aws_batch as batch
 
 import base64
@@ -38,36 +35,13 @@ output_prefix = "output"
 with open("./user_data/fsx_user_data") as f:
 	    user_data_raw = f.read()
 
-# get account ID and region
-# account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,lambda_5,job_Definition_name, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        failed_rule = events.Rule(
-            self,"FAILEDSNS",
-            description = "for failed batch job",
-            event_pattern = events.EventPattern(
-                source = ["aws.batch"],
-                detail = {
-                    "status": [
-                        "FAILED"
-                        ]
-                    },
-                detail_type = ["Batch Job State Change"],
-            )
-        )
-
-        failed_rule.add_target(
-            targets.LambdaFunction(
-                lambda_5,
-                max_event_age=cdk.Duration.hours(2), # Otional: set the maxEventAge retry policy
-                retry_attempts=2
-            )
-        )
 
         dnsName = file_system.dns_name
         mountName = file_system.mount_name
@@ -90,15 +64,12 @@ class BATCHCdkStack(cdk.Stack):
             )
 
         launch_template = ec2.LaunchTemplate(
-            self,"AF2Instances",
-            launch_template_name="BatchLaunchTemplate",
+            self,"Alphafold2BatchInstances",
+            launch_template_name="Alphafold2BatchLaunchTemplate",
             user_data = user_data,
-            key_name = key_pair, # maybe should not be allowed after debug
-            # user_data = ec2.UserData.custom(user_data)
+            key_name = key_pair,
             block_devices = [ec2.BlockDevice(
                                            device_name="/dev/xvda",
-                                        # This is a nvme device
-                                        #    device_name="/dev/nvme0n1p1",
                                            volume=ec2.BlockDeviceVolume.ebs(100,
                                                                             encrypted=True
                                                                             )
@@ -106,150 +77,116 @@ class BATCHCdkStack(cdk.Stack):
                             ],
         )
 
-        # Subnets = ec2.SubnetSelection(subnets=[vpc.public_subnets[0]])
-
         # create compute env high
         af2_8GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_8GPU",
+            self,"Alphafold2CE8GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.16xlarge")],
                 "launch_template":{
-                    # "launch_template_name":launch_template.launch_template_name,
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF28GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                 ]
             }
         )
 
         af2_4GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_4GPU",
+            self,"Alphafold2CE4GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.8xlarge")],
                 "launch_template":{
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF24GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                             ]
             }
         )
 
         af2_1GPU = batch.ComputeEnvironment(
-            self,"ComputeEnvironment_1GPU",
+            self,"Alphafold2CE1GPU",
             compute_resources = {
                 "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
                 "instance_types":[ec2.InstanceType("p3.2xlarge")],
                 "launch_template":{
-                    "launch_template_name":"BatchLaunchTemplate",
+                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
                 },
                 "security_groups":[
-                    # ec2.SecurityGroup.from_security_group_id(
-                    #             self,"AF21GPUSG",
-                    #             security_group_id=vpc.vpc_default_security_group
-                    #         )
                     sg,
                             ]
                 }
         )
 
-        ## TODO check p4 auto
-
         # af2_p4 = batch.ComputeEnvironment(
-        #     self,"ComputeEnvironment_P4",
+        #     self,"Alphafold2CE1GPU",
         #     compute_resources = {
         #         "vpc":vpc,
-                # "vpc_subnets":ec2.SubnetSelection(subnets=[vpc.public_subnets[0]]),
         #         "minv_cpus":0,
-        #         "desiredv_cpus":8,
+        #         "desiredv_cpus":0,
         #         "maxv_cpus":256,
         #         "instance_types":[ec2.InstanceType("p4d.24xlarge")],
         #         "launch_template":{
-        #             "launch_template_name":"lustreLaunchTemplate",
+        #             "launch_template_name":"Alphafold2BatchLaunchTemplate",
         #             "version":"$Latest"
         #         },
         #         "security_groups":[
-        #             # ec2.SecurityGroup.from_security_group_id(
-        #             #             self,"AF21GPUSG",
-        #             #             security_group_id=vpc.vpc_default_security_group
-        #             #         )
         #             sg,
         #                     ]
         #         }
         # )
-
+        
         # create job queue
-        af_high = batch.JobQueue(self, "JobQueue_High",
+        af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
             compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_8GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
             }
             ],
             job_queue_name = 'high',
         )
 
-        af_mid = batch.JobQueue(self, "JobQueue_Mid",
+        af_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
             compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
                 "computeEnvironment": af2_4GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
             }
             ],
             job_queue_name = 'mid',
         )
 
-        af_low = batch.JobQueue(self, "JobQueue_Low",
-            compute_environments=[{
-                # Defines a collection of compute resources to handle assigned batch jobs
+        af_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
+            compute_environments=[
+                {
                 "computeEnvironment": af2_1GPU,
-                # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
                 "order": 1
-            }
+                }
             ],
             job_queue_name = 'low',
         )
 
         # af_p4 = batch.JobQueue(self, "JobQueue_P4",
         #     compute_environments=[{
-        #         # Defines a collection of compute resources to handle assigned batch jobs
         #         "computeEnvironment": af2_p4,
-        #         # Order determines the allocation order for jobs (i.e. Lower means higher preference for job assignment)
         #         "order": 1
         #     }
         #     ],
         #     job_queue_name = 'p4',
         # )
-
-
 
         image_id = ecs.ContainerImage.from_ecr_repository(
             repository=ecr.Repository.from_repository_name(self, "GetCompRegRepoName",repo.repository_name),
@@ -257,23 +194,21 @@ class BATCHCdkStack(cdk.Stack):
         )
 
         batch_job_role =  iam.Role(
-            self,'batch job role',
+            self,'Alphafold2BatchJobRole',
             assumed_by=iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
             description =' IAM role for batch job',
         )
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEC2ContainerRegistryReadOnly'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
-        # batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonFSxReadOnlyAccess'))
 
         # create job definition
-        af2 = batch.JobDefinition(self,"JobDefinition",
+        af2 = batch.JobDefinition(self,"Alphafold2JobDefinition",
             job_definition_name = job_Definition_name,
             container = {
                 "image": image_id,
                 "job_role" : batch_job_role,
                 "command":["/bin/bash","/app/run.sh",
-                # come from af2 input paramaters
                 "-f","Ref::fasta_paths",
                 "-t","Ref::max_template_date",
                 "-m","Ref::model_preset",
