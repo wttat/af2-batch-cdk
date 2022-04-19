@@ -274,9 +274,14 @@ def job_status_update_succeeded(id):
     
 def lambda_handler(event, context):
     
+    # get id
+    for item in event['detail']['container']['environment']:
+        if item['name']=='id':
+            id = item['value']
+
     job_status = event['detail']['status']
     print("Found job status:",job_status)
-    
+
     if job_status == 'STARTING':
         job_status_update_starting(id)
     elif job_status == 'SUCCEEDED':
