@@ -288,7 +288,7 @@ Enjoy!
 * Update aws-cdk to @1.150.0
 
 ### 02/16/2022
-* Tag all resources by {AWS-GCR-HLCS-Solutions:Alphafold2} to track overall costs.
+* Tag all resources by {AWS-GCR-HCLS-Solutions:Alphafold2} to track overall costs.
 
 ### 02/13/2022
 * Update to cdk@1.144.0, will update to cdk@v2 later.
