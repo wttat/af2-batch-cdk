@@ -12,6 +12,7 @@ from aws_cdk.core import App, Stack, Tags
 from af2_batch_cdk.vpc import VPCCdkStack
 from af2_batch_cdk.api_gw import APIGWCdkStack
 from af2_batch_cdk.batch import BATCHCdkStack
+from af2_batch_cdk.notebook import NOTEBOOKCdkStack
 from af2_batch_cdk.nice_dcv import NICEDEVCdkStack
 
 app = core.App()
@@ -59,9 +60,14 @@ batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
     )
 )
 
+notebook_stack = NOTEBOOKCdkStack(app,"NOTEBOOKCdkStack",
+    )
+
+
 Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
 Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
 Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
+Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     key_pair = key_pair,
