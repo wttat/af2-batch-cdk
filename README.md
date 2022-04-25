@@ -66,6 +66,10 @@ aws configure set default.region ${REGION}
 ```
 pip3 install -r requirements.txt
 ```
+& if dependency goes wrong
+```
+pip3 install -r requirements.txt --use-feature=2020-resolver
+```
 & if in China 
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
@@ -74,7 +78,7 @@ pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 npm install -g aws-cdk@1.152.0
 ```
-1.  If never run cdk before in this region, use below code to init cdk:
+9.  If never run cdk before in this region, use below code to init cdk:
 ```
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 ```
