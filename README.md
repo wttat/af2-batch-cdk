@@ -202,7 +202,8 @@ For Alphfold2 Settings:
 
 * Upload the fasta file to the input folder in the S3 bucket just created. Check the S3 bucket arn in the cdk output.
 * Check the API Gateway's URL in the cdk output or via AWS console.  
-* **Using Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
+* **Using Sagemaker Notebook to do this on AWS**.
+* **Or using Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
 1. POST:Submit a job using POST method,change the KEY(if set) and ApiGW_URL to your own. 
 
 ```
