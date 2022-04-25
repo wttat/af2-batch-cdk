@@ -74,9 +74,9 @@ pip3 install -r requirements.txt --use-feature=2020-resolver
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-8. Install CDK@v1.152.0
+8. Install CDK@v1.153.1
 ```
-npm install -g aws-cdk@1.152.0
+npm install -g aws-cdk@1.153.1
 ```
 9.  If never run cdk before in this region, use below code to init cdk:
 ```
@@ -265,6 +265,10 @@ Enjoy!
     original version.
 
 ## Changelog
+
+### 04/25/2022
+* Use sagemaker notebook to submit job
+* Update aws-cdk to @1.153.1
 
 ### 04/18/2022
 * Add SNS notification for job starting.

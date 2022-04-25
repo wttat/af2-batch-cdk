@@ -51,7 +51,7 @@ class APIGWCdkStack(cdk.Stack):
         )
 
         s3deploy.BucketDeployment(self, "DeployFastaSample",
-            sources=[s3deploy.Source.asset("./input/")],
+            sources=[s3deploy.Source.asset("./notebook/input/")],
             destination_bucket= self.bucket ,
             destination_key_prefix="input/"
         )
