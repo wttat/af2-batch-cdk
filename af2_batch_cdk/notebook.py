@@ -31,7 +31,7 @@ class NOTEBOOKCdkStack(cdk.Stack):
         notebook_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSageMakerFullAccess'))
 
         cfn_notebook_instance = sagemaker.CfnNotebookInstance(self,"Alphafold2Notebook",
-            notebook_instance_name="alphafold2-notebook",
+            notebook_instance_name="Alphafold2Notebook",
             role_arn=notebook_job_role.role_arn,
             instance_type="ml.t3.medium",
             default_code_repository="https://github.com/wttat/af2-batch-cdk",
