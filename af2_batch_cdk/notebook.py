@@ -19,7 +19,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class NOTEBOOKCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,bucket,**kwargs):
+    def __init__(self, scope: cdk.Construct, construct_id: str,**kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         notebook_job_role =  iam.Role(
