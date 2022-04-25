@@ -33,7 +33,7 @@ class NOTEBOOKCdkStack(cdk.Stack):
         cfn_notebook_instance = sagemaker.CfnNotebookInstance(self,"Alphafold2Notebook",
             notebook_instance_name="alphafold2-notebook",
             role_arn=notebook_job_role.role_arn,
-            instance_type="ml.t2.medium",
+            instance_type="ml.t3.medium",
             default_code_repository="https://github.com/wttat/af2-batch-cdk",
             volume_size_in_gb=30,
         )
