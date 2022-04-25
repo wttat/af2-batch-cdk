@@ -132,6 +132,8 @@
                 "sagemaker:CreateNotebookInstance",
                 "sagemaker:DeleteNotebookInstance",
                 "sagemaker:DescribeNotebookInstance",
+                "sagemaker:StartNotebookInstance",
+                "sagemaker:StopNotebookInstance",
                 "sagemaker:AddTags",
                 "sagemaker:DeleteTags",
                 "sns:CreateTopic",
