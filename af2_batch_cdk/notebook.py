@@ -42,7 +42,7 @@ class NOTEBOOKCdkStack(cdk.Stack):
         core.CfnOutput(
             self,"af2-notebook-name",
             description="af2-notebook",
-            value=self.cfn_notebook_instance.attr_notebook_instance_name,
+            value=cfn_notebook_instance.attr_notebook_instance_name,
         )
 
 
