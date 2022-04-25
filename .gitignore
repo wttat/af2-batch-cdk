@@ -10,3 +10,6 @@ cdk.context.json
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+notebook/.DS_Store
+notebook/input/.DS_Store
+notebook/output/.DS_Store
