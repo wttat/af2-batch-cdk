@@ -1,4 +1,4 @@
-# For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. https://docs.aws.amazon.com/AmazonS3/latest/userguide/finding-canonical-user-id.html
+# For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. 
 # Current support Alphafold Version : 2.2.0
 Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.0
 # Alphafold2 on AWS Deploy Guide:
@@ -266,6 +266,11 @@ Enjoy!
     original version.
 
 ## Changelog
+
+### 04/26/2022
+* You have to require s3 permissions first to deploy this solution.
+* Update readme.
+* Update architecture diagram.
 
 ### 04/25/2022
 * Use sagemaker notebook to submit job
