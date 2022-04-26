@@ -1,4 +1,4 @@
-# For security reasons, if you want to deploy this solution, please submit your canonical user ID and deployment region  through Github issue. https://docs.aws.amazon.com/AmazonS3/latest/userguide/finding-canonical-user-id.html
+# For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. https://docs.aws.amazon.com/AmazonS3/latest/userguide/finding-canonical-user-id.html
 # Current support Alphafold Version : 2.2.0
 Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.0
 # Alphafold2 on AWS Deploy Guide:
