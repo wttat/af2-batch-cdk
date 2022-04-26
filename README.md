@@ -8,6 +8,8 @@ AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-hig
 Architecture diagram on AWS：
 ![avatar](architecture.png)
 
+https://github.com/wttat/af2-batch-cdk/blob/main/architecture.png
+
 ## Modified Alphafold2 source code GitHub Repo：
 
 https://github.com/wttat/alphafold
@@ -203,7 +205,7 @@ For Alphfold2 Settings:
 * Upload the fasta file to the input folder in the S3 bucket just created. Check the S3 bucket arn in the cdk output.
 * Check the API Gateway's URL in the cdk output or via AWS console.  
 
-* **Option 1:Log into Sagemaker Notebook to do this on AWS**.
+* **Option 1:Log into the Sagemaker Notebook instance just created to do this by jupyter notebook. Notebook path: /af2-batch-cdk/notebook/Alphafold2.ipynb**. Preview :https://github.com/wttat/af2-batch-cdk/blob/main/notebook/Alphafold2.ipynb
 * **Option 2:Use Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
 * **Option 3:Use Terminal or integrate below APIs into existing business systems**, please check it in the AWS blog on the top of this README.
   
