@@ -1,6 +1,6 @@
 # For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. 
-# Current support Alphafold Version : 2.2.0
-Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.0
+# Current support Alphafold Version : 2.2.2
+Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.2
 # Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
