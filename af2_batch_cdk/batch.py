@@ -133,7 +133,7 @@ class BATCHCdkStack(cdk.Stack):
         )
 
         # af2_p4 = batch.ComputeEnvironment(
-        #     self,"Alphafold2CE1GPU",
+        #     self,"Alphafold2CEP4",
         #     compute_resources = {
         #         "vpc":vpc,
         #         "minv_cpus":0,
