@@ -272,6 +272,9 @@ Enjoy!
 
 ## Changelog
 
+### 07/12/2022
+* Add alphafold2 job error check.
+
 ### 06/22/2022
 * Support Alpfadold v2.2.2,minor update,do not need upgrade.
 
