@@ -76,9 +76,9 @@ pip3 install -r requirements.txt --use-feature=2020-resolver
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-8. Install CDK@v1.152.0
+8. Install CDK@v1.176.0
 ```
-npm install -g aws-cdk@1.152.0
+npm install -g aws-cdk@1.176.0
 ```
 9.  If never run cdk before in this region, use below code to init cdk:
 ```
@@ -272,6 +272,10 @@ Enjoy!
 
 ## Changelog
 
+### 10/10/2022
+* Pretty the API response.
+* Update aws-cdk to @1.176.0
+* 
 ### 07/12/2022
 * Add alphafold2 job error check.
 
