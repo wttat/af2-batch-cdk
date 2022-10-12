@@ -21,32 +21,21 @@ queue_url = os.environ['SQS_QUEUE']
 
 def submit_sqs(Item,method):
     messages = ''
-    response_sqs = sqs.send_message(
-        QueueUrl=queue_url,
-        MessageBody=str(Item),
-        DelaySeconds=10,
-        MessageAttributes={
-            'Atcion': {
-                'StringValue': method,
-                'DataType': 'String'
-            }
-        },
-    )
+    try:
+        response_sqs = sqs.send_message(
+            QueueUrl=queue_url,
+            MessageBody=str(Item),
+            DelaySeconds=10,
+            MessageAttributes={
+                'Atcion': {
+                    'StringValue': method,
+                    'DataType': 'String'
+                }
+            },
+        )
+    except:
+        raise Exception('SQS submit failed. Please contact admin.')
 
-    print('submit to sqs',response_sqs)
-    
-    if response_sqs['ResponseMetadata']['HTTPStatusCode'] == 200:
-        if method == 'POST':
-            messages = messages + '\nSuccessful submit Batch job for fasta:' + \
-                Item['fasta'] + ', id:' + Item['id']+'\n\n' + \
-                'Please use $(curl $auth-info $api-gateway-url/' + \
-                Item['id']+') to query this job'+'\n\n'
-        else:
-            messages = messages + 'Successfully send ' + \
-            method+' command to Batch job.\n\n'  + '####\nPlease wait 2min and try to query this job again.\n\n'
-    else:
-        messages = 'SQS submit failed. Please contact admin.'
-    return messages
 
 def check_body(event):
     Items = []
@@ -55,7 +44,7 @@ def check_body(event):
     try:
         datas = json.loads(event['body'])
     except:
-        raise Exception('Please check HTTP body.It should in json.\n')
+        raise Exception('Please check HTTP body.It should in json.')
 
     for data in datas:
         
@@ -71,21 +60,21 @@ def check_body(event):
             file_name = data['file_name']
             model_preset = data['model_preset']
         except:
-            raise Exception('You need to at least specific the fasta/que/file_name/model_preset parameters.\n')
+            raise Exception('You need to at least specific the fasta/que/file_name/model_preset parameters.')
         
         # check if fasta file exist in s3   
         key = prefix+file_name
         try:
             s3.head_object(Bucket=bucket, Key=key)
         except:
-            raise Exception('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix+'\n')
+            raise Exception('The fatsa file path is not correct, please put it in s3://'+bucket+'/'+prefix)
         
         print('fasta found')
         
         # check if que meet the requirements
         # TODO check p4 auto
         if que != 'high' and que != 'mid' and que != 'low' and que != 'p4':
-            raise Exception('The job queue should be high or mid or low or p4(depends on region) .\n')
+            raise Exception('The job queue should be high or mid or low or p4(depends on region) .')
 
         # check max_template_date
         try:
@@ -129,7 +118,7 @@ def check_body(event):
             num_multimer_predictions_per_model = 5
         else:
             if str(num_multimer_predictions_per_model).isdigit() == False:
-                raise Exception('The num_multimer_predictions_per_model should be a number.\n')
+                raise Exception('The num_multimer_predictions_per_model should be a number.')
 
         print('num_multimer_predictions_per_model: ',num_multimer_predictions_per_model)
 
@@ -160,7 +149,7 @@ def check_body(event):
             gpu = 1
         else:
             if str(data['gpu']).isdigit() == False:
-                raise Exception('The gpu should be a number.\n')
+                raise Exception('The gpu should be a number.')
         print('gpu: ',gpu)
         
         if gpu > 1:
@@ -201,87 +190,142 @@ def method_post(event):
     except Exception as e:
         print('body check failed!')
         raise Exception(e.args)
-        # return str(Exception)
 
     print('body check pass~')
-    messages = 'body check pass~.\n'
     for Item in Items:
         response_ddb = table.put_item(Item=Item)
         print('write to ddb',response_ddb)
-        
-        messages = messages+submit_sqs(Item,'POST')
+        submit_sqs(Item,'POST')
 
-    return messages
+    return Items
 
 def method_delete(id):
-    # DELETE ALL
-    if id == '':
-        messages = "Deleting all finished and failed jobs.\n\n"
-        response_ddb = table.scan()
-        for Item in response_ddb['Items']:
-            id = Item['id']
-            messages = messages + submit_sqs(id,'DELETE')
-        return messages
-            
-    # DELETE ONE
+    
+    response_ddb = table.get_item(Key={'id': id})
+    if 'Item' not in response_ddb:
+        raise Exception("No such job id to terminate.")
     else:
-        response_ddb = table.get_item(Key={'id': id})
-        if 'Item' not in response_ddb:
-            raise Exception("No such job id to terminate\n")
+        job_status = (response_ddb)['Item']['job_status']
+        if job_status == 'DELETING':
+            raise Exception("This job is DELETING, please wait.")
+        elif job_status == 'CANCELING':
+            raise Exception("This job is CANCELING, please wait.")
+        elif (job_status != 'SUCCEEDED' and job_status != 'FAILED'):
+            raise Exception("You can't DELETE a "+job_status+" job, please use CANCEL method.")
         else:
-            job_status = (response_ddb)['Item']['job_status']
-            if (job_status != 'SUCCEEDED' and job_status != 'FAILED'):
-                raise Exception("You can't DELETE a "+job_status+" job, please use CANCEL method.\n")
-                
-            return submit_sqs(id,'DELETE')
+            
+            submit_sqs(id,'DELETE')
+            
+    return response_ddb['Item']
             
 def method_cancel(id):
-    # CANCEL ALL
-    if id == '':
 
-        messages = "Canceling all running jobs.\n\n"
-        response_ddb = table.scan()
-        for Item in response_ddb['Items']:
-            id = Item['id']
-            messages = messages + submit_sqs(id,'CANCEL')
-        return messages
-            
-    # CANCEL ONE
+    response_ddb = table.get_item(Key={'id': id})
+    if 'Item' not in response_ddb:
+        raise Exception("No such job id to terminate.")
     else:
-        response_ddb = table.get_item(Key={'id': id})
-        if 'Item' not in response_ddb:
-            raise Exception("No such job id to terminate\n")
+        job_status = (response_ddb)['Item']['job_status']
+        if job_status == 'CANCELING':
+            raise Exception("This job is CANCELING, please wait.")
+        elif job_status == 'DELETING':
+            raise Exception("This job is DELETING, please wait.")
+        elif (job_status == 'SUCCEEDED' or job_status == 'FAILED'):
+            raise Exception("You can't CANCEL a "+job_status+" job, please use DELETE method.")
+        elif (job_status == 'Initializing_SQS' or job_status == 'Initializing_BATCH'):
+            raise Exception("You can't CANCEL a "+job_status+" job, please wait until it goes to batch and cancel again.")
         else:
-            job_status = (response_ddb)['Item']['job_status']
-            if (job_status == 'SUCCEEDED' or job_status == 'FAILED'):
-                raise Exception("You can't CANCEL a "+job_status+" job, please use DELETE method.\n")
-            if (job_status == 'Initializing_SQS' or job_status == 'Initializing_BATCH'):
-                raise Exception("You can't CANCEL a "+job_status+" job, please wait until it goes to batch and cancel again.\n")
-            return submit_sqs(id,'CANCEL')    
+
+            submit_sqs(id,'CANCEL')
+            
+    return response_ddb['Item']
 
 def lambda_handler(event, context):
     
-    print(event) # For debug
-    method = eval(json.dumps(event['requestContext']['http']['method'])) # HTTP method
-    
-    if method == 'POST':
-        try:
-            messages =  method_post(event)
-        except Exception as e:
-            messages = e.args[0][0]
+    routeKey = event['requestContext']['routeKey']
 
-    elif method  == 'DELETE':
-        id = json.dumps(event['requestContext']['http']['path']).strip('"/')
+    if routeKey == "POST /":
         try:
-            messages =  method_delete(id)
+            data = method_post(event)
+            return{
+                "code":200,
+                "message":"OK,POSTED",
+                "data":data
+            }  
         except Exception as e:
-            messages = e.args[0]
-    elif method == 'CANCEL':
-        id = json.dumps(event['requestContext']['http']['path']).strip('"/')
+            return{
+                "code":400,
+                "message":e.args[0][0]
+            }
+    
+    elif routeKey == "DELETE /":
+
+        response_ddb = table.scan()
+        ItemsTBD = [] # Items to be deleted
+        for Item in response_ddb['Items']:
+            id = Item['id']
+            try:
+                method_delete(id)
+            except:
+                print("id:"+id+" could not be deleted.")
+            else:
+                ItemsTBD.append(method_delete(id)) #Only return those who could be deleted
+        return {
+            "code":200,
+            "message":"OK,DELETING all.",
+            "data":ItemsTBD
+        }
+    
+    elif routeKey == "DELETE /{id}":
+        id = event['pathParameters']['id']
         try:
-            messages =  method_cancel(id)
+            data = method_delete(id)
+            return{
+                "code":200,
+                "message":"OK,DELETING",
+                "data":data
+            }
         except Exception as e:
-            messages = e.args[0]
-    else:
-        return  ('Unknown method, Please use POST / DELETE / CANCEL instead.\n')
-    return messages
+            return{
+                "code":400,
+                "message":e.args[0]
+            }
+    else: 
+        if event['requestContext']['http']['method']=="CANCEL":
+            if routeKey == "ANY /":
+                response_ddb = table.scan()
+                ItemsTBC = [] # Items to be canceled
+                for Item in response_ddb['Items']:
+                    id = Item['id']
+                    try:
+                        method_cancel(id)
+                    except:
+                        print("id:"+id+" could not be canceled.")
+                    else:
+                        ItemsTBC.append(method_cancel(id)) #Only return those who could be canceled.
+                return {
+                    "code":200,
+                    "message":"OK,CANCELING all.",
+                    "data":ItemsTBC
+                }
+            
+            elif routeKey == "ANY /{id}":
+
+                id = event['pathParameters']['id']
+                try:
+                    data = method_cancel(id)
+                    return{
+                        "code":200,
+                        "message":"OK,CANCELING",
+                        "data":data
+                    }
+                except Exception as e:
+                    return{
+                        "code":400,
+                        "message":e.args[0]
+                    }
+            
+        else:
+            return{
+                "code":400,
+                "message":"No such method."
+            }

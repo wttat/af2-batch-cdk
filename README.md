@@ -1,12 +1,14 @@
-
-# Current support Alphafold Version : 2.2.0
-Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.0
+# For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. 
+# Current support Alphafold Version : 2.2.2
+Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.2
 # Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
 
 Architecture diagram on AWS：
 ![avatar](architecture.png)
+
+https://github.com/wttat/af2-batch-cdk/blob/main/architecture.png
 
 ## Modified Alphafold2 source code GitHub Repo：
 
@@ -74,9 +76,9 @@ pip3 install -r requirements.txt --use-feature=2020-resolver
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-8. Install CDK@v1.153.1
+8. Install CDK@v1.176.0
 ```
-npm install -g aws-cdk@1.153.1
+npm install -g aws-cdk@1.176.0
 ```
 9.  If never run cdk before in this region, use below code to init cdk:
 ```
@@ -202,7 +204,11 @@ For Alphfold2 Settings:
 
 * Upload the fasta file to the input folder in the S3 bucket just created. Check the S3 bucket arn in the cdk output.
 * Check the API Gateway's URL in the cdk output or via AWS console.  
-* **Using Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
+
+* **Option 1:Log into the Sagemaker Notebook instance just created to do this by jupyter notebook. Notebook path: /af2-batch-cdk/notebook/Alphafold2.ipynb**. Preview :https://github.com/wttat/af2-batch-cdk/blob/main/notebook/Alphafold2.ipynb
+* **Option 2:Use Postman to do this more convenient**, please check it in the AWS blog on the top of this README.
+* **Option 3:Use Terminal or integrate below APIs into existing business systems**, please check it in the AWS blog on the top of this README.
+  
 1. POST:Submit a job using POST method,change the KEY(if set) and ApiGW_URL to your own. 
 
 ```
@@ -266,9 +272,23 @@ Enjoy!
 
 ## Changelog
 
+### 10/10/2022
+* Pretty the API response.
+* Update aws-cdk to @1.176.0
+* 
+### 07/12/2022
+* Add alphafold2 job error check.
+
+### 06/22/2022
+* Support Alpfadold v2.2.2,minor update,do not need upgrade.
+
+### 04/26/2022
+* You have to require s3 permissions first to deploy this solution.
+* Update readme.
+* Update architecture diagram.
+
 ### 04/25/2022
 * Use sagemaker notebook to submit job
-* Update aws-cdk to @1.153.1
 
 ### 04/18/2022
 * Add SNS notification for job starting.
