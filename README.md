@@ -77,25 +77,22 @@ pip3 install -r requirements.txt
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-9. Install CDK
-```
-npm install -g aws-cdk
-```
-10.  If never run cdk before in this region, use below code to init cdk:
+
+9.  If never run cdk before in this region, use below code to init cdk:
 ```
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 ```
-11. Generate Cloudformation template
+19. Generate Cloudformation template
 ```
 cdk synth
 ```
-12. Deploy all stacks.
+11. Deploy all stacks.
 ```
 cdk deploy --all
 ```
-13. Confirm the SNS email to receive follow-up notification.
-14. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
-15. Modify the command.json, check details below. 
+12. Confirm the SNS email to receive follow-up notification.
+13. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
+14. Modify the command.json, check details below. 
 
 ## Manually Settings
 
