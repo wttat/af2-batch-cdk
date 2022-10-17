@@ -63,6 +63,7 @@ aws configure set default.region ${REGION}
 *AUTH*: The auth key used in HTTP Authentication Header.
 
 *ACCOUNTID*: AWS Account ID.
+
 7. Install CDK
 ```
 npm install -g aws-cdk
