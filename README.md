@@ -21,10 +21,10 @@ https://github.com/wttat/alphafold
 
 1. Install Node and Npm.
 ```
-wget https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz
-tar xvf node-v14.18.1-linux-x64.tar.xz
-sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/node /usr/local/bin
-sudo ln -s /home/ec2-user/node-v14.18.1-linux-x64/bin/npm /usr/local/bin
+wget https://nodejs.org/dist/v16.18.0/node-v16.18.0-linux-x64.tar.xz
+tar xvf node-v16.18.0-linux-x64.tar.xz
+sudo ln -s /home/ec2-user/node-v16.18.0-linux-x64/bin/node /usr/local/bin
+sudo ln -s /home/ec2-user/node-v16.18.0-linux-x64/bin/npm /usr/local/bin
 ```
 2. Set PATH env.
 ```
@@ -63,38 +63,38 @@ aws configure set default.region ${REGION}
 *AUTH*: The auth key used in HTTP Authentication Header.
 
 *ACCOUNTID*: AWS Account ID.
-
-7. Install dependancy
+7. Install CDK
+```
+npm install -g aws-cdk
+```
+8. Install dependancy
 ```
 pip3 install -r requirements.txt
-```
-& if dependency goes wrong
-```
-pip3 install -r requirements.txt --use-feature=2020-resolver
+
 ```
 & if in China 
 ```
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-8. Install CDK@v1.176.0
+9. Install CDK
 ```
-npm install -g aws-cdk@1.176.0
+npm install -g aws-cdk
 ```
-9.  If never run cdk before in this region, use below code to init cdk:
+10.  If never run cdk before in this region, use below code to init cdk:
 ```
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 ```
-10. Generate Cloudformation template
+11. Generate Cloudformation template
 ```
 cdk synth
 ```
-11. Deploy all stacks.
+12. Deploy all stacks.
 ```
 cdk deploy --all
 ```
-12. Confirm the SNS email to receive follow-up notification.
-13. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
-14. Modify the command.json, check details below. 
+13. Confirm the SNS email to receive follow-up notification.
+14. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
+15. Modify the command.json, check details below. 
 
 ## Manually Settings
 
@@ -272,10 +272,13 @@ Enjoy!
 
 ## Changelog
 
+### 10/17/2022
+* Update aws-cdk to @2.46.0
+
 ### 10/10/2022
 * Pretty the API response.
 * Update aws-cdk to @1.176.0
-* 
+
 ### 07/12/2022
 * Add alphafold2 job error check.
 

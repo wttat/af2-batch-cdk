@@ -1,25 +1,18 @@
-# from typing import Protocol
 import os
-from aws_cdk import core as cdk
-
-# For consistency with other languages, `cdk` is the preferred import name for
-# the CDK's core module.  The following line also imports it as `core` for use
-# with examples from the CDK Developer's Guide, which are in the process of
-# being updated to use `cdk`.  You may delete this import if you don't need it.
+from constructs import Construct
 from aws_cdk import (
-    core,
+    App, Stack,CfnOutput,
+    aws_iam as iam,
+    aws_s3 as s3,
+    aws_ec2 as ec2,
+    aws_sagemaker as sagemaker
 )
-
-import aws_cdk.aws_iam as iam
-import aws_cdk.aws_s3 as s3
-import aws_cdk.aws_ec2 as ec2
-import aws_cdk.aws_sagemaker as sagemaker
 
 region = os.environ["CDK_DEFAULT_REGION"]
 
-class NOTEBOOKCdkStack(cdk.Stack):
+class NOTEBOOKCdkStack(Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,**kwargs):
+    def __init__(self, scope: Construct, construct_id: str,**kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         notebook_job_role =  iam.Role(
@@ -39,7 +32,7 @@ class NOTEBOOKCdkStack(cdk.Stack):
         )
 
         
-        core.CfnOutput(
+        CfnOutput(
             self,"af2-notebook-name",
             description="af2-notebook",
             value=cfn_notebook_instance.attr_notebook_instance_name,
