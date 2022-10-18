@@ -1,19 +1,16 @@
 # from typing import Protocol
 import os
-from aws_cdk import core as cdk
-
-# For consistency with other languages, `cdk` is the preferred import name for
-# the CDK's core module.  The following line also imports it as `core` for use
-# with examples from the CDK Developer's Guide, which are in the process of
-# being updated to use `cdk`.  You may delete this import if you don't need it.
-from aws_cdk import core
-
-import aws_cdk.aws_iam as iam
-import aws_cdk.aws_s3 as s3
-import aws_cdk.aws_ec2 as ec2
-import aws_cdk.aws_ecr as ecr
-import aws_cdk.aws_fsx as fsx
-import aws_cdk.aws_sns as sns
+from constructs import Construct
+from aws_cdk import (
+    App, Stack,RemovalPolicy,
+    aws_iam as iam,
+    aws_ec2 as ec2,
+    aws_s3 as s3,
+    aws_ecr as ecr,
+    aws_fsx as fsx,
+    aws_sns as sns
+   
+)
 
 import base64
 
@@ -45,9 +42,9 @@ dataset_name=dataset_arn.split("/")[-1]
 with open("./user_data/tmpec2_user_data") as f:
 	    user_data_raw = f.read()
 
-class VPCCdkStack(cdk.Stack):
+class VPCCdkStack(Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, key_pair,sns_mail,vpc_id,use_default_vpc,**kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, key_pair,sns_mail,vpc_id,use_default_vpc,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         #  create a SNS topic   
@@ -66,7 +63,7 @@ class VPCCdkStack(cdk.Stack):
         # create ECR repo
         self.repo = ecr.Repository(
             self,'Alphafold2EcrRepo-',
-            removal_policy=cdk.RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.DESTROY
         )
 
         # choose or create a vpc
@@ -92,18 +89,15 @@ class VPCCdkStack(cdk.Stack):
         self.sg.add_ingress_rule(ec2.Peer.ipv4(self.vpc.vpc_cidr_block),ec2.Port.all_traffic())
         self.sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
 
-        # create fsx for lustre, if we use 2.4T storage, then must apply LZ4 compression, but not found in cdk?
-
         self.file_system = fsx.LustreFileSystem(
             self,'Alphafold2FileSystem',
-            # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-            #                         "per_unit_storage_throughput":100},
-            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
+            lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.LZ4},
+            # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.NONE},
             vpc = self.vpc,
             vpc_subnet=self.vpc.public_subnets[0],
-            # vpc_subnet=self.vpc.private_subnets[0],
-            storage_capacity_gib = 4800,
-            removal_policy=cdk.RemovalPolicy.DESTROY,
+            storage_capacity_gib = 2400,
+            # storage_capacity_gib = 4800,
+            removal_policy=RemovalPolicy.DESTROY,
             security_group = self.sg,
         )
 

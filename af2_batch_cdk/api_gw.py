@@ -1,43 +1,33 @@
-# from typing import Protocol
+from constructs import Construct
 import os
-from aws_cdk import core as cdk
 
-# For consistency with other languages, `cdk` is the preferred import name for
-# the CDK's core module.  The following line also imports it as `core` for use
-# with examples from the CDK Developer's Guide, which are in the process of
-# being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import (
-    core,
+    App, Stack,Duration,CfnOutput,
+    aws_iam as iam,
+    aws_ec2 as ec2,
+    aws_s3 as s3,
+    aws_dynamodb as dynamodb,
+    aws_events as events,
+    aws_ecr as ecr,
+    aws_lambda as _lambda,
+    aws_sqs as sqs,
+    aws_fsx as fsx,
+    aws_s3_notifications as s3n,
+    aws_lambda_event_sources as eventsources,
+    aws_s3_deployment as s3deploy,
+    aws_events_targets as targets
 )
 
-import aws_cdk.aws_iam as iam
-import aws_cdk.aws_ec2 as ec2
-import aws_cdk.aws_s3 as s3
-import aws_cdk.aws_dynamodb as dynamodb
-import aws_cdk.aws_events as events
-import aws_cdk.aws_ecr as ecr
-import aws_cdk.aws_lambda as _lambda
-import aws_cdk.aws_sqs as sqs
-import aws_cdk.aws_fsx as fsx
-import aws_cdk.aws_apigatewayv2 as apigatewayv2
-import aws_cdk.aws_apigatewayv2_authorizers as apigatewayv2_authorizers
-import aws_cdk.aws_apigatewayv2_integrations as apigatewayv2_integrations
-from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
-import aws_cdk.aws_s3_notifications as s3n
-import aws_cdk.aws_lambda_event_sources as eventsources
-import aws_cdk.aws_s3_deployment as s3deploy
-import aws_cdk.aws_events as events
-import aws_cdk.aws_events_targets as targets
+from aws_cdk import aws_apigatewayv2_alpha as apigatewayv2
+from aws_cdk.aws_apigatewayv2_authorizers_alpha import HttpLambdaAuthorizer,HttpLambdaResponseType
+from aws_cdk.aws_apigatewayv2_integrations_alpha import HttpLambdaIntegration
 
-# get account ID and region
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
+class APIGWCdkStack(Stack):
 
-
-class APIGWCdkStack(cdk.Stack):
-
-    def __init__(self, scope: cdk.Construct, construct_id: str,vpc,sns_topic, auth_key,**kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str,sns_topic, auth_key,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         self.job_Definition_name = 'af2'
@@ -145,7 +135,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role1,
-                                              timeout = core.Duration.seconds(30),
+                                              timeout = Duration.seconds(30),
                                               description = "Receive not-GET method HTTP request, send messages to SQS",
                                               code=_lambda.Code.from_asset("./lambda/lambda_1"))
 
@@ -158,7 +148,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role2,
-                                              timeout = core.Duration.seconds(30),
+                                              timeout = Duration.seconds(30),
                                               description = "Receive GET method HTTP request, query DynamoDB",
                                               code=_lambda.Code.from_asset("./lambda/lambda_2"))
 
@@ -169,7 +159,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role3,
-                                              timeout = core.Duration.seconds(30),
+                                              timeout = Duration.seconds(30),
                                               description = "Receive SQS messages, Submit to Batch",
                                               code=_lambda.Code.from_asset("./lambda/lambda_3"))
 
@@ -186,7 +176,7 @@ class APIGWCdkStack(cdk.Stack):
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = role4,
-                                              timeout = core.Duration.seconds(30),
+                                              timeout = Duration.seconds(30),
                                               description = "Track job status, update dynamodb and send messages to SNS",
                                               code=_lambda.Code.from_asset("./lambda/lambda_4"))
 
@@ -219,16 +209,16 @@ class APIGWCdkStack(cdk.Stack):
         Batch_status_change_rule.add_target(
             targets.LambdaFunction(
                 lambda_4,
-                max_event_age=cdk.Duration.hours(2), # Otional: set the maxEventAge retry policy
+                max_event_age=Duration.hours(2), # Otional: set the maxEventAge retry policy
                 retry_attempts=2
             )
         )
 
         # create api-gateway
-        apigw_auth = apigatewayv2_authorizers.HttpLambdaAuthorizer(
+        apigw_auth = HttpLambdaAuthorizer(
             "Alphafold2Auth",
             authorizer_name = 'Alphafold2Auth',
-            response_types = [apigatewayv2_authorizers.HttpLambdaResponseType('SIMPLE')],
+            response_types = [HttpLambdaResponseType('SIMPLE')],
             # payload_format_version = apigatewayv2.AuthorizerPayloadVersion('VERSION_2_0'),
             handler = lambda_0
         )
@@ -290,13 +280,13 @@ class APIGWCdkStack(cdk.Stack):
             integration = not_GET_intergation
         )
 
-        core.CfnOutput(
+        CfnOutput(
             self,"af2-S3",
             description="S3",
             value=self.bucket.bucket_arn,
         )
 
-        core.CfnOutput(
+        CfnOutput(
             self,"af2-APIGW",
             description="APIGW",
             value=apigw.api_endpoint,
