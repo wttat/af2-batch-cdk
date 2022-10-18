@@ -125,23 +125,23 @@ class BATCHCdkStack(Stack):
                 }
         )
 
-        af2_p4 = batch.ComputeEnvironment(
-            self,"Alphafold2CEP4",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p4d.24xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                            ]
-                }
-        )
+        # af2_p4 = batch.ComputeEnvironment(
+        #     self,"Alphafold2CEP4",
+        #     compute_resources = {
+        #         "vpc":vpc,
+        #         "minv_cpus":0,
+        #         "desiredv_cpus":0,
+        #         "maxv_cpus":256,
+        #         "instance_types":[ec2.InstanceType("p4d.24xlarge")],
+        #         "launch_template":{
+        #             "launch_template_name":"Alphafold2BatchLaunchTemplate",
+        #             "version":"$Latest"
+        #         },
+        #         "security_groups":[
+        #             sg,
+        #                     ]
+        #         }
+        # )
         
         # create job queue
         af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
@@ -172,14 +172,14 @@ class BATCHCdkStack(Stack):
             job_queue_name = 'low',
         )
 
-        af_p4 = batch.JobQueue(self, "JobQueue_P4",
-            compute_environments=[{
-                "computeEnvironment": af2_p4,
-                "order": 1
-            }
-            ],
-            job_queue_name = 'p4',
-        )
+        # af_p4 = batch.JobQueue(self, "JobQueue_P4",
+        #     compute_environments=[{
+        #         "computeEnvironment": af2_p4,
+        #         "order": 1
+        #     }
+        #     ],
+        #     job_queue_name = 'p4',
+        # )
 
         image_id = ecs.ContainerImage.from_ecr_repository(
             repository=ecr.Repository.from_repository_name(self, "GetCompRegRepoName",repo.repository_name),
