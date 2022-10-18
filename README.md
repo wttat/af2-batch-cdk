@@ -122,8 +122,8 @@ cdk deploy --all
         
         Uncomment to use Nice DCV to visualize output pdb files.
 2. af2_batch_cdk/batch.py
-   - Line 184-205. Uncomment to use P4 batch CE.
-   - Line 241-250. Uncomment to use P4 batch que.
+   - Line 128-144. Uncomment to use P4 batch CE.
+   - Line 175-182. Uncomment to use P4 batch que.
       
       Note: You have to do this at the same time.
 
