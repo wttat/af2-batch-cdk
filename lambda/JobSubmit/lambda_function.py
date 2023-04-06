@@ -56,11 +56,10 @@ def check_body(event):
         # check mandatory paramaters
         try:
             fasta = data['fasta']
-            que = data['que']
             file_name = data['file_name']
             model_preset = data['model_preset']
         except:
-            raise Exception('You need to at least specific the fasta/que/file_name/model_preset parameters.')
+            raise Exception('You need to at least specific the fasta/file_name/model_preset parameters.')
         
         # check if fasta file exist in s3   
         key = prefix+file_name
@@ -72,9 +71,15 @@ def check_body(event):
         print('fasta found')
         
         # check if que meet the requirements
-        # TODO check p4 auto
-        if que != 'high' and que != 'mid' and que != 'low' and que != 'p4':
-            raise Exception('The job queue should be high or mid or low or p4(depends on region) .')
+        try:
+            que = data['que']
+        except:
+            print('no preset,using dafault que p3')
+            que = 'p3'
+        else:
+            if que != 'p3' and que != 'p4':
+                raise Exception('The que  shoudl be p3 or p4')
+        print('que: ',que)
 
         # check max_template_date
         try:
@@ -122,16 +127,16 @@ def check_body(event):
 
         print('num_multimer_predictions_per_model: ',num_multimer_predictions_per_model)
 
-        # check run_relax
+        # check models_to_relax
         try:
-            run_relax = data['run_relax']
+            models_to_relax = data['models_to_relax']
         except:
-            print('no run_relax,using dafault preset true')
-            run_relax = 'true'
+            print('no models_to_relax,using dafault models_to_relax best')
+            models_to_relax = 'best'
         else:
-            if data['run_relax'] != 'true' and data['run_relax'] != 'false':
-                raise Exception('The run_relax shoudl be true or false')
-        print('run_relax: ',run_relax)
+            if data['models_to_relax'] != 'best' and data['models_to_relax'] != 'null'and data['models_to_relax'] != 'all':
+                raise Exception('The models_to_relax shoudl be best or null or all')
+        print('models_to_relax: ',models_to_relax)
         
         # check comment
         try:
@@ -152,14 +157,9 @@ def check_body(event):
                 raise Exception('The gpu should be a number.')
         print('gpu: ',gpu)
         
-        if gpu > 1:
-            if data['que'] == 'low':
-                raise Exception('this que only support 1 GPU')
-            if gpu > 4:
-                if data['que'] == 'mid':
-                    raise Exception('only p3.8xlarge or p4 support more than 4 GPU')
-                if gpu > 8:
-                    raise Exception('max GPU = 8')
+        # check gpu number
+        if gpu > 8:
+            raise Exception('max GPU = 8')
         
         # generate all parameters 
         Item = {
@@ -177,7 +177,7 @@ def check_body(event):
             'time': timestamp,
             'gpu': gpu,
             'comment': comment,
-            'run_relax':run_relax
+            'models_to_relax':models_to_relax,
         }
 
         Items.append(Item)

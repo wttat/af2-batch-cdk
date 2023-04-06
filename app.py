@@ -19,15 +19,13 @@ app = App()
 use_default_vpc = 0 # set to 0 to do not use the default vpc,set to 1 to use your default VPC in this region,this paramater will overwrite vpcid.
 vpc_id = "" # if you wanna to set your own VPC,change this to your vpc'id.
 
-# SSH key pair name, 
-key_pair = os.environ["KEYPAIR"]
+
 sns_mail = os.environ["MAIL"]
 auth_key = os.environ["AUTH"]
 
 vpc_stack = VPCCdkStack(app, "VPCCdkStack",
     use_default_vpc = use_default_vpc,
     vpc_id = vpc_id,
-    key_pair = key_pair,
     sns_mail = sns_mail,
     env=Environment(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],
@@ -50,7 +48,6 @@ batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
     sg = vpc_stack.sg,
     repo = vpc_stack.repo,
     bucket = api_gw_stack.bucket,
-    key_pair = key_pair,
     job_Definition_name = api_gw_stack.job_Definition_name,
     env=Environment(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],
@@ -73,8 +70,8 @@ Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
 #     bucket = api_gw_stack.bucket,
 #     # pub_subnet = vpc_stack.pub_subnet,
 #     env=core.Environment(
-#         account=os.environ["CDK_DEFAULT_ACCOUNT"],
-#         region=os.environ["CDK_DEFAULT_REGION"]
+#         account = os.environ["CDK_DEFAULT_ACCOUNT"],
+#         region = os.environ["CDK_DEFAULT_REGION"]
 #     )
 # )
 

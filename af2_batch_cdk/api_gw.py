@@ -58,131 +58,131 @@ class APIGWCdkStack(Stack):
 
         queue = sqs.Queue(self, "Alphafold2SQSQueue")
 
-        # create IAM role 0
-        role0 = iam.Role(
-            self,'Alphafold2IAMrole0',
+        # create IAM role for Lambda Authorizer
+        iam_role_LambdaAuthorizer = iam.Role(
+            self,'Alphafold2IAMRoleforLambdaAuthorizer',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_0',
+            description ='IAM role for Lambda Authorizer',
         )
 
-        role0.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
+        iam_role_LambdaAuthorizer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
 
-        # create IAM role 1
-        role1 = iam.Role(
-            self,'Alphafold2IAMrole1',
+        # create IAM role for Lambda JobSubmit
+        iam_role_LambdaJobSubmit = iam.Role(
+            self,'Alphafold2IAMRoleForLambdaJobSubmit',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_1',
+            description ='IAM role for Lambda JobSubmit',
         )
 
-        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
-        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
-        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
-        role1.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
+        iam_role_LambdaJobSubmit.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
+        iam_role_LambdaJobSubmit.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
+        iam_role_LambdaJobSubmit.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
+        iam_role_LambdaJobSubmit.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
 
-        # create IAM role 2
-        role2 = iam.Role(
-            self,'Alphafold2IAMrole2',
+        # create IAM role for Lambda JobStatusQuery
+        iam_role_LambdaJobStatusQuery = iam.Role(
+            self,'Alphafold2IAMRoleForLambdaStatusQuery',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_2',
+            description =' IAM role for Lambda JobStatusQuery',
         )
 
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsReadOnlyAccess'))
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
-        role2.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
+        iam_role_LambdaJobStatusQuery.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
+        iam_role_LambdaJobStatusQuery.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsReadOnlyAccess'))
+        iam_role_LambdaJobStatusQuery.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
+        iam_role_LambdaJobStatusQuery.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
+        iam_role_LambdaJobStatusQuery.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
 
 
-        # create IAM role 3
-        role3 = iam.Role(
-            self,'Alphafold2IAMrole3',
+        # create IAM role for Lambda SQSCustomer
+        iam_role_LambdaSQSCustomer = iam.Role(
+            self,'Alphafold2IAMRoleForLambdaSQSCustomer',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_3',
+            description =' IAM role for Lambda SQSCustomer',
         )
 
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
-        role3.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
+        iam_role_LambdaSQSCustomer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
+        iam_role_LambdaSQSCustomer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSQSFullAccess'))
+        iam_role_LambdaSQSCustomer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
+        iam_role_LambdaSQSCustomer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
+        iam_role_LambdaSQSCustomer.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
 
-        # create IAM role 4
-        role4 = iam.Role(
-            self,'Alphafold2IAMrole4',
+        # create IAM role for Lambda JobStatusTracker
+        iam_role_LambdaJobStatusTracker = iam.Role(
+            self,'Alphafold2IAMRoleRotLambdaJobStatusTracker',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
-            description =' IAM role for lambda_4',
+            description =' IAM role for Lambda JobStatusTracker',
         )
 
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSNSFullAccess'))
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
-        role4.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
+        iam_role_LambdaJobStatusTracker.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'))
+        iam_role_LambdaJobStatusTracker.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
+        iam_role_LambdaJobStatusTracker.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSNSFullAccess'))
+        iam_role_LambdaJobStatusTracker.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'))
+        iam_role_LambdaJobStatusTracker.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AWSBatchFullAccess'))
 
-        # create Lambda 0
-        lambda_0 = _lambda.Function(self, "Alphafold2Lambda0",
+        # create Lambda Authorizer
+        lambda_Authorizer = _lambda.Function(self, "Alphafold2LambdaAuthorizer",
                                               runtime=_lambda.Runtime.NODEJS_14_X,
                                               handler="index.handler",
-                                              role = role0,
-                                              description = "Api Gateway Auth",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_0")
+                                              role = iam_role_LambdaAuthorizer,
+                                              description = "Lambda For API Gateway Auth",
+                                              code=_lambda.Code.from_asset("./lambda/Authorizer")
                                               )
 
-        lambda_0.add_environment("AUTH_KEY", auth_key)
+        lambda_Authorizer.add_environment("AUTH_KEY", auth_key)
 
-        # create Lambda 1
-        lambda_1 = _lambda.Function(self, "Alphafold2Lambda1-",
+        # create Lambda JobSubmit
+        lambda_JobSubmit = _lambda.Function(self, "Alphafold2LambdaJobSubmit",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
-                                              role = role1,
+                                              role = iam_role_LambdaJobSubmit,
                                               timeout = Duration.seconds(30),
-                                              description = "Receive not-GET method HTTP request, send messages to SQS",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_1"))
+                                              description = "Receive non-Get method HTTP request, send messages to SQS",
+                                              code=_lambda.Code.from_asset("./lambda/JobSubmit"))
 
-        lambda_1.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_1.add_environment("S3_BUCKET", self.bucket.bucket_name)
-        lambda_1.add_environment("SQS_QUEUE", queue.queue_url)
+        lambda_JobSubmit.add_environment("TABLE_NAME", ddb_table.table_name)
+        lambda_JobSubmit.add_environment("S3_BUCKET", self.bucket.bucket_name)
+        lambda_JobSubmit.add_environment("SQS_QUEUE", queue.queue_url)
 
-        # create Lambda 2
-        lambda_2 = _lambda.Function(self, "Alphafold2Lambda2-",
+        # create Lambda JobStatusQuery
+        lambda_JobStatusQuery = _lambda.Function(self, "Alphafold2LambdaJobStatusQuery",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
-                                              role = role2,
+                                              role = iam_role_LambdaJobStatusQuery,
                                               timeout = Duration.seconds(30),
                                               description = "Receive GET method HTTP request, query DynamoDB",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_2"))
+                                              code=_lambda.Code.from_asset("./lambda/JobStatusQuery"))
 
-        lambda_2.add_environment("TABLE_NAME", ddb_table.table_name)
+        lambda_JobStatusQuery.add_environment("TABLE_NAME", ddb_table.table_name)
 
-        # create Lambda 3
-        lambda_3 = _lambda.Function(self, "Alphafold2Lambda3-",
+        # create Lambda SQSCustomer
+        lambda_SQSCustomer = _lambda.Function(self, "Alphafold2LambdaSQSCustomer",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
-                                              role = role3,
+                                              role = iam_role_LambdaSQSCustomer,
                                               timeout = Duration.seconds(30),
                                               description = "Receive SQS messages, Submit to Batch",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_3"))
+                                              code=_lambda.Code.from_asset("./lambda/SQSCustomer"))
 
-        lambda_3.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_3.add_environment("S3_BUCKET", self.bucket.bucket_name)
-        lambda_3.add_environment("SQS_QUEUE", queue.queue_url)  
-        lambda_3.add_environment("JOB_DEFINITION_NAME", self.job_Definition_name)
+        lambda_SQSCustomer.add_environment("TABLE_NAME", ddb_table.table_name)
+        lambda_SQSCustomer.add_environment("S3_BUCKET", self.bucket.bucket_name)
+        lambda_SQSCustomer.add_environment("SQS_QUEUE", queue.queue_url)  
+        lambda_SQSCustomer.add_environment("JOB_DEFINITION_NAME", self.job_Definition_name)
 
         # create sqs invoker
-        lambda_3.add_event_source(eventsources.SqsEventSource(queue))
+        lambda_SQSCustomer.add_event_source(eventsources.SqsEventSource(queue))
 
-        # create Lambda 4
-        lambda_4 = _lambda.Function(self, "Alphafold2Lambda4-",
+        # create Lambda JobStatusTracker
+        lambda_JobStatusTracker = _lambda.Function(self, "Alphafold2LambdaJobStatusTracker",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
-                                              role = role4,
+                                              role = iam_role_LambdaJobStatusTracker,
                                               timeout = Duration.seconds(30),
                                               description = "Track job status, update dynamodb and send messages to SNS",
-                                              code=_lambda.Code.from_asset("./lambda/lambda_4"))
+                                              code=_lambda.Code.from_asset("./lambda/JobStatusTracker"))
 
-        lambda_4.add_environment("TABLE_NAME", ddb_table.table_name)
-        lambda_4.add_environment("SNS_ARN", sns_topic.topic_arn)
-        lambda_4.add_environment("S3_BUCKET", self.bucket.bucket_name)
+        lambda_JobStatusTracker.add_environment("TABLE_NAME", ddb_table.table_name)
+        lambda_JobStatusTracker.add_environment("SNS_ARN", sns_topic.topic_arn)
+        lambda_JobStatusTracker.add_environment("S3_BUCKET", self.bucket.bucket_name)
 
 
         Batch_status_change_rule = events.Rule(
@@ -208,8 +208,8 @@ class APIGWCdkStack(Stack):
 
         Batch_status_change_rule.add_target(
             targets.LambdaFunction(
-                lambda_4,
-                max_event_age=Duration.hours(2), # Otional: set the maxEventAge retry policy
+                lambda_JobStatusTracker,
+                max_event_age=Duration.hours(2),
                 retry_attempts=2
             )
         )
@@ -220,7 +220,7 @@ class APIGWCdkStack(Stack):
             authorizer_name = 'Alphafold2Auth',
             response_types = [HttpLambdaResponseType('SIMPLE')],
             # payload_format_version = apigatewayv2.AuthorizerPayloadVersion('VERSION_2_0'),
-            handler = lambda_0
+            handler = lambda_Authorizer,
         )
 
         if len(auth_key)!=0:
@@ -237,11 +237,11 @@ class APIGWCdkStack(Stack):
 
         not_GET_intergation = HttpLambdaIntegration(
             "not-GET method",
-            handler=lambda_1
+            handler=lambda_JobSubmit
         )
         GET_intergation = HttpLambdaIntegration(
             "all-Get method",
-            handler=lambda_2
+            handler=lambda_JobStatusQuery
         )
 
         apigw.add_routes(

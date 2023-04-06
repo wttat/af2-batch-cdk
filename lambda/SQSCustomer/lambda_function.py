@@ -32,7 +32,7 @@ def method_post(payload):
     model_preset = payload_dict['model_preset']
     db_preset = payload_dict['db_preset']
     num_multimer_predictions_per_model = payload_dict['num_multimer_predictions_per_model']
-    run_relax = payload_dict['run_relax']
+    models_to_relax = payload_dict['models_to_relax']
 
     que = payload_dict['que']
     gpu = payload_dict['gpu']
@@ -56,7 +56,7 @@ def method_post(payload):
             'model_preset': model_preset,
             'db_preset': db_preset,
             'num_multimer_predictions_per_model': str(num_multimer_predictions_per_model),
-            'run_relax':run_relax,
+            'models_to_relax':models_to_relax,
         },
         propagateTags=False,
         containerOverrides={

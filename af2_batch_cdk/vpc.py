@@ -25,12 +25,12 @@ account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 if region == 'cn-north-1' or region == 'cn-northwest-1':
-    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch5.tar'
-    dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset4v2.tar.gz'
+    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch6.tar'
+    dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset5.tar.gz'
     dataset_region='cn-northwest-1'
 else:
-    image_arn='s3://alphafold2/prod/images/af2-batch5.tar'
-    dataset_arn='s3://alphafold2/prod/datasets/dataset4v2.tar.gz'
+    image_arn='s3://alphafold2/prod/images/af2-batch6.tar'
+    dataset_arn='s3://alphafold2/prod/datasets/dataset5.tar.gz'
     dataset_region='us-east-1'
 
 # af2-batch image file name
@@ -74,10 +74,17 @@ class VPCCdkStack(Stack):
         else:
             self.vpc = ec2.Vpc(self, "Alphafold2VPC",
             max_azs=99, # use all az in this region
+            nat_gateways=1,
             subnet_configuration=[
-                {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
-                # {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
-                ]
+                ec2.SubnetConfiguration(
+                    name="Public",
+                    subnet_type=ec2.SubnetType.PUBLIC
+                ),
+                ec2.SubnetConfiguration(
+                    name="Private",
+                    subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
+                )
+            ]
             )
 
         self.sg = ec2.SecurityGroup(self, "Alphafold2SecurityGroup",
@@ -87,16 +94,13 @@ class VPCCdkStack(Stack):
                                 allow_all_outbound=True,
                             )
         self.sg.add_ingress_rule(ec2.Peer.ipv4(self.vpc.vpc_cidr_block),ec2.Port.all_traffic())
-        self.sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world")
 
         self.file_system = fsx.LustreFileSystem(
             self,'Alphafold2FileSystem',
             lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.LZ4},
-            # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.NONE},
             vpc = self.vpc,
-            vpc_subnet=self.vpc.public_subnets[0],
+            vpc_subnet=self.vpc.private_subnets[0],
             storage_capacity_gib = 2400,
-            # storage_capacity_gib = 4800,
             removal_policy=RemovalPolicy.DESTROY,
             security_group = self.sg,
         )
@@ -120,7 +124,7 @@ class VPCCdkStack(Stack):
         ec2_tmp = ec2.Instance(self, "Alphafold2DatasetDownload",
             instance_type = ec2.InstanceType("c5.9xlarge"),
             vpc = self.vpc,
-            vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
+            vpc_subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
             machine_image = amzn_linux,
             key_name = key_pair,
             block_devices = [ec2.BlockDevice(
@@ -138,6 +142,7 @@ class VPCCdkStack(Stack):
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonEC2ContainerRegistryFullAccess"))
         ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSNSFullAccess"))
+        ec2_tmp.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"))
 
         ec2_tmp.user_data.add_commands("set -eux",
                                         "yum update -y",

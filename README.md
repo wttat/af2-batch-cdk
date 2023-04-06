@@ -44,7 +44,6 @@ cd af2-batch-cdk
 
 
 ```
-echo 'export KEYPAIR="******"' >> ~/.bashrc
 echo 'export MAIL="******"' >> ~/.bashrc
 echo 'export REGION="******"' >> ~/.bashrc
 echo 'export AUTH="******"' >> ~/.bashrc
@@ -54,8 +53,6 @@ aws configure set default.region ${REGION}
 ```
 **Parameter Description**:
 
-*KEYPAIR*: The EC2 key pair's name which available in the AWS region.
-
 *MAIL*: The email address used to receive SNS notification.
 
 *REGION*: The region you want to deploy.
@@ -64,11 +61,11 @@ aws configure set default.region ${REGION}
 
 *ACCOUNTID*: AWS Account ID.
 
-7. Install CDK
+1. Install CDK
 ```
 npm install -g aws-cdk
 ```
-8. Install dependancy
+1. Install dependancy
 ```
 pip3 install -r requirements.txt
 
@@ -159,9 +156,9 @@ For Job Settings:
     
     The name of fasta file which stored in S3's input folder.
 
-3. que.type:string.options:*{low/mid/high/p4}*,**Required**:
+3. que.type:string.options:*{p3/p4}*,Default:[p3]:
    
-   The GPU instance to use,which indicated for [p3.2xlarge、p3.8xlarge,p3.16xlarge and p4d.24xlarge].p4 needs manually uncomment。
+   The GPU instance to use,which indicated for [p3 family].p4 needs manually uncomment。
 4. comment.type:string
 
     The comment for this job。
@@ -187,9 +184,9 @@ For Alphfold2 Settings:
    monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.
    
    multimer: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
-3. run_relax.type:string(bool).options:*{true/false}*,Default:true
+3. models_to_relax.type:string.options:*{best/all/none}*,Default:best
    
-   Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
+    After generating the predicted model, AlphaFold runs a relaxation step to improve local geometry. By default, only the best model (by pLDDT) is relaxed (--models_to_relax=best), but also all of the models (--models_to_relax=all) or none of the models (--models_to_relax=none) can be relaxed
 4. num_multimer_predictions_per_model.type:int.Default:[5]:
 
     Controls how many predictions will be made per model, by default the offline system will run each model 5 times for a total of 25 predictions.
@@ -270,6 +267,14 @@ Enjoy!
 
 ## Changelog
 
+### 04/06/2023
+* Support Alphafold v2.3.2.
+* Change run_relax to models_to_relax.
+* Move EC2 to private subnets.
+* Add system manager policy to EC2,remove SSH key.
+* Rename Lambda
+* Default que is p3, you do not have to specify it now.
+
 ### 10/17/2022
 * Update aws-cdk to @2.46.0
 
@@ -281,7 +286,7 @@ Enjoy!
 * Add alphafold2 job error check.
 
 ### 06/22/2022
-* Support Alpfadold v2.2.2,minor update,do not need upgrade.
+* Support Alphafold v2.2.2,minor update,do not need upgrade.
 
 ### 04/26/2022
 * You have to require s3 permissions first to deploy this solution.
@@ -356,6 +361,7 @@ Enjoy!
 * Auto check p4.
 * Use Code pipeline to update images.
 * Frontend pages.
+* Add use_precomputed_msas
 
 ## Resource Cleanup
 

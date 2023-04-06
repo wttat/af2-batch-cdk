@@ -32,7 +32,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,job_Definition_name, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str,vpc,sg,file_system,bucket,repo,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
 
@@ -60,7 +60,6 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2BatchInstances",
             launch_template_name="Alphafold2BatchLaunchTemplate",
             user_data = user_data,
-            key_name = key_pair,
             block_devices = [ec2.BlockDevice(
                                            device_name="/dev/xvda",
                                            volume=ec2.BlockDeviceVolume.ebs(100,
@@ -71,59 +70,21 @@ class BATCHCdkStack(Stack):
         )
 
         # create compute env high
-        af2_8GPU = batch.ComputeEnvironment(
-            self,"Alphafold2CE8GPU",
+        af2_p3 = batch.ComputeEnvironment(
+            self,"Alphafold2CEp3",
             compute_resources = {
                 "vpc":vpc,
                 "minv_cpus":0,
                 "desiredv_cpus":0,
                 "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.16xlarge")],
+                "instance_types":[ec2.InstanceType("p3")],
                 "launch_template":{
                     "launch_template_name":"Alphafold2BatchLaunchTemplate",
                     "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                ]
-            }
-        )
-
-        af2_4GPU = batch.ComputeEnvironment(
-            self,"Alphafold2CE4GPU",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.8xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                            ]
-            }
-        )
-
-        af2_1GPU = batch.ComputeEnvironment(
-            self,"Alphafold2CE1GPU",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.2xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                            ]
                 }
+            }
         )
+
 
         # af2_p4 = batch.ComputeEnvironment(
         #     self,"Alphafold2CEP4",
@@ -132,7 +93,7 @@ class BATCHCdkStack(Stack):
         #         "minv_cpus":0,
         #         "desiredv_cpus":0,
         #         "maxv_cpus":256,
-        #         "instance_types":[ec2.InstanceType("p4d.24xlarge")],
+        #         "instance_types":[ec2.InstanceType("p4")],
         #         "launch_template":{
         #             "launch_template_name":"Alphafold2BatchLaunchTemplate",
         #             "version":"$Latest"
@@ -144,32 +105,13 @@ class BATCHCdkStack(Stack):
         # )
         
         # create job queue
-        af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
+        af_p3 = batch.JobQueue(self, "JobQueue_P3",
             compute_environments=[{
-                "computeEnvironment": af2_8GPU,
+                "computeEnvironment": af2_p3,
                 "order": 1
             }
             ],
-            job_queue_name = 'high',
-        )
-
-        af_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
-            compute_environments=[{
-                "computeEnvironment": af2_4GPU,
-                "order": 1
-            }
-            ],
-            job_queue_name = 'mid',
-        )
-
-        af_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
-            compute_environments=[
-                {
-                "computeEnvironment": af2_1GPU,
-                "order": 1
-                }
-            ],
-            job_queue_name = 'low',
+            job_queue_name = 'p3',
         )
 
         # af_p4 = batch.JobQueue(self, "JobQueue_P4",
@@ -194,6 +136,7 @@ class BATCHCdkStack(Stack):
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3FullAccess'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEC2ContainerRegistryReadOnly'))
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
+        batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMManagedInstanceCore'))
 
         # create job definition
         af2 = batch.JobDefinition(self,"Alphafold2JobDefinition",
@@ -208,7 +151,7 @@ class BATCHCdkStack(Stack):
                 "-c","Ref::db_preset",
                 "-l","Ref::num_multimer_predictions_per_model",
                 "-p","Ref::use_precomputed_msas",
-                "-r","Ref::run_relax",
+                "-r","Ref::models_to_relax",
                 "-b","Ref::benchmark",
                 ],
                 "volumes": [
@@ -252,7 +195,7 @@ class BATCHCdkStack(Stack):
                 "num_multimer_predictions_per_model":"5",
                 "use_precomputed_msas":'false',
                 "benchmark":'false',
-                "run_relax":"true"
+                "models_to_relax":"best"
             },
             
         )
