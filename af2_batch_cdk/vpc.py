@@ -74,9 +74,10 @@ class VPCCdkStack(Stack):
         else:
             self.vpc = ec2.Vpc(self, "Alphafold2VPC",
             max_azs=99, # use all az in this region
+            nat_gateways=1,
             subnet_configuration=[
                 {"name":"public","subnetType":ec2.SubnetType.PUBLIC},
-                # {"name":"private","subnetType":ec2.SubnetType.PRIVATE}
+                {"name":"private","subnetType":ec2.SubnetType.PRIVATE_WITH_EGRESS}
                 ]
             )
 
@@ -94,7 +95,7 @@ class VPCCdkStack(Stack):
             lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.LZ4},
             # lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2,"data_compression_type": fsx.LustreDataCompressionType.NONE},
             vpc = self.vpc,
-            vpc_subnet=self.vpc.public_subnets[0],
+            vpc_subnet=self.vpc.private_subnets[0],
             storage_capacity_gib = 2400,
             # storage_capacity_gib = 4800,
             removal_policy=RemovalPolicy.DESTROY,

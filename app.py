@@ -50,7 +50,6 @@ batch_stack = BATCHCdkStack(app,"BATCHCdkStack",
     sg = vpc_stack.sg,
     repo = vpc_stack.repo,
     bucket = api_gw_stack.bucket,
-    key_pair = key_pair,
     job_Definition_name = api_gw_stack.job_Definition_name,
     env=Environment(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],

@@ -1,7 +1,7 @@
 from constructs import Construct
 import os
 from aws_cdk import (
-    App, Stack,
+    App, Stack,Size,
     aws_iam as iam,
     aws_ec2 as ec2,
     aws_s3 as s3,
@@ -16,6 +16,7 @@ from aws_cdk import (
     aws_lambda_event_sources as eventsources,
     aws_s3_deployment as s3deploy,
     aws_events_targets as targets,
+    aws_ecs as ecs
 )
 from aws_cdk import aws_batch_alpha as batch
 import base64
@@ -32,7 +33,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class BATCHCdkStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str,vpc,sg,file_system,bucket,repo,key_pair,job_Definition_name, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str,vpc,sg,file_system,bucket,repo,job_Definition_name, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
 
@@ -60,7 +61,6 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2BatchInstances",
             launch_template_name="Alphafold2BatchLaunchTemplate",
             user_data = user_data,
-            key_name = key_pair,
             block_devices = [ec2.BlockDevice(
                                            device_name="/dev/xvda",
                                            volume=ec2.BlockDeviceVolume.ebs(100,
@@ -76,13 +76,11 @@ class BATCHCdkStack(Stack):
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType("p3.16xlarge")],
-            launch_template={
-                "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                "version":"$Latest"
-            },
+            launch_template=launch_template,
             security_groups=[
                 sg,
-            ]
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
         )
 
         af2_4GPU = batch.ManagedEc2EcsComputeEnvironment(
@@ -90,13 +88,11 @@ class BATCHCdkStack(Stack):
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType("p3.8xlarge")],
-            launch_template={
-                "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                "version":"$Latest"
-            },
+            launch_template=launch_template,
             security_groups=[
                 sg,
-            ]
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
         )
 
         af2_1GPU = batch.ManagedEc2EcsComputeEnvironment(
@@ -104,13 +100,11 @@ class BATCHCdkStack(Stack):
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType("p3.2xlarge")],
-            launch_template={
-                "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                "version":"$Latest"
-            },
+            launch_template=launch_template,
             security_groups=[
                 sg,
-            ]
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
         )
 
         # af2_p4 = batch.ComputeEnvironment(
@@ -184,12 +178,12 @@ class BATCHCdkStack(Stack):
         batch_job_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchLogsFullAccess'))
 
         # create job definition
-        af2 = batch.JobDefinition(self,"Alphafold2JobDefinition",
+        af2 = batch.EcsJobDefinition(self,"Alphafold2JobDefinition",
             job_definition_name = job_Definition_name,
-            container = {
-                "image": image_id,
-                "job_role" : batch_job_role,
-                "command":["/bin/bash","/app/run.sh",
+            container = batch.EcsEc2ContainerDefinition(self,"Alphafold2ContainerDefinition",
+                image=image_id,
+                job_role=batch_job_role,
+                command=["/bin/bash","/app/run.sh",
                 "-f","Ref::fasta_paths",
                 "-t","Ref::max_template_date",
                 "-m","Ref::model_preset",
@@ -199,15 +193,12 @@ class BATCHCdkStack(Stack):
                 "-r","Ref::run_relax",
                 "-b","Ref::benchmark",
                 ],
-                "volumes": [
-                    {
-                        "host":{
-                            "sourcePath":mountPath,
-                        },
-                        "name":"Lustre"
-                    }
-                ],
-                "environment":{
+                volumes=[batch.EcsVolume.host(
+                    name="Alphafold2Lustre",
+                    host_path=mountPath,
+                    container_path=mountPath
+                )],
+                environment={
                         "XLA_PYTHON_CLIENT_MEM_FRACTION":"4.0",
                         "TF_FORCE_UNIFIED_MEMORY":"1",
                         "BATCH_BUCKET":bucket.bucket_name,
@@ -215,22 +206,13 @@ class BATCHCdkStack(Stack):
                         "OUTPUT_PREFIX":output_prefix,
                         "REGION":region,
                 },
-                "mount_points":[
-                    {
-                        "containerPath": mountPath,
-                        "readOnly":False,
-                        "sourceVolume": "Lustre",
-                    }
-                ],
-                "user":"root",
-                "gpu_count":1,
-                "vcpus":8,
-                "memory_limit_mib":60000,
-                "log_configuration":{
-                    "log_driver":batch.LogDriver.AWSLOGS
-                }
-            },
-            
+                user="root",
+                cpu=8,
+                memory=Size.gibibytes(60),
+                logging=ecs.LogDriver.aws_logs(
+                        stream_prefix="Alphafold2JobLogs"
+                    )
+            ),
             # default parameters
             parameters = {
                 "fasta_paths": "fp",
@@ -241,7 +223,8 @@ class BATCHCdkStack(Stack):
                 "use_precomputed_msas":'false',
                 "benchmark":'false',
                 "run_relax":"true"
-            },
-            
+            }
         )
+            
+        
    
