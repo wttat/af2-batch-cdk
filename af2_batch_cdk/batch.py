@@ -71,58 +71,49 @@ class BATCHCdkStack(Stack):
         )
 
         # create compute env high
-        af2_8GPU = batch.ComputeEnvironment(
+        af2_8GPU = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CE8GPU",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.16xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                ]
-            }
+            vpc=vpc,
+            minv_cpus=0,
+            desiredv_cpus=0,
+            instance_types=[ec2.InstanceType("p3.16xlarge")],
+            launch_template={
+                "launch_template_name":"Alphafold2BatchLaunchTemplate",
+                "version":"$Latest"
+            },
+            security_groups=[
+                sg,
+            ]
         )
 
-        af2_4GPU = batch.ComputeEnvironment(
+        af2_4GPU = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CE4GPU",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.8xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                            ]
-            }
+            vpc=vpc,
+            minv_cpus=0,
+            desiredv_cpus=0,
+            instance_types=[ec2.InstanceType("p3.8xlarge")],
+            launch_template={
+                "launch_template_name":"Alphafold2BatchLaunchTemplate",
+                "version":"$Latest"
+            },
+            security_groups=[
+                sg,
+            ]
         )
 
-        af2_1GPU = batch.ComputeEnvironment(
+        af2_1GPU = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CE1GPU",
-            compute_resources = {
-                "vpc":vpc,
-                "minv_cpus":0,
-                "desiredv_cpus":0,
-                "maxv_cpus":256,
-                "instance_types":[ec2.InstanceType("p3.2xlarge")],
-                "launch_template":{
-                    "launch_template_name":"Alphafold2BatchLaunchTemplate",
-                    "version":"$Latest"
-                },
-                "security_groups":[
-                    sg,
-                            ]
-                }
+            vpc=vpc,
+            minv_cpus=0,
+            desiredv_cpus=0,
+            instance_types=[ec2.InstanceType("p3.2xlarge")],
+            launch_template={
+                "launch_template_name":"Alphafold2BatchLaunchTemplate",
+                "version":"$Latest"
+            },
+            security_groups=[
+                sg,
+            ]
         )
 
         # af2_p4 = batch.ComputeEnvironment(
