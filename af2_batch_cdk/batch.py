@@ -75,7 +75,6 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2CE8GPU",
             vpc=vpc,
             minv_cpus=0,
-            desiredv_cpus=0,
             instance_types=[ec2.InstanceType("p3.16xlarge")],
             launch_template={
                 "launch_template_name":"Alphafold2BatchLaunchTemplate",
@@ -90,7 +89,6 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2CE4GPU",
             vpc=vpc,
             minv_cpus=0,
-            desiredv_cpus=0,
             instance_types=[ec2.InstanceType("p3.8xlarge")],
             launch_template={
                 "launch_template_name":"Alphafold2BatchLaunchTemplate",
@@ -105,7 +103,6 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2CE1GPU",
             vpc=vpc,
             minv_cpus=0,
-            desiredv_cpus=0,
             instance_types=[ec2.InstanceType("p3.2xlarge")],
             launch_template={
                 "launch_template_name":"Alphafold2BatchLaunchTemplate",
