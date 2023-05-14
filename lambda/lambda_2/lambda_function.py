@@ -108,7 +108,8 @@ def lambda_handler(event, context):
                             "code":500,
                             "message":"Job is FAILED. Please check logs for error",
                             "data":response_ddb['Item'],
-                            "logs":getLogs(logStreamName),
+                            "logs":logStreamName,
+                            # "logs":getLogs(logStreamName),
                         }
                         
             elif job_status == "SUCCEEDED":
@@ -132,7 +133,8 @@ def lambda_handler(event, context):
                         "code":200,
                         "message":"Job is SUCCEEDED, Please check logs for info",
                         "data":response_ddb['Item'],
-                        "logs":getLogs(logStreamName),
+                        "logs":logStreamName,
+                        # "logs":getLogs(logStreamName),
                     }
             else:
                 if job_status == "RUNNING":
@@ -146,7 +148,8 @@ def lambda_handler(event, context):
                         "code":200,
                         "message":"Job is RUNNING, Please check logs for error",
                         "data":response_ddb['Item'],
-                        "logs":getLogs(logStreamName),
+                        "logs":logStreamName,
+                        # "logs":getLogs(logStreamName),
                     }
                     
                 else:

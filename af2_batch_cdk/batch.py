@@ -75,36 +75,39 @@ class BATCHCdkStack(Stack):
             self,"Alphafold2CE8GPU",
             vpc=vpc,
             minv_cpus=0,
-            instance_types=[ec2.InstanceType("p3.16xlarge")],
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE16)],
             launch_template=launch_template,
             security_groups=[
                 sg,
             ],
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False
         )
 
         af2_4GPU = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CE4GPU",
             vpc=vpc,
             minv_cpus=0,
-            instance_types=[ec2.InstanceType("p3.8xlarge")],
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE8)],
             launch_template=launch_template,
             security_groups=[
                 sg,
             ],
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False
         )
 
         af2_1GPU = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CE1GPU",
             vpc=vpc,
             minv_cpus=0,
-            instance_types=[ec2.InstanceType("p3.2xlarge")],
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE2)],
             launch_template=launch_template,
             security_groups=[
                 sg,
             ],
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False
         )
 
         # af2_p4 = batch.ComputeEnvironment(
@@ -209,9 +212,6 @@ class BATCHCdkStack(Stack):
                 user="root",
                 cpu=8,
                 memory=Size.gibibytes(60),
-                logging=ecs.LogDriver.aws_logs(
-                        stream_prefix="Alphafold2JobLogs"
-                    )
             ),
             # default parameters
             parameters = {
