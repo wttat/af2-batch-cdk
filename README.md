@@ -122,32 +122,10 @@ cdk deploy --all
         
         Uncomment to use Nice DCV to visualize output pdb files.
 2. af2_batch_cdk/batch.py
-   - Line 128-144. Uncomment to use P4 batch CE.
-   - Line 175-182. Uncomment to use P4 batch que.
+   - Uncomment to use P4/G5 batch CE.
+   - Uncomment to use P4/G5 batch que.
       
       Note: You have to do this at the same time.
-
-3. Additional settings:
-   
-   **This action will lower fsx price and throughput, therefore may increase the EC2 cost, please think ahead although you could edit it later.**
-
-    If you want to deeply reduce cost, you could edit the fsx volume size in vpc_ec2.py,row 119:
-    
-    from
-        
-        storage_capacity_gib = 4800,
-    to
-        
-        storage_capacity_gib = 2400,
-    **then you have to manually change the fsx compression type to lz4 before all file are decompressed.**
-    
-    Or edit row 113-115 if you know what this means:
-    
-    ```
-    #lustre_configuration={"deployment_type": fsx.LustreDeploymentType.PERSISTENT_1,
-    #                     "per_unit_storage_throughput":100},
-    lustre_configuration={"deployment_type": fsx.LustreDeploymentType.SCRATCH_2},
-    ```
 
 ## Parameter Description of command.json 
 
@@ -159,9 +137,9 @@ For Job Settings:
     
     The name of fasta file which stored in S3's input folder.
 
-3. que.type:string.options:*{low/mid/high/p4}*,**Required**:
+3. que.type:string.options:*{low/mid/high/p4/g4dn/g4dn12x/g5/g512x}*,**Required**:
    
-   The GPU instance to use,which indicated for [p3.2xlarge、p3.8xlarge,p3.16xlarge and p4d.24xlarge].p4 needs manually uncomment。
+   The GPU instance to use,which indicated for [p3.2xlarge、p3.8xlarge,p3.16xlarge,g4dn.2xlarge,g4dn.12xlarge,g5.2xlarge,g5.12xlarge and p4d.24xlarge].p4/g5 needs manually uncomment。
 4. comment.type:string
 
     The comment for this job。
@@ -269,6 +247,10 @@ Enjoy!
     original version.
 
 ## Changelog
+
+### 05/15/2023
+* Update aws-cdk to @2.79.1
+* Add g4dn.2xlarge/g4dn.12xlarge/g5.2xlarge/g5.12xlarge instance for new que g4dn/g4dn12x/g5/g512x.
 
 ### 10/17/2022
 * Update aws-cdk to @2.46.0

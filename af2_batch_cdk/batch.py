@@ -71,8 +71,8 @@ class BATCHCdkStack(Stack):
         )
 
         # create compute env high
-        af2_8GPU = batch.ManagedEc2EcsComputeEnvironment(
-            self,"Alphafold2CE8GPU",
+        CE_P3_16X = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEP316X",
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE16)],
@@ -84,8 +84,8 @@ class BATCHCdkStack(Stack):
             use_optimal_instance_classes=False
         )
 
-        af2_4GPU = batch.ManagedEc2EcsComputeEnvironment(
-            self,"Alphafold2CE4GPU",
+        CE_P3_8X = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEP38X",
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE8)],
@@ -97,8 +97,8 @@ class BATCHCdkStack(Stack):
             use_optimal_instance_classes=False
         )
 
-        af2_1GPU = batch.ManagedEc2EcsComputeEnvironment(
-            self,"Alphafold2CE1GPU",
+        CE_P3_2X = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEP32X",
             vpc=vpc,
             minv_cpus=0,
             instance_types=[ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE2)],
@@ -109,6 +109,58 @@ class BATCHCdkStack(Stack):
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
             use_optimal_instance_classes=False
         )
+
+        CE_G4DN_2X = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEG4DN2X",
+            vpc=vpc,
+            minv_cpus=0,
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE2)],
+            launch_template=launch_template,
+            security_groups=[
+                sg,
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False
+        )
+
+        CE_G4DN_12X = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEG4DN12X",
+            vpc=vpc,
+            minv_cpus=0,
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE12)],
+            launch_template=launch_template,
+            security_groups=[
+                sg,
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False
+        )
+
+        # CE_G5_2X = batch.ManagedEc2EcsComputeEnvironment(
+        #     self,"Alphafold2CEG52X",
+        #     vpc=vpc,
+        #     minv_cpus=0,
+        #     instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G5, ec2.InstanceSize.XLARGE2)],
+        #     launch_template=launch_template,
+        #     security_groups=[
+        #         sg,
+        #     ],
+        #     vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+        #     use_optimal_instance_classes=False
+        # )
+
+        # CE_G5_12X = batch.ManagedEc2EcsComputeEnvironment(
+        #     self,"Alphafold2CEG512X",
+        #     vpc=vpc,
+        #     minv_cpus=0,
+        #     instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G5, ec2.InstanceSize.XLARGE12)],
+        #     launch_template=launch_template,
+        #     security_groups=[
+        #         sg,
+        #     ],
+        #     vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+        #     use_optimal_instance_classes=False
+        # )
 
         # af2_p4 = batch.ComputeEnvironment(
         #     self,"Alphafold2CEP4",
@@ -129,33 +181,73 @@ class BATCHCdkStack(Stack):
         # )
         
         # create job queue
-        af_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
+        que_high = batch.JobQueue(self, "Alphafold2JobQueueHigh",
             compute_environments=[{
-                "computeEnvironment": af2_8GPU,
+                "computeEnvironment": CE_P3_16X,
                 "order": 1
             }
             ],
             job_queue_name = 'high',
         )
 
-        af_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
+        que_mid = batch.JobQueue(self, "Alphafold2JobQueueMid",
             compute_environments=[{
-                "computeEnvironment": af2_4GPU,
+                "computeEnvironment": CE_P3_8X,
                 "order": 1
             }
             ],
             job_queue_name = 'mid',
         )
 
-        af_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
+        que_low = batch.JobQueue(self, "Alphafold2JobQueueLow",
             compute_environments=[
                 {
-                "computeEnvironment": af2_1GPU,
+                "computeEnvironment": CE_P3_2X,
                 "order": 1
                 }
             ],
             job_queue_name = 'low',
         )
+
+        que_g4dn = batch.JobQueue(self, "Alphafold2JobQueueG4dn",
+            compute_environments=[
+                {
+                "computeEnvironment": CE_G4DN_2X,
+                "order": 1
+                }
+            ],
+            job_queue_name = 'g4dn',
+        )
+
+        que_g4dn12x = batch.JobQueue(self, "Alphafold2JobQueueG4dn12X",
+            compute_environments=[
+                {
+                "computeEnvironment": CE_G4DN_12X,
+                "order": 1
+                }
+            ],
+            job_queue_name = 'g4dn12x',
+        )
+
+        # que_g5 = batch.JobQueue(self, "Alphafold2JobQueueG4dn",
+        #     compute_environments=[
+        #         {
+        #         "computeEnvironment": CE_G5_2X,
+        #         "order": 1
+        #         }
+        #     ],
+        #     job_queue_name = 'g5',
+        # )
+
+        # que_g512x = batch.JobQueue(self, "Alphafold2JobQueueG4dn12X",
+        #     compute_environments=[
+        #         {
+        #         "computeEnvironment": CE_G5_12X,
+        #         "order": 1
+        #         }
+        #     ],
+        #     job_queue_name = 'g512x',
+        # )
 
         # af_p4 = batch.JobQueue(self, "JobQueue_P4",
         #     compute_environments=[{
