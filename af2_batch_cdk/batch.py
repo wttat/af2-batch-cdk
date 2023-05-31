@@ -278,6 +278,7 @@ class BATCHCdkStack(Stack):
             container = batch.EcsEc2ContainerDefinition(self,"Alphafold2ContainerDefinition",
                 image=image_id,
                 job_role=batch_job_role,
+                execution_role=batch_job_role,
                 command=["/bin/bash","/app/run.sh",
                 "-f","Ref::fasta_paths",
                 "-t","Ref::max_template_date",
