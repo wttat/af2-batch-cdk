@@ -1,6 +1,6 @@
 # For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. 
-# Current support Alphafold Version : 2.2.2
-Releases : https://github.com/deepmind/alphafold/releases/tag/v2.2.2
+# Current support Alphafold Version : 2.3.2
+Releases : https://github.com/deepmind/alphafold/releases/tag/v2.3.2
 # Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
@@ -165,9 +165,10 @@ For Alphfold2 Settings:
    monomer_ptm: This is the original CASP14 model fine tuned with the pTM head, providing a pairwise confidence measure. It is slightly less accurate than the normal monomer model.
    
    multimer: This is the AlphaFold-Multimer (https://github.com/deepmind/alphafold#citing-this-work) model. To use this model, provide a multi-sequence FASTA file. In addition, the UniProt database should have been downloaded.
-3. run_relax.type:string(bool).options:*{true/false}*,Default:true
+3. models_to_relax.type:string.options:*{best/all/none}*,Default:best
    
-   Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage.
+   By default, only the best model (by pLDDT) is relaxed (--models_to_relax=best), but also all of the models (--models_to_relax=all) or none of the models (--models_to_relax=none) can be relaxed.
+   
 4. num_multimer_predictions_per_model.type:int.Default:[5]:
 
     Controls how many predictions will be made per model, by default the offline system will run each model 5 times for a total of 25 predictions.
@@ -233,20 +234,26 @@ Enjoy!
 
 ## Current dataset version：
 
-1. dataset4v2.tar.gz
+1. dataset5.tar.gz
 
-    update params to alphafold_params_2022-03-02.tar.
-2. dataset3.tar.gz
+    update params to alphafold_params_2022-12-06.tar.
+2. dataset4v2.tar.gz
+
+    update params to alphafold_params_2022-03-02.tar.   
+3. dataset3.tar.gz
     
     update params to alphafold_params_2022-01-19.tar.
-3. dataset2.tar.gz
+4. dataset2.tar.gz
     
     update the dataset and params used by multimer.
-4. dataset.tar.gz
+5. dataset.tar.gz
 
     original version.
 
 ## Changelog
+
+### 05/30/2023
+* Support Alpfadold v2.3.2,api changes from run_relax to models_to_relax
 
 ### 05/15/2023
 * Update aws-cdk to @2.79.1

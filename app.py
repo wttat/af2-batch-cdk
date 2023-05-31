@@ -61,10 +61,10 @@ notebook_stack = NOTEBOOKCdkStack(app,"NOTEBOOKCdkStack",
     )
 
 
-Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
-Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
-Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
-Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2")
+Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
+Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
+Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
+Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     key_pair = key_pair,

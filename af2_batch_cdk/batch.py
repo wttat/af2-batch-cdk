@@ -260,7 +260,7 @@ class BATCHCdkStack(Stack):
 
         image_id = ecs.ContainerImage.from_ecr_repository(
             repository=ecr.Repository.from_repository_name(self, "GetCompRegRepoName",repo.repository_name),
-            tag="lastest"
+            tag="latest"
         )
 
         batch_job_role =  iam.Role(
@@ -285,7 +285,7 @@ class BATCHCdkStack(Stack):
                 "-c","Ref::db_preset",
                 "-l","Ref::num_multimer_predictions_per_model",
                 "-p","Ref::use_precomputed_msas",
-                "-r","Ref::run_relax",
+                "-r","Ref::models_to_relax",
                 "-b","Ref::benchmark",
                 ],
                 volumes=[batch.EcsVolume.host(
@@ -314,7 +314,7 @@ class BATCHCdkStack(Stack):
                 "num_multimer_predictions_per_model":"5",
                 "use_precomputed_msas":'false',
                 "benchmark":'false',
-                "run_relax":"true"
+                "models_to_relax":"best"
             }
         )
             

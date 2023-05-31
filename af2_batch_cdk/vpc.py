@@ -25,12 +25,12 @@ account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 if region == 'cn-north-1' or region == 'cn-northwest-1':
-    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch5.tar'
-    dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset4v2.tar.gz'
+    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch6.tar'
+    dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset5.tar.gz'
     dataset_region='cn-northwest-1'
 else:
-    image_arn='s3://alphafold2/prod/images/af2-batch5.tar'
-    dataset_arn='s3://alphafold2/prod/datasets/dataset4v2.tar.gz'
+    image_arn='s3://alphafold2/prod/images/af2-batch6.tar'
+    dataset_arn='s3://alphafold2/prod/datasets/dataset5.tar.gz'
     dataset_region='us-east-1'
 
 # af2-batch image file name
@@ -158,8 +158,8 @@ class VPCCdkStack(Stack):
                                         f"aws s3 cp {image_arn} ./ --request-payer --region {dataset_region}",
                                         f"docker load < {image_name}",
                                         f"aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {ecr_endpoint}",
-                                        f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('lastest')}",
-                                        f"docker push {self.repo.repository_uri_for_tag('lastest')}",
+                                        f"docker tag $(docker images -q) {self.repo.repository_uri_for_tag('latest')}",
+                                        f"docker push {self.repo.repository_uri_for_tag('latest')}",
                                         f"aws s3 cp {dataset_arn} ./ --request-payer --region {dataset_region}",
                                         f"tar -I pigz -xvf {dataset_name} --directory={mountPath}"
                                         )

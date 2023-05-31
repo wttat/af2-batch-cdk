@@ -122,16 +122,16 @@ def check_body(event):
 
         print('num_multimer_predictions_per_model: ',num_multimer_predictions_per_model)
 
-        # check run_relax
+        # check models_to_relax
         try:
-            run_relax = data['run_relax']
+            models_to_relax = data['models_to_relax']
         except:
-            print('no run_relax,using dafault preset true')
-            run_relax = 'true'
+            print('no models_to_relax,using dafault preset true')
+            models_to_relax = 'best'
         else:
-            if data['run_relax'] != 'true' and data['run_relax'] != 'false':
-                raise Exception('The run_relax shoudl be true or false')
-        print('run_relax: ',run_relax)
+            if data['models_to_relax'] != 'best' and data['models_to_relax'] != 'all'and data['models_to_relax'] != 'none':
+                raise Exception('The models_to_relax should be best or all or none.')
+        print('models_to_relax: ',models_to_relax)
         
         # check comment
         try:
@@ -177,7 +177,7 @@ def check_body(event):
             'time': timestamp,
             'gpu': gpu,
             'comment': comment,
-            'run_relax':run_relax
+            'models_to_relax':models_to_relax
         }
 
         Items.append(Item)
