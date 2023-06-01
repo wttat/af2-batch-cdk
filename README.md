@@ -1,6 +1,7 @@
 # For security reasons, if you want to deploy this solution, please submit your 12 digit AWS account ID and deployment region  through Github issue. 
 # Current support Alphafold Version : 2.3.2
 Releases : https://github.com/deepmind/alphafold/releases/tag/v2.3.2
+CDK version support check for 2.81.0 (build bd920f2)
 # Alphafold2 on AWS Deploy Guide:
 
 AWS Blog：https://aws.amazon.com/cn/blogs/china/one-click-construction-of-a-highly-available-protein-structure-prediction-platform-on-the-cloud-part-one/
@@ -21,14 +22,13 @@ https://github.com/wttat/alphafold
 
 1. Install Node and Npm.
 ```
-wget https://nodejs.org/dist/v16.18.0/node-v16.18.0-linux-x64.tar.xz
-tar xvf node-v16.18.0-linux-x64.tar.xz
-sudo ln -s /home/ec2-user/node-v16.18.0-linux-x64/bin/node /usr/local/bin
-sudo ln -s /home/ec2-user/node-v16.18.0-linux-x64/bin/npm /usr/local/bin
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install 16
 ```
-2. Set PATH env.
+2. Test node.
 ```
-echo 'export PATH=$PATH:$(npm get prefix)/bin' >> ~/.bashrc
+node -e "console.log('Running Node.js ' + process.version)"
 ```
 3. Install Git.
 ```
