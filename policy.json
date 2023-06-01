@@ -2,7 +2,7 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "Alphafold2",
+            "Sid": "Alphafold2IAMPolicy",
             "Effect": "Allow",
             "Action": [
                 "apigateway:DELETE",

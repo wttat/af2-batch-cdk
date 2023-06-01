@@ -90,10 +90,6 @@ def method_post(payload):
                 {
                     'name': 'id',
                     'value': id
-                },
-                {
-                    'name':'AWS-GCR-HCLS-Solutions',
-                    'value':'Alphafold2'
                 }
             ],
         },
