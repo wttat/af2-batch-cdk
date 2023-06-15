@@ -82,7 +82,7 @@ pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 ```
-19. Generate Cloudformation template
+10. Generate Cloudformation template
 ```
 cdk synth
 ```
