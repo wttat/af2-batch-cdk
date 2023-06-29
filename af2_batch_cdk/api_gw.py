@@ -195,11 +195,11 @@ class APIGWCdkStack(Stack):
                     "container": {
                         "environment": {
                             "name": [
-                            "AWS-GCR-HCLS-Solutions"
+                            "id"
                         ],
-                            "value": [
-                            tag
-                        ]
+                            "value": [{
+          "exists": True
+        }]
                         }
                     }
                 }
