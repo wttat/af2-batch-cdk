@@ -122,7 +122,7 @@ def lambda_handler(event, context):
 
                     return {
                         "code":200,
-                        "message":'Job is SUCCEEDED,Logs have been deleted',
+                        "message":'Job is SUCCEEDED.',
                         "data":response_ddb['Item']
                     }
                     
@@ -131,7 +131,7 @@ def lambda_handler(event, context):
                     logStreamName = response_batch['jobs'][0]['container']['logStreamName']
                     return {
                         "code":200,
-                        "message":"Job is SUCCEEDED, Please check logs for info",
+                        "message":"Job is SUCCEEDED.",
                         "data":response_ddb['Item'],
                         "logs":logStreamName,
                         # "logs":getLogs(logStreamName),
@@ -146,7 +146,7 @@ def lambda_handler(event, context):
                     logStreamName = response_batch['jobs'][0]['container']['logStreamName']
                     return {
                         "code":200,
-                        "message":"Job is RUNNING, Please check logs for error",
+                        "message":"Job is RUNNING.",
                         "data":response_ddb['Item'],
                         "logs":logStreamName,
                         # "logs":getLogs(logStreamName),
