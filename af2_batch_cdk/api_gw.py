@@ -27,7 +27,7 @@ region = os.environ["CDK_DEFAULT_REGION"]
 
 class APIGWCdkStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str,sns_topic, auth_key,**kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str,sns_topic, auth_key,tag,**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         self.job_Definition_name = 'af2'
@@ -198,7 +198,7 @@ class APIGWCdkStack(Stack):
                             "AWS-GCR-HCLS-Solutions"
                         ],
                             "value": [
-                            "Alphafold2"
+                            tag
                         ]
                         }
                     }

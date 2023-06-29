@@ -24,6 +24,8 @@ key_pair = os.environ["KEYPAIR"]
 sns_mail = os.environ["MAIL"]
 auth_key = os.environ["AUTH"]
 
+Tag = "Alphafold2_v2.3.2_01"
+
 vpc_stack = VPCCdkStack(app, "VPCCdkStack",
     use_default_vpc = use_default_vpc,
     vpc_id = vpc_id,
@@ -38,6 +40,7 @@ vpc_stack = VPCCdkStack(app, "VPCCdkStack",
 api_gw_stack = APIGWCdkStack(app, "APIGWCdkStack",
     sns_topic = vpc_stack.sns_topic,
     auth_key = auth_key,
+    tag = Tag,
     env=Environment(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],
         region=os.environ["CDK_DEFAULT_REGION"]
@@ -61,10 +64,11 @@ notebook_stack = NOTEBOOKCdkStack(app,"NOTEBOOKCdkStack",
     )
 
 
-Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
-Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
-Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
-Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", "Alphafold2_v2.3.2_01")
+
+Tags.of(vpc_stack).add("AWS-GCR-HCLS-Solutions", Tag)
+Tags.of(api_gw_stack).add("AWS-GCR-HCLS-Solutions", Tag)
+Tags.of(batch_stack).add("AWS-GCR-HCLS-Solutions", Tag)
+Tags.of(notebook_stack).add("AWS-GCR-HCLS-Solutions", Tag)
 
 # nice_dev_stack = NICEDEVCdkStack(app, "NICEDEVCdkStack",
 #     key_pair = key_pair,
