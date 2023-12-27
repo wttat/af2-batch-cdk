@@ -24,7 +24,7 @@ key_pair = os.environ["KEYPAIR"]
 sns_mail = os.environ["MAIL"]
 auth_key = os.environ["AUTH"]
 
-Tag = "Alphafold2_v2.3.2_01"
+Tag = "Alphafold2_v2.3.2_02"
 
 vpc_stack = VPCCdkStack(app, "VPCCdkStack",
     use_default_vpc = use_default_vpc,

@@ -15,12 +15,12 @@ from aws_cdk import (
     aws_s3_notifications as s3n,
     aws_lambda_event_sources as eventsources,
     aws_s3_deployment as s3deploy,
-    aws_events_targets as targets
+    aws_events_targets as targets,
+    aws_apigatewayv2 as apigatewayv2
 )
 
-from aws_cdk import aws_apigatewayv2_alpha as apigatewayv2
-from aws_cdk.aws_apigatewayv2_authorizers_alpha import HttpLambdaAuthorizer,HttpLambdaResponseType
-from aws_cdk.aws_apigatewayv2_integrations_alpha import HttpLambdaIntegration
+from aws_cdk.aws_apigatewayv2_authorizers import HttpLambdaAuthorizer,HttpLambdaResponseType
+from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
 
 account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]

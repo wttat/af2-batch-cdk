@@ -80,6 +80,12 @@ class VPCCdkStack(Stack):
                 {"name":"private","subnetType":ec2.SubnetType.PRIVATE_WITH_EGRESS}
                 ]
             )
+        self.vpc.add_gateway_endpoint(
+            "S3Endpoint",
+            service=ec2.GatewayVpcEndpointAwsService.S3
+        )
+
+
 
         self.sg = ec2.SecurityGroup(self, "Alphafold2SecurityGroup",
                                 vpc=self.vpc,

@@ -16,9 +16,9 @@ from aws_cdk import (
     aws_lambda_event_sources as eventsources,
     aws_s3_deployment as s3deploy,
     aws_events_targets as targets,
-    aws_ecs as ecs
+    aws_ecs as ecs,
+    aws_batch as batch
 )
-from aws_cdk import aws_batch_alpha as batch
 import base64
 
 mountPath = "/fsx" # do not touch
