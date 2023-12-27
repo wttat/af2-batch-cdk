@@ -123,6 +123,20 @@ class BATCHCdkStack(Stack):
             use_optimal_instance_classes=False
         )
 
+        CE_G4DN_2X_SPOT = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEG4DN2XSPOT",
+            vpc=vpc,
+            minv_cpus=0,
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE2)],
+            launch_template=launch_template,
+            security_groups=[
+                sg,
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False,
+            spot=True
+        )
+
         CE_G4DN_12X = batch.ManagedEc2EcsComputeEnvironment(
             self,"Alphafold2CEG4DN12X",
             vpc=vpc,
@@ -134,6 +148,20 @@ class BATCHCdkStack(Stack):
             ],
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
             use_optimal_instance_classes=False
+        )
+
+        CE_G4DN_12X_SPOT = batch.ManagedEc2EcsComputeEnvironment(
+            self,"Alphafold2CEG4DN12XSPOT",
+            vpc=vpc,
+            minv_cpus=0,
+            instance_types=[ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE12)],
+            launch_template=launch_template,
+            security_groups=[
+                sg,
+            ],
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            use_optimal_instance_classes=False,
+            spot=True
         )
 
         # CE_G5_2X = batch.ManagedEc2EcsComputeEnvironment(
@@ -219,6 +247,16 @@ class BATCHCdkStack(Stack):
             job_queue_name = 'g4dn',
         )
 
+        que_g4dn_spot = batch.JobQueue(self, "Alphafold2JobQueueG4dnSpot",
+            compute_environments=[
+                {
+                "computeEnvironment": CE_G4DN_2X_SPOT,
+                "order": 1
+                }
+            ],
+            job_queue_name = 'g4dn_spot',
+        )
+
         que_g4dn12x = batch.JobQueue(self, "Alphafold2JobQueueG4dn12X",
             compute_environments=[
                 {
@@ -227,6 +265,16 @@ class BATCHCdkStack(Stack):
                 }
             ],
             job_queue_name = 'g4dn12x',
+        )
+
+        que_g4dn12x_spot = batch.JobQueue(self, "Alphafold2JobQueueG4dn12XSpot",
+            compute_environments=[
+                {
+                "computeEnvironment": CE_G4DN_12X_SPOT,
+                "order": 1
+                }
+            ],
+            job_queue_name = 'g4dn12x_spot',
         )
 
         # que_g5 = batch.JobQueue(self, "Alphafold2JobQueueG4dn",

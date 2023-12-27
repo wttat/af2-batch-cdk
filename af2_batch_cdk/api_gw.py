@@ -144,7 +144,7 @@ class APIGWCdkStack(Stack):
         check_request_lambda.add_environment("SQS_QUEUE", queue.queue_url)
 
         # create query status Lambda
-        query_status_lambda = _lambda.Function(self, "Alphafold2Lambda2-",
+        query_status_lambda = _lambda.Function(self, "Alphafold2QueryStatusLambda",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = query_status_lambda_role,
@@ -155,7 +155,7 @@ class APIGWCdkStack(Stack):
         query_status_lambda.add_environment("TABLE_NAME", ddb_table.table_name)
 
         # create submit job Lambda
-        submit_job_lambda = _lambda.Function(self, "Alphafold2Lambda3-",
+        submit_job_lambda = _lambda.Function(self, "Alphafold2SubmitJobLambda",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = submit_job_lambda_role,
@@ -172,7 +172,7 @@ class APIGWCdkStack(Stack):
         submit_job_lambda.add_event_source(eventsources.SqsEventSource(queue))
 
         # create track status Lambda
-        track_status_lambda = _lambda.Function(self, "Alphafold2Lambda4-",
+        track_status_lambda = _lambda.Function(self, "Alphafold2TrackStatusLambda",
                                               runtime=_lambda.Runtime.PYTHON_3_7,
                                               handler="lambda_function.lambda_handler",
                                               role = track_status_lambda_role,

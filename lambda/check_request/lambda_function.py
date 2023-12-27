@@ -73,7 +73,7 @@ def check_body(event):
         
         # check if que meet the requirements
         # TODO check p4 auto
-        if que != 'high' and que != 'mid' and que != 'low' and que != 'p4'and que != 'g4dn' and que != 'g4dn12x'and que != 'g5' and que != 'g512x':
+        if que != 'high' and que != 'mid' and que != 'low' and que != 'p4'and que != 'g4dn'and que != 'g4dn_spot' and que != 'g4dn12x'and que != 'g4dn12x_spot'and que != 'g5' and que != 'g512x':
             raise Exception('The job queue should be high or mid or low or g4dn or g4dn12x or g5 or g412x or p4(depends on region) .')
 
         # check max_template_date
@@ -153,10 +153,10 @@ def check_body(event):
         print('gpu: ',gpu)
         
         if gpu > 1:
-            if data['que'] == 'low' or data['que'] == 'g4dn'or data['que'] == 'g5':
+            if data['que'] == 'low' or data['que'] == 'g4dn'or data['que'] == 'g4dn_spot'or data['que'] == 'g5':
                 raise Exception('this que only support 1 GPU')
             if gpu > 4:
-                if data['que'] == 'mid' or data['que'] == 'g4dn12x'or data['que'] == 'g512x':
+                if data['que'] == 'mid' or data['que'] == 'g4dn12x'or data['que'] == 'g4dn12x_spot'or data['que'] == 'g512x':
                     raise Exception('only p3.8xlarge or g4dn12x or g512x or p4 support more than 4 GPU')
                 if gpu > 8:
                     raise Exception('max GPU = 8')

@@ -45,7 +45,13 @@ def method_post(payload):
     elif que == 'g4dn':
         vcpu = 8
         memory = 30000
+    elif que == 'g4dn_spot':
+        vcpu = 8
+        memory = 30000
     elif que == 'g4dn12x':
+        vcpu = 12
+        memory = 45000
+    elif que == 'g4dn12x_spot':
         vcpu = 12
         memory = 45000
     elif que == 'g5':
