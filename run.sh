@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 CONFIG_FILE="af2_config.json"
 echo "初始化参数。。" 
 
@@ -18,11 +18,11 @@ load_config() {
         read -p "检测到配置文件 $CONFIG_FILE，是否要使用此文件中的参数？(y/n): " use_config
         if [ "$use_config" == "y" ]; then
             echo "加载配置文件..."
-            REGION=$(jq -r '.REGION' "$CONFIG_FILE")
-            MAIL=$(jq -r '.MAIL' "$CONFIG_FILE")
-            KEYPAIR=$(jq -r '.KEYPAIR' "$CONFIG_FILE")
-            AUTH=$(jq -r '.AUTH' "$CONFIG_FILE")
-            ACCOUNTID=$(jq -r '.ACCOUNTID' "$CONFIG_FILE")
+            export REGION=$(jq -r '.REGION' "$CONFIG_FILE")
+            export MAIL=$(jq -r '.MAIL' "$CONFIG_FILE")
+            export KEYPAIR=$(jq -r '.KEYPAIR' "$CONFIG_FILE")
+            export AUTH=$(jq -r '.AUTH' "$CONFIG_FILE")
+            export ACCOUNTID=$(jq -r '.ACCOUNTID' "$CONFIG_FILE")
             return 0
         fi
     fi
@@ -99,8 +99,11 @@ if ! load_config; then
 fi
 
 echo "准备执行CDK部署"
-# 执行 CDK 命令
 
+echo "KEYPAIR:"$KEYPAIR
+echo "MAIL:"$MAIL
+echo "AUTH:"$AUTH
+# 执行 CDK 命令
 echo "CDK 初始化开始。。"
 cdk bootstrap aws://${ACCOUNTID}/${REGION}
 echo "CDK 初始化结束。。"
