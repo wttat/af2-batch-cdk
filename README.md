@@ -195,13 +195,13 @@ curl -X "POST" -H "Authorization: {KEY}" -H "Content-Type: application/json" {Ap
 2. GET ALL:Query all jobs, change the KEY(if set) and ApiGW_URL to your own:
 
 ```
-curl -H "Authorization: {KEY}" -H {ApiGW_URL}
+curl -H "Authorization: {KEY}" {ApiGW_URL}
 ```
 
 3. GET ONE:Query one job, change the KEY(if set) and ApiGW_URL to your own,the id of job could be searched via  GET ALL or POST:
 
 ```
-curl -H "Authorization: {KEY}" -H {ApiGW_URL}/{id}
+curl -H "Authorization: {KEY}" {ApiGW_URL}/{id}
 ```
 
 4. CANCEL ALL:Cancel all running jobs,change the KEY(if set) and ApiGW_URL to your own. 
