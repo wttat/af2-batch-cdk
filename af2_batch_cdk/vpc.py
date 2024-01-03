@@ -25,11 +25,11 @@ account = os.environ["CDK_DEFAULT_ACCOUNT"]
 region = os.environ["CDK_DEFAULT_REGION"]
 
 if region == 'cn-north-1' or region == 'cn-northwest-1':
-    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch6.tar'
+    image_arn='s3://alphafold2-raw-data/prod/images/af2-batch7.tar'
     dataset_arn='s3://alphafold2-raw-data/prod/datasets/dataset5.tar.gz'
     dataset_region='cn-northwest-1'
 else:
-    image_arn='s3://alphafold2/prod/images/af2-batch6.tar'
+    image_arn='s3://alphafold2/prod/images/af2-batch7.tar'
     dataset_arn='s3://alphafold2/prod/datasets/dataset5.tar.gz'
     dataset_region='us-east-1'
 

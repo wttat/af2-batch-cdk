@@ -20,79 +20,21 @@ https://github.com/wttat/alphafold
 
 ## Deployed steps. Based on Amazon Linux 2 AMI
 
-1. Install Node and Npm.
-```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-. ~/.nvm/nvm.sh
-nvm install 16
-```
-2. Test node.
-```
-node -e "console.log('Running Node.js ' + process.version)"
-```
-3. Install Git.
+1. Install Git.
 ```
 sudo yum install -y git
 ```
-4. Clone Repo.
+1. Clone Repo.
 ```
 git clone https://github.com/wttat/af2-batch-cdk
 cd af2-batch-cdk
 ```
-5. Modify af2_batch_cdk/batch.py if needed, check details below. 
-6. Set parameters via env,replace ****** to your own.
+3. Modify af2_batch_cdk/batch.py if needed, check details below. 
+4. Run ./run.sh
 
-
-```
-echo 'export KEYPAIR="******"' >> ~/.bashrc
-echo 'export MAIL="******"' >> ~/.bashrc
-echo 'export REGION="******"' >> ~/.bashrc
-echo 'export AUTH="******"' >> ~/.bashrc
-echo 'export ACCOUNTID="******"' >> ~/.bashrc
-source ~/.bashrc
-aws configure set default.region ${REGION}
-```
-**Parameter Description**:
-
-*KEYPAIR*: The EC2 key pair's name which available in the AWS region.
-
-*MAIL*: The email address used to receive SNS notification.
-
-*REGION*: The region you want to deploy.
-
-*AUTH*: The auth key used in HTTP Authentication Header.
-
-*ACCOUNTID*: AWS Account ID.
-
-7. Install CDK
-```
-npm install -g aws-cdk
-```
-8. Install dependancy
-```
-pip3 install -r requirements.txt
-
-```
-& if in China 
-```
-pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-
-9.  If never run cdk before in this region, use below code to init cdk:
-```
-cdk bootstrap aws://${ACCOUNTID}/${REGION}
-```
-10. Generate Cloudformation template
-```
-cdk synth
-```
-11. Deploy all stacks.
-```
-cdk deploy --all
-```
-12. Confirm the SNS email to receive follow-up notification.
-13. There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
-14. Modify the command.json, check details below. 
+1.  Confirm the SNS email to receive follow-up notification.
+2.  There will be an c5.9xlarge EC2 launched to download all dataset and images and save to Fsx for lustre. After everything prepared(about 3h), you will received a email notification, you could terminate the EC2 and begin to submit alphafold2 job2 via API.
+3.  Modify the sampleParameters.json, check details below. 
 
 ## Manually Settings
 
@@ -127,7 +69,7 @@ cdk deploy --all
       
       Note: You have to do this at the same time.
 
-## Parameter Description of command.json 
+## Parameter Description of sampleParameters.json 
 
 For Job Settings:
 1. fasta.type:string,**Required**:
@@ -189,7 +131,7 @@ For Alphfold2 Settings:
 1. POST:Submit a job using POST method,change the KEY(if set) and ApiGW_URL to your own. 
 
 ```
-curl -X "POST" -H "Authorization: {KEY}" -H "Content-Type: application/json" {ApiGW_URL} -d @command.json
+curl -X "POST" -H "Authorization: {KEY}" -H "Content-Type: application/json" {ApiGW_URL} -d @sampleParameters.json
 ```
 
 2. GET ALL:Query all jobs, change the KEY(if set) and ApiGW_URL to your own:
@@ -230,7 +172,7 @@ Enjoy!
 
 ## Total cost calculate：
 * The cost filed in DynamoDB counts the number of seconds each task runs. 
-* Use tag {AWS-GCR-HCLS-Solutions:Alphafold2} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
+* Use tag {AWS-GCR-HCLS-Solutions:Alphafold2_v2.3.2_03} to track total cost. Check:https://docs.aws.amazon.com/zh_cn/awsaccountbilling/latest/aboutv2/activating-tags.html
 
 ## Current dataset version：
 
