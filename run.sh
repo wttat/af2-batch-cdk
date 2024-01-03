@@ -97,6 +97,14 @@ if ! load_config; then
 
     echo "配置文件已保存"
 fi
+echo "安装CDK及pip依赖"
+
+npm install -g aws-cdk
+if [[ "$REGION" == "cn-north-1" || "$REGION" == "cn-northwest-1" ]]; then
+    pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+else
+    pip3 install -r requirements.txt
+fi
 
 echo "准备执行CDK部署"
 
