@@ -100,6 +100,7 @@ fi
 echo "安装CDK及pip依赖"
 
 npm install -g aws-cdk
+yum install python3-pip -y
 if [[ "$REGION" == "cn-north-1" || "$REGION" == "cn-northwest-1" ]]; then
     pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 else
