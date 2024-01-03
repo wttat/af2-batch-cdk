@@ -44,7 +44,7 @@ def check_body(event):
     try:
         datas = json.loads(event['body'])
     except:
-        raise Exception('Please check HTTP body.It should in json.')
+        raise Exception('HTTP body should be json list format, please check https://github.com/wttat/af2-batch-cdk/blob/main/sampleParameters.json for more info')
 
     for data in datas:
         
