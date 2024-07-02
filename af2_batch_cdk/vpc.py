@@ -63,7 +63,8 @@ class VPCCdkStack(Stack):
         # create ECR repo
         self.repo = ecr.Repository(
             self,'Alphafold2EcrRepo-',
-            removal_policy=RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.DESTROY,
+            empty_on_delete=True
         )
 
         # choose or create a vpc
