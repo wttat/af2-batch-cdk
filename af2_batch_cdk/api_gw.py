@@ -121,7 +121,7 @@ class APIGWCdkStack(Stack):
 
         # create Auth Lambda 
         auth_lambda = _lambda.Function(self, "Alphafold2AuthLambda",
-                                              runtime=_lambda.Runtime.NODEJS_14_X,
+                                              runtime=_lambda.Runtime.NODEJS_18_X,
                                               handler="index.handler",
                                               role = auth_lambda_role,
                                               description = "Api Gateway Auth",
@@ -132,7 +132,7 @@ class APIGWCdkStack(Stack):
 
         # create check request Lambda
         check_request_lambda = _lambda.Function(self, "Alphafold2CheckRequestLambda",
-                                              runtime=_lambda.Runtime.PYTHON_3_7,
+                                              runtime=_lambda.Runtime.PYTHON_3_11,
                                               handler="lambda_function.lambda_handler",
                                               role = check_request_lambda_role,
                                               timeout = Duration.seconds(30),
@@ -145,7 +145,7 @@ class APIGWCdkStack(Stack):
 
         # create query status Lambda
         query_status_lambda = _lambda.Function(self, "Alphafold2QueryStatusLambda",
-                                              runtime=_lambda.Runtime.PYTHON_3_7,
+                                              runtime=_lambda.Runtime.PYTHON_3_11,
                                               handler="lambda_function.lambda_handler",
                                               role = query_status_lambda_role,
                                               timeout = Duration.seconds(30),
@@ -156,7 +156,7 @@ class APIGWCdkStack(Stack):
 
         # create submit job Lambda
         submit_job_lambda = _lambda.Function(self, "Alphafold2SubmitJobLambda",
-                                              runtime=_lambda.Runtime.PYTHON_3_7,
+                                              runtime=_lambda.Runtime.PYTHON_3_11,
                                               handler="lambda_function.lambda_handler",
                                               role = submit_job_lambda_role,
                                               timeout = Duration.seconds(30),
@@ -173,7 +173,7 @@ class APIGWCdkStack(Stack):
 
         # create track status Lambda
         track_status_lambda = _lambda.Function(self, "Alphafold2TrackStatusLambda",
-                                              runtime=_lambda.Runtime.PYTHON_3_7,
+                                              runtime=_lambda.Runtime.PYTHON_3_11,
                                               handler="lambda_function.lambda_handler",
                                               role = track_status_lambda_role,
                                               timeout = Duration.seconds(30),
