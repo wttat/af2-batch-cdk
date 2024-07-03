@@ -49,6 +49,7 @@ class APIGWCdkStack(Stack):
         ddb_table = dynamodb.Table(
             self,'Alphafold2DDBTable-',
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=cdk.RemovalPolicy.DESTROY,
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING,
