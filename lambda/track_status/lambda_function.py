@@ -171,9 +171,10 @@ def job_status_update_starting(id):
 def job_status_update_succeeded(id):
     # First check whether this job is truly succeeded.
     response_ddb = ddb.get_item(Key={'id': id})
-    fasta_file_name = response_ddb['Item']['file_name']
-    dirPrefix = 'output/'+fasta_file_name.split('.')[0]
-    tar_gz = 'output/'+fasta_file_name.split('.')[0]+'.tar'+'.gz'
+    # fasta_file_name = response_ddb['Item']['file_name']
+    fasta_name = response_ddb['Item']['fasta']
+    dirPrefix = 'output/'+fasta_name.split('.')[0]
+    tar_gz = 'output/'+fasta_name.split('.')[0]+'.tar'+'.gz'
     
     # Check S3 permission.
     if bucket_name.strip() == '': 
