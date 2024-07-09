@@ -2,7 +2,7 @@ from constructs import Construct
 import os
 
 from aws_cdk import (
-    App, Stack,Duration,CfnOutput,
+    App, Stack,Duration,CfnOutput,RemovalPolicy,
     aws_iam as iam,
     aws_ec2 as ec2,
     aws_s3 as s3,
